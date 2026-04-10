@@ -86,6 +86,24 @@
     background-image: linear-gradient(135deg, hsl(174 72% 56%), hsl(55 80% 55%));
   }
 
+  .brand-logo {
+    color: transparent;
+    background-image: linear-gradient(135deg, hsl(174 72% 65%), hsl(187 100% 85%));
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-shadow: 0 0 20px rgba(37, 211, 102, 0.12);
+    animation: logo-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes logo-glow {
+    0%, 100% {
+      text-shadow: 0 0 12px rgba(37, 211, 102, 0.12);
+    }
+    50% {
+      text-shadow: 0 0 28px rgba(37, 211, 102, 0.24);
+    }
+  }
+
   .glow-border {
     border: 1px solid hsl(174 72% 50% / 0.3);
     box-shadow: 0 0 15px hsl(174 72% 50% / 0.1), inset 0 0 15px hsl(174 72% 50% / 0.05);
@@ -93,5 +111,49 @@
 
   .card-gradient {
     background: linear-gradient(145deg, hsl(210 30% 8%), hsl(210 30% 5%));
+  }
+
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  .whatsapp-bubble {
+    animation: whatsapp-breath 3s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  @keyframes whatsapp-breath {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+      box-shadow: 0 0 0 rgba(37, 211, 102, 0.35);
+    }
+    50% {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 0 24px rgba(37, 211, 102, 0.18);
+    }
+  }
+
+  .typewriter-cursor {
+    display: inline-block;
+    width: 0.7rem;
+    margin-left: 0.125rem;
+    animation: blink-caret 0.8s steps(2, start) infinite;
+  }
+
+  @keyframes blink-caret {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
   }
 }

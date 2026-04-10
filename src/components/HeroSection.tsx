@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Download, Github, Twitter, Mail, MessageCircle } from "lucide-react";
-import avatarImg from "@/assets/avatar.png";
+import avatarImg from "@/assets/profile.png";
+
+const heroSkills =
+  "Frontend | Backend | Database & Cloud | AI Integration";
 
 const HeroSection = () => {
   return (
@@ -30,21 +33,34 @@ const HeroSection = () => {
         ))}
       </div>
 
-      <div className="container mx-auto px-6 pt-24 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="container mx-auto px-6 pt-24 relative z-10 max-w-5xl">
+        <div className="grid lg:grid-cols-2 gap-12 items-center justify-center mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
+            className="max-w-xl mx-auto text-center lg:max-w-none"
           >
-            <p className="text-primary text-lg mb-2">Hi, I am</p>
-            <h1 className="text-5xl md:text-7xl font-bold mb-4">
+            <p className="text-primary text-lg mb-2 text-center lg:text-left">
+              Hi, I am
+            </p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">
               Samuel <span className="text-gradient">AKINGENEYE</span>
             </h1>
-            <p className="text-primary text-xl font-semibold mb-2">
+            <p className="text-primary text-xl font-semibold mb-4 animate-breathe">
               Software Engineer
             </p>
-            <p className="text-muted-foreground mb-2">Based in Rwanda.</p>
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.15 }}
+              className="text-muted-foreground mb-4 font-mono text-sm tracking-wide"
+            >
+              {heroSkills} <span className="font-semibold text-primary animate-breathe">
+                Available Now!
+              </span>
+            </motion.p>
+            <p className="text-muted-foreground mb-4">Based in Rwanda.</p>
             <p className="text-muted-foreground max-w-lg mb-6 leading-relaxed">
               I build modern, user-focused web applications that solve real-world problems. 
               From AI-powered learning platforms to civic engagement tools, I'm passionate about 
@@ -68,7 +84,7 @@ const HeroSection = () => {
             </div>
 
             {/* CTA buttons */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 items-center justify-center lg:justify-start">
               <a
                 href="#projects"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
@@ -88,19 +104,29 @@ const HeroSection = () => {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="flex justify-center lg:justify-end"
+            className="flex justify-center"
           >
             <div className="relative">
-              <div className="w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden glow-border animate-float">
+              <div className="w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden glow-border animate-float bg-[#111] flex items-center justify-center">
                 <img
                   src={avatarImg}
                   alt="Samuel AKINGENEYE"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-3 -right-3 bg-card border border-border rounded-full px-4 py-2 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-sm text-foreground">Open to Work</span>
+              <div className="absolute -bottom-3 left-0 right-0 flex items-center justify-between px-3">
+                <a
+                  href="/resume.pdf"
+                  download
+                  className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/90 px-4 py-2 text-sm font-semibold text-primary shadow-sm shadow-primary/10 hover:bg-primary/10 transition-all"
+                >
+                  Resume
+                  <Download size={16} />
+                </a>
+                <div className="bg-card border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-lg shadow-primary/10">
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm text-foreground">Open to Work</span>
+                </div>
               </div>
             </div>
           </motion.div>

@@ -5,10 +5,9 @@ import { Menu, X } from "lucide-react";
 const navItems = [
   { label: "About", href: "#about" },
   { label: "Skills", href: "#skills" },
-  { label: "Journey", href: "#experience" },
+  { label: "Testimonials", href: "#testimonials" },
   { label: "Projects", href: "#projects" },
-  { label: "Education", href: "#education" },
-  { label: "Contact", href: "#contact" },
+  { label: "Certifications", href: "#certifications" },
 ];
 
 const Navbar = () => {
@@ -30,8 +29,8 @@ const Navbar = () => {
       }`}
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="#" className="text-xl font-bold font-mono text-primary">
-          {"{ SA }"}
+        <a href="#" className="brand-logo text-xl font-bold font-mono">
+          {"{AS}"}
         </a>
 
         <div className="hidden md:flex items-center gap-8">

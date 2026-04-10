@@ -6,25 +6,31 @@ const projects = [
     title: "SpeakSmart",
     desc: "An AI-powered language learning platform that helps users improve English speaking skills through interactive voice chat. It simulates real conversations to build fluency, confidence, and pronunciation.",
     tags: ["React", "AI", "Voice Chat", "Node.js", "API Integration"],
-    link: "#",
+    link: "https://voice-ai-english.lovable.app/",
   },
   {
     title: "Smart Learn Rwanda",
     desc: "A digital learning platform designed to support Rwandan students with accessible academic resources for studying from home. Simplifying learning and improving access to quality education.",
     tags: ["React", "Education", "REST API", "Responsive Design"],
-    link: "#",
+    link: "https://smart-learn-rwanda.lovable.app/",
   },
   {
     title: "Smart Citizen Request System",
     desc: "A civic engagement platform that allows citizens to report local issues and submit service requests directly to government authorities. Improves communication and transparency.",
     tags: ["Full Stack", "Node.js", "Database", "Government Tech"],
-    link: "#",
+    link: "https://smart-citizen-request.lovable.app",
   },
   {
     title: "E-Commerce Website",
     desc: "A full-featured online shopping platform with product browsing, cart management, and checkout flow. Demonstrates core e-commerce functionality and user-friendly navigation.",
     tags: ["React", "E-Commerce", "Cart System", "CSS", "JavaScript"],
-    link: "#",
+    link: "https://midrand-shop-easy.lovable.app",
+  },
+  {
+    title: "Alpha Scholars Rwanda",
+    desc: "Responsible for helping alumni of high school apply for universities through a streamlined application support portal.",
+    tags: ["React", "Education", "University Applications", "Support Platform"],
+    link: "https://alphascholarsrwanda.lovable.app",
   },
 ];
 

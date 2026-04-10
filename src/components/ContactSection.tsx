@@ -1,14 +1,74 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Github, Twitter, MessageCircle } from "lucide-react";
+import { Mail, MapPin, Github, Twitter, MessageCircle, Instagram, Linkedin } from "lucide-react";
 
 const ContactSection = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Thanks for reaching out! (Form submission not connected yet)");
+    setStatus("idle");
+    setStatusMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      formData.append("subject", form.subject);
+      formData.append("message", form.message);
+      formData.append("_subject", "New message from portfolio contact form");
+      formData.append("_captcha", "false");
+
+      const response = await fetch("https://formsubmit.co/ajax/freshtalent491@gmail.com", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Form submission failed");
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || "Submission failed");
+      }
+
+      setStatus("success");
+      setStatusMessage("Your message has been sent successfully, Samuel will reach out to you soon!");
+      setIsAlertVisible(true);
+      setForm({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      setStatus("error");
+      setStatusMessage("Something went wrong — please try again in a moment.");
+      setIsAlertVisible(true);
+      console.error(error);
+    } finally {
+      setStatus("error");
+      setStatusMessage("Something went wrong — please try again in a moment.");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  useEffect(() => {
+    if (status === "idle") return;
+
+    const timeout = window.setTimeout(() => {
+      setStatus("idle");
+      setStatusMessage("");
+    }, 5000);
+
+    return () => window.clearTimeout(timeout);
+  }, [status]);
 
   return (
     <section id="contact" className="py-24 bg-secondary/30">
@@ -47,15 +107,21 @@ const ContactSection = () => {
               </div>
             </div>
             <p className="text-muted-foreground text-sm mb-4">Connect on social media</p>
-            <div className="flex gap-4">
-              <a href="https://github.com/samuelakingeneye" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+            <div className="flex gap-4 flex-wrap">
+              <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
                 <Github size={18} />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+              <a href="https://x.com/TalentFres47507" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
                 <Twitter size={18} />
               </a>
-              <a href="https://wa.me/250790663921" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
-                <MessageCircle size={18} />
+              <a href="mailto:freshtalent491@gmail.com" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+                <Mail size={18} />
+              </a>
+              <a href="https://instagram.com/samuel_akingeneye" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+                <Instagram size={18} />
+              </a>
+              <a href="https://linkedin.com/in/samuel-akingeneye" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+                <Linkedin size={18} />
               </a>
             </div>
           </motion.div>
@@ -67,9 +133,31 @@ const ContactSection = () => {
             viewport={{ once: true }}
             className="space-y-4"
           >
+            {status !== "idle" && (
+              <div
+                className={`rounded-3xl p-4 border shadow-sm ${
+                  status === "success"
+                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-100"
+                    : "border-destructive/20 bg-destructive-500/10 text-destructive-100"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 text-lg font-bold">
+                    ✓
+                  </span>
+                  <div>
+                    <p className="font-semibold text-sm">
+                      {status === "success" ? "Message sent!" : "Submission failed"}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{statusMessage}</p>
+                  </div>
+                </div>
+              </div>
+            )}
             {(["name", "email", "subject"] as const).map((field) => (
               <input
                 key={field}
+                name={field}
                 type={field === "email" ? "email" : "text"}
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                 value={form[field]}
@@ -79,6 +167,7 @@ const ContactSection = () => {
               />
             ))}
             <textarea
+              name="message"
               placeholder="Message"
               rows={4}
               value={form.message}
@@ -88,9 +177,10 @@ const ContactSection = () => {
             />
             <button
               type="submit"
-              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Send Message
+              {isSubmitting ? "Sending..." : "Send Message"}
             </button>
           </motion.form>
         </div>
