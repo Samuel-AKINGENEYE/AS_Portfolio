@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Github, Linkedin, Twitter } from "lucide-react";
+import { Mail, MapPin, Github, Twitter, MessageCircle } from "lucide-react";
 
 const ContactSection = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // placeholder
     alert("Thanks for reaching out! (Form submission not connected yet)");
   };
 
@@ -22,12 +21,11 @@ const ContactSection = () => {
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Let's Connect</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Have a project in mind? I'd love to hear from you!
+            Have a project in mind or want to collaborate? I'd love to hear from you!
           </p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-          {/* Info */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -35,26 +33,33 @@ const ContactSection = () => {
           >
             <h3 className="text-xl font-semibold mb-6">Get in Touch</h3>
             <div className="space-y-4 mb-8">
-              <a href="mailto:your@email.com" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
+              <a href="mailto:freshtalent491@gmail.com" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
                 <Mail size={18} className="text-primary" />
-                your@email.com
+                freshtalent491@gmail.com
+              </a>
+              <a href="https://wa.me/250790663921" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
+                <MessageCircle size={18} className="text-primary" />
+                +250 790 663 921
               </a>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <MapPin size={18} className="text-primary" />
-                Your Location
+                Rwanda
               </div>
             </div>
             <p className="text-muted-foreground text-sm mb-4">Connect on social media</p>
             <div className="flex gap-4">
-              {[Github, Linkedin, Twitter].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
-                  <Icon size={18} />
-                </a>
-              ))}
+              <a href="https://github.com/samuelakingeneye" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+                <Github size={18} />
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+                <Twitter size={18} />
+              </a>
+              <a href="https://wa.me/250790663921" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-all">
+                <MessageCircle size={18} />
+              </a>
             </div>
           </motion.div>
 
-          {/* Form */}
           <motion.form
             onSubmit={handleSubmit}
             initial={{ opacity: 0, x: 20 }}

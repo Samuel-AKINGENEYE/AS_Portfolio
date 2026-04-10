@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Download, Github, Linkedin, Twitter, Mail } from "lucide-react";
+import { ArrowRight, Download, Github, Twitter, Mail, MessageCircle } from "lucide-react";
 import avatarImg from "@/assets/avatar.png";
 
 const HeroSection = () => {
@@ -9,7 +9,6 @@ const HeroSection = () => {
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(174_72%_50%_/_0.08)_0%,_transparent_70%)]" />
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-background to-transparent" />
-        {/* Floating dots */}
         {[...Array(30)].map((_, i) => (
           <motion.div
             key={i}
@@ -33,7 +32,6 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-6 pt-24 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -41,28 +39,32 @@ const HeroSection = () => {
           >
             <p className="text-primary text-lg mb-2">Hi, I am</p>
             <h1 className="text-5xl md:text-7xl font-bold mb-4">
-              Your <span className="text-gradient">Name</span>
+              Samuel <span className="text-gradient">AKINGENEYE</span>
             </h1>
             <p className="text-primary text-xl font-semibold mb-2">
-              Full Stack Developer
+              Software Engineer
             </p>
-            <p className="text-muted-foreground mb-2">Based in Your City.</p>
+            <p className="text-muted-foreground mb-2">Based in Rwanda.</p>
             <p className="text-muted-foreground max-w-lg mb-6 leading-relaxed">
-              I build modern, scalable web applications with clean code and great user experiences. 
-              Passionate about creating digital products that make a difference.
+              I build modern, user-focused web applications that solve real-world problems. 
+              From AI-powered learning platforms to civic engagement tools, I'm passionate about 
+              using technology to create meaningful impact in communities.
             </p>
 
             {/* Social icons */}
             <div className="flex gap-4 mb-8">
-              {[Github, Linkedin, Twitter, Mail].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Icon size={20} />
-                </a>
-              ))}
+              <a href="https://github.com/samuelakingeneye" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <Github size={20} />
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <Twitter size={20} />
+              </a>
+              <a href="mailto:freshtalent491@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                <Mail size={20} />
+              </a>
+              <a href="https://wa.me/250790663921" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <MessageCircle size={20} />
+              </a>
             </div>
 
             {/* CTA buttons */}
@@ -74,15 +76,14 @@ const HeroSection = () => {
                 View Projects <ArrowRight size={16} />
               </a>
               <a
-                href="#"
+                href="#contact"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground hover:border-primary transition-colors"
               >
-                Resume <Download size={16} />
+                Get in Touch <Mail size={16} />
               </a>
             </div>
           </motion.div>
 
-          {/* Right - Avatar */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -93,7 +94,7 @@ const HeroSection = () => {
               <div className="w-72 h-72 md:w-80 md:h-80 rounded-2xl overflow-hidden glow-border animate-float">
                 <img
                   src={avatarImg}
-                  alt="Profile avatar"
+                  alt="Samuel AKINGENEYE"
                   className="w-full h-full object-cover"
                 />
               </div>

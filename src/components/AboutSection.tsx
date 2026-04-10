@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
-import { Code2, Brain, Layout, Server, Cloud, Users } from "lucide-react";
+import { Code2, Brain, Layout, Server, Lightbulb, Users } from "lucide-react";
 
 const cards = [
-  { icon: Code2, title: "Full Stack Development", desc: "End-to-end applications with React, Node.js, TypeScript, and Python." },
-  { icon: Brain, title: "Problem Solving", desc: "Analytical thinking and creative solutions for complex technical challenges." },
-  { icon: Layout, title: "UI/UX Design", desc: "Clean, intuitive interfaces with modern design patterns and accessibility." },
-  { icon: Server, title: "Backend Architecture", desc: "Scalable APIs, microservices, and database design for production systems." },
-  { icon: Cloud, title: "Cloud & DevOps", desc: "AWS, Docker, CI/CD pipelines, and infrastructure automation." },
-  { icon: Users, title: "Team Collaboration", desc: "Agile workflows, code reviews, and cross-functional team leadership." },
+  { icon: Code2, title: "Full Stack Development", desc: "Building end-to-end web applications with React, Node.js, and modern JavaScript." },
+  { icon: Brain, title: "AI Integration", desc: "Creating AI-powered features like voice chat and intelligent learning systems." },
+  { icon: Layout, title: "UI/UX Design", desc: "Crafting clean, intuitive interfaces that prioritize user experience and accessibility." },
+  { icon: Server, title: "Backend Development", desc: "Designing APIs, databases, and server logic for scalable applications." },
+  { icon: Lightbulb, title: "Problem Solving", desc: "Turning real-world challenges into practical, technology-driven solutions." },
+  { icon: Users, title: "Community Impact", desc: "Building tools that improve education, civic engagement, and daily life." },
 ];
 
 const AboutSection = () => (
@@ -21,7 +21,7 @@ const AboutSection = () => (
       >
         <h2 className="text-3xl md:text-4xl font-bold mb-4">About Me</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Passionate developer focused on building impactful digital products
+          Self-taught developer passionate about building impactful digital products
         </p>
       </motion.div>
 
@@ -33,14 +33,14 @@ const AboutSection = () => (
       >
         <h3 className="text-xl font-semibold mb-4 text-primary">Background</h3>
         <p className="text-muted-foreground leading-relaxed mb-4">
-          With a strong foundation in computer science and years of hands-on experience, I've built my career 
-          creating modern web applications and scalable backend systems. I'm passionate about clean code, 
-          great user experiences, and continuous learning.
+          I'm Samuel AKINGENEYE, a self-taught Software Engineer based in Rwanda. My journey into tech started 
+          with curiosity and a drive to solve problems — from there I dove into freeCodeCamp's Full Stack 
+          Bootcamp and countless online courses, teaching myself everything from frontend frameworks to backend architecture.
         </p>
         <p className="text-muted-foreground leading-relaxed">
-          My expertise spans the full stack — from crafting pixel-perfect UIs with React and Tailwind to 
-          designing robust APIs and deploying to cloud infrastructure. I thrive in collaborative environments 
-          where innovation drives real-world impact.
+          I believe great software should serve people. That's why my projects focus on real-world impact — 
+          from AI-powered language learning to platforms that connect citizens with their government. 
+          I'm constantly learning, building, and pushing myself to grow as a developer.
         </p>
       </motion.div>
 
