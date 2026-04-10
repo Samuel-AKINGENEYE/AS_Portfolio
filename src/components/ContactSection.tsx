@@ -7,7 +7,6 @@ const ContactSection = () => {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isAlertVisible, setIsAlertVisible] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,14 +42,8 @@ const ContactSection = () => {
 
       setStatus("success");
       setStatusMessage("Your message has been sent successfully, Samuel will reach out to you soon!");
-      setIsAlertVisible(true);
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
-      setStatus("error");
-      setStatusMessage("Something went wrong — please try again in a moment.");
-      setIsAlertVisible(true);
-      console.error(error);
-    } finally {
       setStatus("error");
       setStatusMessage("Something went wrong — please try again in a moment.");
       console.error(error);
@@ -154,6 +147,7 @@ const ContactSection = () => {
                 </div>
               </div>
             )}
+
             {(["name", "email", "subject"] as const).map((field) => (
               <input
                 key={field}
@@ -166,6 +160,7 @@ const ContactSection = () => {
                 required
               />
             ))}
+
             <textarea
               name="message"
               placeholder="Message"
@@ -175,6 +170,7 @@ const ContactSection = () => {
               className="w-full px-4 py-3 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none"
               required
             />
+
             <button
               type="submit"
               disabled={isSubmitting}
