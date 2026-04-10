@@ -3,27 +3,27 @@ import { ExternalLink } from "lucide-react";
 
 const projects = [
   {
-    title: "E-Commerce Platform",
-    desc: "Full-stack e-commerce application with real-time inventory, payment processing, and admin dashboard.",
-    tags: ["React", "Node.js", "PostgreSQL", "Stripe", "AWS"],
+    title: "SpeakSmart",
+    desc: "An AI-powered language learning platform that helps users improve English speaking skills through interactive voice chat. It simulates real conversations to build fluency, confidence, and pronunciation.",
+    tags: ["React", "AI", "Voice Chat", "Node.js", "API Integration"],
     link: "#",
   },
   {
-    title: "Project Management Tool",
-    desc: "Collaborative project management app with kanban boards, real-time updates, and team chat.",
-    tags: ["Next.js", "TypeScript", "WebSocket", "MongoDB"],
+    title: "Smart Learn Rwanda",
+    desc: "A digital learning platform designed to support Rwandan students with accessible academic resources for studying from home. Simplifying learning and improving access to quality education.",
+    tags: ["React", "Education", "REST API", "Responsive Design"],
     link: "#",
   },
   {
-    title: "Analytics Dashboard",
-    desc: "Real-time analytics platform with interactive charts, custom reports, and data export.",
-    tags: ["React", "D3.js", "Python", "Redis", "Docker"],
+    title: "Smart Citizen Request System",
+    desc: "A civic engagement platform that allows citizens to report local issues and submit service requests directly to government authorities. Improves communication and transparency.",
+    tags: ["Full Stack", "Node.js", "Database", "Government Tech"],
     link: "#",
   },
   {
-    title: "Social Media App",
-    desc: "Mobile-first social platform with content feeds, messaging, and notification system.",
-    tags: ["React Native", "GraphQL", "PostgreSQL", "AWS"],
+    title: "E-Commerce Website",
+    desc: "A full-featured online shopping platform with product browsing, cart management, and checkout flow. Demonstrates core e-commerce functionality and user-friendly navigation.",
+    tags: ["React", "E-Commerce", "Cart System", "CSS", "JavaScript"],
     link: "#",
   },
 ];
@@ -38,7 +38,7 @@ const ProjectsSection = () => (
         className="text-center mb-16"
       >
         <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Projects</h2>
-        <p className="text-muted-foreground">A selection of my recent work</p>
+        <p className="text-muted-foreground">Real-world applications I've built</p>
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
