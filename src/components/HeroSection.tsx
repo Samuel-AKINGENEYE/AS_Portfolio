@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Download, Mail } from "lucide-react";
-import avatarImg from "@/assets/profile.jpg";
+import avatarImg from "@/assets/profile.png";
 
 const heroSkills =
   "Frontend | Backend | Database & Cloud | AI Integration";
