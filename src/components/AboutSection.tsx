@@ -1,11 +1,10 @@
 import { motion } from "framer-motion";
-import { Code2, Brain, Layout, Server, Lightbulb, Users } from "lucide-react";
+import { Code2, Brain, Layout, Lightbulb, Users } from "lucide-react";
 
 const cards = [
   { icon: Code2, title: "Full Stack Development", desc: "Building end-to-end web applications with React, Node.js, and modern JavaScript." },
   { icon: Brain, title: "AI Integration", desc: "Creating AI-powered features like voice chat and intelligent learning systems." },
   { icon: Layout, title: "UI/UX Design", desc: "Crafting clean, intuitive interfaces that prioritize user experience and accessibility." },
-  { icon: Server, title: "Backend Development", desc: "Designing APIs, databases, and server logic for scalable applications." },
   { icon: Lightbulb, title: "Problem Solving", desc: "Turning real-world challenges into practical, technology-driven solutions." },
   { icon: Users, title: "Community Impact", desc: "Building tools that improve education, civic engagement, and daily life." },
 ];

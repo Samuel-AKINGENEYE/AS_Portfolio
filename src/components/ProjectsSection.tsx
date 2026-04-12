@@ -1,36 +1,53 @@
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+import speakSmartImg from "@/assets/project-screenshots/speak-smart.png";
+import smartLearnImg from "@/assets/project-screenshots/smart-learn-rwanda.png";
+import smartCitizenImg from "@/assets/project-screenshots/smart-citizen-request.png";
+import shopeasyImg from "@/assets/project-screenshots/midrand-shopeasy.png";
+import internshipBookingImg from "@/assets/project-screenshots/internship-booking-system.png";
 
 const projects = [
   {
     title: "SpeakSmart",
+    image: speakSmartImg,
     desc: "An AI-powered language learning platform that helps users improve English speaking skills through interactive voice chat. It simulates real conversations to build fluency, confidence, and pronunciation.",
     tags: ["React", "AI", "Voice Chat", "Node.js", "API Integration"],
     link: "https://voice-ai-english.lovable.app/",
   },
   {
     title: "Smart Learn Rwanda",
+    image: smartLearnImg,
     desc: "A digital learning platform designed to support Rwandan students with accessible academic resources for studying from home. Simplifying learning and improving access to quality education.",
     tags: ["React", "Education", "REST API", "Responsive Design"],
-    link: "https://smart-learn-rwanda.lovable.app/",
+    link: "https://fresh-talent-solutions-z8ax.vercel.app",
   },
   {
     title: "Smart Citizen Request System",
+    image: smartCitizenImg,
     desc: "A civic engagement platform that allows citizens to report local issues and submit service requests directly to government authorities. Improves communication and transparency.",
     tags: ["Full Stack", "Node.js", "Database", "Government Tech"],
     link: "https://smart-citizen-request.lovable.app",
   },
   {
     title: "E-Commerce Website",
+    image: shopeasyImg,
     desc: "A full-featured online shopping platform with product browsing, cart management, and checkout flow. Demonstrates core e-commerce functionality and user-friendly navigation.",
     tags: ["React", "E-Commerce", "Cart System", "CSS", "JavaScript"],
     link: "https://midrand-shop-easy.lovable.app",
   },
   {
     title: "Alpha Scholars Rwanda",
+    image: "https://image.thum.io/get/https://alphascholarsrwanda.lovable.app",
     desc: "Responsible for helping alumni of high school apply for universities through a streamlined application support portal.",
     tags: ["React", "Education", "University Applications", "Support Platform"],
     link: "https://alphascholarsrwanda.lovable.app",
+  },
+  {
+    title: "Internship Booking System",
+    image: internshipBookingImg,
+    desc: "A booking platform for managing internship applications, matching students with opportunities and streamlining scheduling for recruiters.",
+    tags: ["React", "Booking System", "Internships", "Student Portal"],
+    link: "https://internship-booking-system.vercel.app",
   },
 ];
 
@@ -57,9 +74,17 @@ const ProjectsSection = () => (
             transition={{ delay: i * 0.1 }}
             className="card-gradient glow-border rounded-xl overflow-hidden group hover:border-primary/50 transition-all"
           >
-            <div className="h-48 bg-gradient-to-br from-primary/10 to-secondary flex items-center justify-center">
-              <span className="text-4xl text-primary/40 font-mono">{"</>"}</span>
-            </div>
+            <a href={project.link} target="_blank" rel="noopener noreferrer" className="block h-48 overflow-hidden bg-[#070c12]">
+              <img
+                src={project.image}
+                alt={`${project.title} preview`}
+                width={720}
+                height={288}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </a>
             <div className="p-6">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Download, Github, Twitter, Mail, MessageCircle } from "lucide-react";
-import avatarImg from "@/assets/profile.png";
+import { ArrowRight, Download, Mail } from "lucide-react";
+import avatarImg from "@/assets/profile.jpg";
 
 const heroSkills =
   "Frontend | Backend | Database & Cloud | AI Integration";
@@ -12,7 +12,7 @@ const HeroSection = () => {
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(174_72%_50%_/_0.08)_0%,_transparent_70%)]" />
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-background to-transparent" />
-        {[...Array(30)].map((_, i) => (
+        {[...Array(14)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 rounded-full bg-primary/30"
@@ -67,22 +67,6 @@ const HeroSection = () => {
               using technology to create meaningful impact in communities.
             </p>
 
-            {/* Social icons */}
-            <div className="flex gap-4 mb-8">
-              <a href="https://github.com/samuelakingeneye" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                <Github size={20} />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href="mailto:freshtalent491@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
-                <Mail size={20} />
-              </a>
-              <a href="https://wa.me/250790663921" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                <MessageCircle size={20} />
-              </a>
-            </div>
-
             {/* CTA buttons */}
             <div className="flex flex-wrap gap-4 items-center justify-center lg:justify-start">
               <a
@@ -112,12 +96,17 @@ const HeroSection = () => {
                   src={avatarImg}
                   alt="Samuel AKINGENEYE"
                   className="w-full h-full object-cover"
+                  width={320}
+                  height={320}
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
               <div className="absolute -bottom-3 left-0 right-0 flex items-center justify-between px-3">
                 <a
                   href="/resume.pdf"
-                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-background/90 px-4 py-2 text-sm font-semibold text-primary shadow-sm shadow-primary/10 hover:bg-primary/10 transition-all"
                 >
                   Resume
