@@ -43,6 +43,13 @@ const projects = [
     link: "https://alphascholarsrwanda.lovable.app",
   },
   {
+    title: "One health",
+    image: "https://image.thum.io/get/https://health-hub-connect-three.vercel.app",
+    desc: "A community health education platform delivering trusted local guidance on menstrual hygiene, mental health, nutrition, malaria prevention, first aid, and adolescent health with Kinyarwanda support.",
+    tags: ["Health", "Public Health", "Community", "Kinyarwanda", "Education"],
+    link: "https://health-hub-connect-three.vercel.app/",
+  },
+  {
     title: "Internship Booking System",
     image: internshipBookingImg,
     desc: "A booking platform for managing internship applications, matching students with opportunities and streamlining scheduling for recruiters.",
