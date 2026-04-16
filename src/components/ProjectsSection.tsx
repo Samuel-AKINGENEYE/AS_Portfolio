@@ -5,6 +5,7 @@ import smartLearnImg from "@/assets/project-screenshots/smart-learn-rwanda.png";
 import smartCitizenImg from "@/assets/project-screenshots/smart-citizen-request.png";
 import shopeasyImg from "@/assets/project-screenshots/midrand-shopeasy.png";
 import internshipBookingImg from "@/assets/project-screenshots/internship-booking-system.png";
+import oneHealthImg from "@/assets/project-screenshots/one-health.png";
 
 const projects = [
   {
@@ -44,7 +45,7 @@ const projects = [
   },
   {
     title: "One health",
-    image: "https://image.thum.io/get/https://health-hub-connect-three.vercel.app",
+    image: oneHealthImg,
     desc: "A community health education platform delivering trusted local guidance on menstrual hygiene, mental health, nutrition, malaria prevention, first aid, and adolescent health with Kinyarwanda support.",
     tags: ["Health", "Public Health", "Community", "Kinyarwanda", "Education"],
     link: "https://health-hub-connect-three.vercel.app/",
