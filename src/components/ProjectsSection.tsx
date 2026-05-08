@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import speakSmartImg from "@/assets/project-screenshots/speak-smart.png";
-import smartLearnImg from "@/assets/project-screenshots/smart-learn-rwanda.png";
+
 import smartCitizenImg from "@/assets/project-screenshots/smart-citizen-request.png";
 import shopeasyImg from "@/assets/project-screenshots/midrand-shopeasy.png";
 import internshipBookingImg from "@/assets/project-screenshots/internship-booking-system.png";
@@ -15,13 +15,7 @@ const projects = [
     tags: ["React", "AI", "Voice Chat", "Node.js", "API Integration"],
     link: "https://voice-ai-english.lovable.app/",
   },
-  {
-    title: "Smart Learn Rwanda",
-    image: smartLearnImg,
-    desc: "A digital learning platform designed to support Rwandan students with accessible academic resources for studying from home. Simplifying learning and improving access to quality education.",
-    tags: ["React", "Education", "REST API", "Responsive Design"],
-    link: "https://fresh-talent-solutions-z8ax.vercel.app",
-  },
+
   {
     title: "Smart Citizen Request System",
     image: smartCitizenImg,
