@@ -46,7 +46,7 @@ const projects = [
   },
   {
     title: "Internship Booking System",
-    image: BookingImg,
+    image: internshipBookingImg,
     desc: "A booking platform for managing internship applications, matching students with opportunities and streamlining scheduling for recruiters.",
     tags: ["React", "Booking System", "Internships", "Student Portal"],
     link: "https://internship-booking-system.vercel.app",
