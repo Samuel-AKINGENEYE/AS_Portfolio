@@ -13,7 +13,7 @@ const projects = [
     image: speakSmartImg,
     desc: "An AI-powered language learning platform that helps users improve English speaking skills through interactive voice chat. It simulates real conversations to build fluency, confidence, and pronunciation.",
     tags: ["React", "AI", "Voice Chat", "Node.js", "API Integration"],
-    link: "https://voice-ai-english.lovable.app/",
+    link: "https://speak-smart-pi.vercel.app/",
   },
 
   {
