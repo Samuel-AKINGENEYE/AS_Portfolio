@@ -27,7 +27,7 @@ const projects = [
     image: smartCitizenImg,
     desc: "A civic engagement platform that allows citizens to report local issues and submit service requests directly to government authorities. Improves communication and transparency.",
     tags: ["Full Stack", "Node.js", "Database", "Government Tech"],
-    link: "https://smart-citizen-request.lovable.app",
+    link: "https://samuel-akingeneye.github.io/Smart-Citizen-Service-Request-System/",
   },
   {
     title: "E-Commerce Website",
