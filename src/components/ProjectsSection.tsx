@@ -36,13 +36,7 @@ const projects = [
     tags: ["React", "E-Commerce", "Cart System", "CSS", "JavaScript"],
     link: "https://midrand-shop-easy.lovable.app",
   },
-  {
-    title: "Alpha Scholars Rwanda",
-    image: "https://image.thum.io/get/https://alphascholarsrwanda.lovable.app",
-    desc: "Responsible for helping alumni of high school apply for universities through a streamlined application support portal.",
-    tags: ["React", "Education", "University Applications", "Support Platform"],
-    link: "https://alphascholarsrwanda.lovable.app",
-  },
+ 
   {
     title: "One health",
     image: oneHealthImg,
@@ -52,7 +46,7 @@ const projects = [
   },
   {
     title: "Internship Booking System",
-    image: internshipBookingImg,
+    image: BookingImg,
     desc: "A booking platform for managing internship applications, matching students with opportunities and streamlining scheduling for recruiters.",
     tags: ["React", "Booking System", "Internships", "Student Portal"],
     link: "https://internship-booking-system.vercel.app",
