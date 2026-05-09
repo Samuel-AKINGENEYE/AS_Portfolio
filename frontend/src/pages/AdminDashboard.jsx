@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code, BookOpen, Briefcase } from 'lucide-react';
-import { projectsApi, certificatesApi, profileApi, skillsApi, educationApi, experienceApi } from '../services/api.js';
+import { LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code, BookOpen, Briefcase, Upload } from 'lucide-react';
+import { projectsApi, certificatesApi, profileApi, skillsApi, educationApi, experienceApi, uploadApi } from '../services/api.js';
 import DarkModeToggle from '../components/DarkModeToggle.jsx';
 
 const INPUT = 'w-full px-3 py-2.5 rounded-lg text-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors';
@@ -36,26 +36,68 @@ function ProfileTab() {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  useEffect(() => { profileApi.get().then(res => setForm(res.data.data)).catch(() => toast.error('Failed to load profile')).finally(() => setLoading(false)); }, []);
+  useEffect(() => { profileApi.get().then(res => setForm(res.data.data)).catch(() => toast.error("Failed to load profile")).finally(() => setLoading(false)); }, []);
 
   const setField = (key, val) => setForm(f => ({ ...f, [key]: val }));
   const setSocial = (key, val) => setForm(f => ({ ...f, socialLinks: { ...f.socialLinks, [key]: val } }));
 
-  const handleSubmit = async (e) => { e.preventDefault(); setSaving(true); try { await profileApi.update(form); toast.success('Profile saved!'); } catch { toast.error('Failed to save'); } finally { setSaving(false); } };
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be less than 5MB"); return; }
+    setUploading(true);
+    try {
+      const res = await uploadApi.uploadAvatar(file);
+      setField("avatar", res.data.data.url);
+      toast.success("Avatar uploaded! Click Save to update profile.");
+    } catch (err) { toast.error("Upload failed"); }
+    finally { setUploading(false); }
+  };
+
+  const handleSubmit = async (e) => { e.preventDefault(); setSaving(true); try { await profileApi.update(form); toast.success("Profile saved!"); } catch { toast.error("Failed to save"); } finally { setSaving(false); } };
 
   if (loading) return <div className="space-y-4">{Array.from({ length: 5 }, (_, i) => <div key={i} className="h-12 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />)}</div>;
   if (!form) return null;
 
-  return (<form onSubmit={handleSubmit} className="space-y-6 max-w-xl"><h2 className="text-lg font-semibold">Profile Settings</h2>
-    <div><label className={LABEL}>Profile Avatar (Image URL)</label><div className="flex items-start gap-4">{form?.avatar && <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500 shadow-md"><img src={form.avatar} alt="Avatar" className="w-full h-full object-cover" /></div>}<div className="flex-1"><input type="url" placeholder="https://your-image-url.com/avatar.jpg" value={form?.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} /><p className="text-xs text-slate-400 mt-1">Paste image URL from ImgBB, Cloudinary, or any image hosting</p></div></div></div>
-    <div className="grid grid-cols-2 gap-4"><div><label className={LABEL}>Name</label><input value={form.name ?? ''} onChange={e => setField('name', e.target.value)} className={INPUT} /></div><div><label className={LABEL}>Title</label><input value={form.title ?? ''} onChange={e => setField('title', e.target.value)} className={INPUT} /></div></div>
-    <div><label className={LABEL}>Bio</label><textarea rows={5} value={form.bio ?? ''} onChange={e => setField('bio', e.target.value)} className={INPUT} /></div>
-    <div className="grid grid-cols-2 gap-4"><div><label className={LABEL}>Location</label><input value={form.location ?? ''} onChange={e => setField('location', e.target.value)} className={INPUT} /></div><div><label className={LABEL}>Email</label><input type="email" value={form.email ?? ''} onChange={e => setField('email', e.target.value)} className={INPUT} /></div></div>
-    <div className="grid grid-cols-2 gap-4"><div><label className={LABEL}>Availability</label><input value={form.availability ?? ''} onChange={e => setField('availability', e.target.value)} className={INPUT} /></div><div><label className={LABEL}>Years of Experience</label><input type="number" value={form.yearsOfExperience ?? 0} onChange={e => setField('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div></div>
-    <div><h3 className="text-sm font-medium mb-3">Social Links</h3><div className="space-y-3">{['github', 'linkedin', 'twitter'].map(key => (<div key={key}><label className={LABEL}>{key.charAt(0).toUpperCase() + key.slice(1)}</label><input type="url" value={form.socialLinks?.[key] ?? ''} onChange={e => setSocial(key, e.target.value)} className={INPUT} placeholder={`https://${key}.com/...`} /></div>))}</div></div>
-    <button type="submit" disabled={saving} className={BTN_PRIMARY}>{saving ? <Spinner /> : <Save size={14} />}{saving ? 'Saving…' : 'Save Profile'}</button>
-  </form>);
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
+      <h2 className="text-lg font-semibold">Profile Settings</h2>
+      <div>
+        <label className={LABEL}>Profile Avatar</label>
+        <div className="flex items-start gap-4">
+          {form?.avatar && <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500 shadow-md"><img src={form.avatar} alt="Avatar" className="w-full h-full object-cover" /></div>}
+          <div className="flex-1 space-y-2">
+            <div className="flex gap-2">
+              <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors inline-flex items-center gap-2">
+                <Upload size={14} /> {uploading ? "Uploading..." : "Choose Image"}
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+              </label>
+            </div>
+            <input type="url" placeholder="Or paste image URL directly" value={form?.avatar || ""} onChange={(e) => setField("avatar", e.target.value)} className={INPUT} />
+            <p className="text-xs text-slate-400">Upload JPEG/PNG (max 5MB) or paste URL</p>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div><label className={LABEL}>Name</label><input value={form.name ?? ""} onChange={e => setField("name", e.target.value)} className={INPUT} /></div>
+        <div><label className={LABEL}>Title</label><input value={form.title ?? ""} onChange={e => setField("title", e.target.value)} className={INPUT} /></div>
+      </div>
+      <div><label className={LABEL}>Bio</label><textarea rows={5} value={form.bio ?? ""} onChange={e => setField("bio", e.target.value)} className={INPUT} /></div>
+      <div className="grid grid-cols-2 gap-4">
+        <div><label className={LABEL}>Location</label><input value={form.location ?? ""} onChange={e => setField("location", e.target.value)} className={INPUT} /></div>
+        <div><label className={LABEL}>Email</label><input type="email" value={form.email ?? ""} onChange={e => setField("email", e.target.value)} className={INPUT} /></div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div><label className={LABEL}>Availability</label><input value={form.availability ?? ""} onChange={e => setField("availability", e.target.value)} className={INPUT} /></div>
+        <div><label className={LABEL}>Years of Experience</label><input type="number" value={form.yearsOfExperience ?? 0} onChange={e => setField("yearsOfExperience", Number(e.target.value))} className={INPUT} /></div>
+      </div>
+      <div><h3 className="text-sm font-medium mb-3">Social Links</h3><div className="space-y-3">{["github", "linkedin", "twitter"].map(key => (<div key={key}><label className={LABEL}>{key.charAt(0).toUpperCase() + key.slice(1)}</label><input type="url" value={form.socialLinks?.[key] ?? ""} onChange={e => setSocial(key, e.target.value)} className={INPUT} placeholder={`https://${key}.com/...`} /></div>))}</div></div>
+      <button type="submit" disabled={saving} className={BTN_PRIMARY}>{saving ? <Spinner /> : <Save size={14} />}{saving ? "Saving…" : "Save Profile"}</button>
+    </form>
+  );
 }
 
 function CertificatesTab() { return <div>Certificates Tab</div>; }
