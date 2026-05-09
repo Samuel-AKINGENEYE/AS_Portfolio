@@ -1,9 +1,11 @@
 [build]
-  command = "npm run build"
+  base = "frontend"
+  command = "npm install && npm run build"
   publish = "dist"
 
 [build.environment]
   VITE_API_URL = "https://samuel-ak-portfolio-api.onrender.com/api"
+  VITE_WHATSAPP_NUMBER = "250788000000"
 
 [[redirects]]
   from = "/*"

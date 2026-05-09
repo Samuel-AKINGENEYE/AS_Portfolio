@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-slate-800; }
+  ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-600 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-blue-500; }
+}
+
+@layer utilities {
+  /* ── Text ── */
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent;
+  }
+
+  /* ── Cards ── */
+  .card {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl;
+  }
+
+  .card-glass {
+    @apply rounded-2xl border border-white/20 dark:border-white/10;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .dark .card-glass {
+    background: rgba(15, 23, 42, 0.7);
+  }
+
+  /* ── Hover glow ── */
+  .glow-hover {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  }
+  .glow-hover:hover {
+    @apply border-blue-500/50;
+    box-shadow: 0 0 24px rgba(59, 130, 246, 0.18);
+    transform: translateY(-2px);
+  }
+
+  /* ── Layout ── */
+  .section {
+    @apply py-24 px-6;
+  }
+
+  .container-max {
+    @apply max-w-6xl mx-auto;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-slate-900 dark:text-white;
+  }
+
+  .section-sub {
+    @apply text-slate-500 dark:text-slate-400 mt-3 max-w-xl mx-auto;
+  }
+
+  /* ── Reveal animation (JS toggled) ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-d1 { transition-delay: 0.1s; }
+  .reveal-d2 { transition-delay: 0.2s; }
+  .reveal-d3 { transition-delay: 0.3s; }
+  .reveal-d4 { transition-delay: 0.4s; }
+
+  /* ── Animated gradient bg ── */
+  .gradient-bg {
+    background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f172a, #1d4ed8);
+    background-size: 300%;
+    animation: gradientShift 8s ease infinite;
+  }
+
+  /* ── WhatsApp pulse ── */
+  .wa-pulse {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* ── Stat counter ── */
+  .stat-num {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Keyframes (not in Tailwind keyframe map) ── */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.65);
+  }
+  70% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 14px rgba(37, 211, 102, 0);
+  }
+}
