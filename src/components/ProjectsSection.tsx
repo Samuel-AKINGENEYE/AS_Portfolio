@@ -3,9 +3,7 @@ import { ExternalLink } from "lucide-react";
 import speakSmartImg from "@/assets/project-screenshots/speak-smart.png";
 
 import smartCitizenImg from "@/assets/project-screenshots/smart-citizen-request.png";
-import shopeasyImg from "@/assets/project-screenshots/midrand-shopeasy.png";
-import internshipBookingImg from "@/assets/project-screenshots/internship-booking-system.png";
-import oneHealthImg from "@/assets/project-screenshots/one-health.png";
+
 
 const projects = [
   {
@@ -22,28 +20,6 @@ const projects = [
     desc: "A civic engagement platform that allows citizens to report local issues and submit service requests directly to government authorities. Improves communication and transparency.",
     tags: ["Full Stack", "Node.js", "Database", "Government Tech"],
     link: "https://samuel-akingeneye.github.io/Smart-Citizen-Service-Request-System/",
-  },
-  {
-    title: "E-Commerce Website",
-    image: shopeasyImg,
-    desc: "A full-featured online shopping platform with product browsing, cart management, and checkout flow. Demonstrates core e-commerce functionality and user-friendly navigation.",
-    tags: ["React", "E-Commerce", "Cart System", "CSS", "JavaScript"],
-    link: "https://midrand-shop-easy.lovable.app",
-  },
- 
-  {
-    title: "One health",
-    image: oneHealthImg,
-    desc: "A community health education platform delivering trusted local guidance on menstrual hygiene, mental health, nutrition, malaria prevention, first aid, and adolescent health with Kinyarwanda support.",
-    tags: ["Health", "Public Health", "Community", "Kinyarwanda", "Education"],
-    link: "https://health-hub-connect-three.vercel.app/",
-  },
-  {
-    title: "Internship Booking System",
-    image: internshipBookingImg,
-    desc: "A booking platform for managing internship applications, matching students with opportunities and streamlining scheduling for recruiters.",
-    tags: ["React", "Booking System", "Internships", "Student Portal"],
-    link: "https://internship-booking-system.vercel.app",
   },
 ];
 
