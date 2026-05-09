@@ -92,12 +92,10 @@ export default function Home() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
   const [sending, setSending]         = useState(false);
 
-  // Track page view once
   useEffect(() => {
     analyticsApi.track({ page: '/', visitorId: getVisitorId() }).catch(() => {});
   }, []);
 
-  // Load all data
   useEffect(() => {
     const load = async () => {
       try {
@@ -124,7 +122,6 @@ export default function Home() {
     load();
   }, []);
 
-  // Scroll-reveal: observe all .reveal elements, re-run when data loads
   useEffect(() => {
     const obs = new IntersectionObserver(
       (entries) => entries.forEach(e => e.isIntersecting && e.target.classList.add('visible')),
@@ -134,13 +131,11 @@ export default function Home() {
     return () => obs.disconnect();
   }, [loading]);
 
-  // Group skills by category
   const skillsByCategory = skills.reduce((acc, s) => {
     (acc[s.category] = acc[s.category] || []).push(s);
     return acc;
   }, {});
 
-  // Tech filter options from project data
   const allTechs = ['All', ...new Set(projects.flatMap(p => p.techStack || []))].slice(0, 9);
   const filteredProjects = techFilter === 'All'
     ? projects
@@ -172,69 +167,40 @@ export default function Home() {
       <Navbar />
       <WhatsAppButton />
 
-      {/* ═══════════════════════════════════════════════════════════
-          HERO
-      ═══════════════════════════════════════════════════════════ */}
-      <section
-        id="hero"
-        className="relative min-h-screen flex items-center pt-16 px-6 overflow-hidden bg-slate-950"
-      >
+      {/* Hero Section */}
+      <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 overflow-hidden bg-slate-950">
         <StarBackground />
-        {/* Mesh gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900/90 to-blue-950/40 pointer-events-none" />
-        {/* Radial glow */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-6xl mx-auto w-full py-24">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-            {/* Left — text */}
             <div className="animate-slide-up">
-              {/* Availability pill */}
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium mb-7">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                 {profile?.availability || 'Available for Work'}
               </div>
-
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.1] mb-4 text-white">
                 Hi, I'm{' '}
                 <span className="text-gradient">
                   {profile?.name?.split(' ')[0] || 'Samuel'}
                 </span>
               </h1>
-
               <div className="text-2xl lg:text-3xl font-semibold text-slate-300 mb-5 min-h-[2.5rem]">
                 <TypingText texts={HERO_TEXTS} />
               </div>
-
               <p className="text-slate-400 leading-relaxed mb-8 max-w-lg">
                 {profile?.bio ||
                   'Building tools used by 500+ users across Africa. From AI-powered language tutors to civic engagement platforms — I write code that creates real impact.'}
               </p>
-
               <div className="flex flex-wrap gap-3 mb-12">
-                <a
-                  href="#projects"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-600
-                             text-white font-medium transition-all shadow-lg shadow-blue-500/25
-                             hover:shadow-blue-500/40 hover:-translate-y-0.5"
-                >
+                <a href="#projects" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5">
                   View My Work <ChevronRight size={16} />
                 </a>
-                <a
-                  href="/resume.pdf"
-                  download
-                  onClick={trackResume}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl
-                             border border-slate-600 text-slate-300
-                             hover:border-blue-500 hover:text-blue-400 font-medium
-                             transition-all hover:-translate-y-0.5"
-                >
+                <a href="/resume.pdf" download onClick={trackResume} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-600 text-slate-300 hover:border-blue-500 hover:text-blue-400 font-medium transition-all hover:-translate-y-0.5">
                   <Download size={16} /> Resume
                 </a>
               </div>
-
-              {/* Stats */}
               <div className="flex flex-wrap gap-10">
                 {[
                   { value: projects.length || 12, suffix: '+', label: 'Projects Built' },
@@ -251,19 +217,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right — avatar */}
             <div className="hidden lg:flex justify-center animate-slide-up-d2">
               <div className="relative">
-                {/* Outer glow ring */}
                 <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-blue-500/30 to-cyan-500/20 blur-2xl" />
                 <div className="relative w-80 h-80 rounded-[2rem] overflow-hidden border border-blue-500/20 shadow-2xl bg-slate-900">
                   {profile?.avatar ? (
-                    <img
-                      src={profile.avatar}
-                      alt={profile.name || 'Profile'}
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                    />
+                    <img src={profile.avatar} alt={profile.name || 'Profile'} className="w-full h-full object-cover" loading="eager" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-8xl font-black text-blue-500/15 select-none">SA</span>
@@ -280,23 +239,12 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* Scroll cue */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
-          <div className="w-6 h-10 rounded-full border-2 border-slate-600 flex items-start justify-center p-1.5">
-            <div className="w-1 h-2.5 bg-slate-400 rounded-full animate-[slideUp_1.5s_ease-in-out_infinite]" />
-          </div>
-        </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          PROJECTS
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Projects Section */}
       <section id="projects" className="section bg-white dark:bg-slate-800/20">
         <div className="container-max">
           <SectionHeader title="Featured Projects" subtitle="Things I've built and shipped" />
-
-          {/* Tech filter pills */}
           {allTechs.length > 1 && (
             <div className="flex flex-wrap gap-2 justify-center mb-10 reveal">
               {allTechs.map(tech => (
@@ -314,7 +262,6 @@ export default function Home() {
               ))}
             </div>
           )}
-
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3].map(i => <SkeletonCard key={i} className="h-64" />)}
@@ -333,9 +280,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          SKILLS
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Skills Section - IMPROVED WITH DISTINCT CATEGORY HEADINGS */}
       <section id="skills" className="section">
         <div className="container-max">
           <SectionHeader title="Skills & Tech Stack" subtitle="Technologies I work with daily" />
@@ -354,15 +299,20 @@ export default function Home() {
                     key={cat}
                     className={`reveal reveal-d${Math.min(i + 1, 4)} card-glass glow-hover p-6 border ${cfg.border}`}
                   >
-                    <div className={`inline-flex items-center gap-2 ${cfg.bg} rounded-xl px-3 py-2 mb-5`}>
-                      <Icon size={15} className={cfg.color} />
-                      <span className={`text-sm font-semibold ${cfg.color}`}>{cat}</span>
+                    {/* Category Header - Distinct from skills */}
+                    <div className="mb-5 pb-2 border-b border-slate-200 dark:border-slate-700">
+                      <div className={`inline-flex items-center gap-2 ${cfg.bg} rounded-xl px-3 py-2`}>
+                        <Icon size={16} className={cfg.color} />
+                        <h3 className={`font-bold text-base ${cfg.color}`}>{cat}</h3>
+                      </div>
                     </div>
+                    
+                    {/* Skills as badges */}
                     <div className="flex flex-wrap gap-2">
                       {catSkills.map(skill => (
                         <span
                           key={skill._id}
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} border ${cfg.border} hover:scale-105 transition-transform cursor-default select-none`}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} border ${cfg.border} hover:scale-105 transition-transform cursor-default select-none`}
                         >
                           {skill.name}
                         </span>
@@ -373,38 +323,35 @@ export default function Home() {
               })}
             </div>
           ) : (
-            /* Fallback static skills when DB is empty */
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Object.entries({
-                Frontend: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-                Backend:  ['Node.js', 'Express', 'Python'],
-                Database: ['PostgreSQL', 'MongoDB', 'Redis'],
-                Tools:    ['Git', 'Docker', 'AWS'],
-              }).map(([cat, items], i) => {
-                const cfg = CATEGORY_CFG[cat];
-                const Icon = cfg.icon;
-                return (
-                  <div key={cat} className={`reveal reveal-d${Math.min(i + 1, 4)} card-glass glow-hover p-6 border ${cfg.border}`}>
-                    <div className={`inline-flex items-center gap-2 ${cfg.bg} rounded-xl px-3 py-2 mb-5`}>
-                      <Icon size={15} className={cfg.color} />
-                      <span className={`text-sm font-semibold ${cfg.color}`}>{cat}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {items.map(s => (
-                        <span key={s} className={`px-3 py-1 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} border ${cfg.border}`}>{s}</span>
-                      ))}
+                Frontend: { icon: Globe, color: 'text-blue-500', bg: 'bg-blue-500/10', items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'] },
+                Backend: { icon: Code2, color: 'text-green-500', bg: 'bg-green-500/10', items: ['Node.js', 'Express', 'Python'] },
+                Database: { icon: Database, color: 'text-purple-500', bg: 'bg-purple-500/10', items: ['PostgreSQL', 'MongoDB', 'Redis'] },
+                Tools: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', items: ['Git', 'Docker', 'AWS'] },
+              }).map(([cat, { icon: Icon, color, bg, items }], i) => (
+                <div key={cat} className={`reveal reveal-d${i + 1} card-glass glow-hover p-6 border`}>
+                  <div className="mb-5 pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <div className={`inline-flex items-center gap-2 ${bg} rounded-xl px-3 py-2`}>
+                      <Icon size={16} className={color} />
+                      <h3 className={`font-bold text-base ${color}`}>{cat}</h3>
                     </div>
                   </div>
-                );
-              })}
+                  <div className="flex flex-wrap gap-2">
+                    {items.map(skill => (
+                      <span key={skill} className={`px-3 py-1.5 rounded-full text-xs font-medium ${bg} ${color} border`}>
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          EXPERIENCE
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Experience Section */}
       <section id="experience" className="section bg-white dark:bg-slate-800/20">
         <div className="container-max">
           <SectionHeader title="Work Experience" subtitle="My professional journey" />
@@ -422,9 +369,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          EDUCATION
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Education Section */}
       <section id="education" className="section">
         <div className="container-max">
           <SectionHeader title="Education" subtitle="My academic background" />
@@ -442,9 +387,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          CERTIFICATES
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Certificates Section */}
       <section id="certificates" className="section bg-white dark:bg-slate-800/20">
         <div className="container-max">
           <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
@@ -466,9 +409,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          TESTIMONIALS
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Testimonials Section */}
       <section id="testimonials" className="section">
         <div className="container-max">
           <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
@@ -489,135 +430,54 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════
-          CONTACT
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Contact Section */}
       <section id="contact" className="section bg-white dark:bg-slate-800/20">
         <div className="container-max">
           <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
-
           <div className="grid lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {/* Contact form */}
             <form onSubmit={handleContact} className="reveal space-y-4">
-              {/* Honeypot (hidden from real users) */}
-              <input
-                type="text"
-                tabIndex={-1}
-                autoComplete="off"
-                className="hidden"
-                value={contactForm.honeypot}
-                onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))}
-              />
-
+              <input type="text" tabIndex={-1} autoComplete="off" className="hidden" value={contactForm.honeypot} onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Name
-                </label>
-                <input
-                  required
-                  value={contactForm.name}
-                  onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Your full name"
-                  className="input"
-                />
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Name</label>
+                <input required value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} placeholder="Your full name" className="input" />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Email
-                </label>
-                <input
-                  required
-                  type="email"
-                  value={contactForm.email}
-                  onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="you@example.com"
-                  className="input"
-                />
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
+                <input required type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} placeholder="you@example.com" className="input" />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                  Message
-                </label>
-                <textarea
-                  required
-                  rows={5}
-                  value={contactForm.message}
-                  onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
-                  placeholder="Tell me about your project..."
-                  className="input resize-none"
-                />
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Message</label>
+                <textarea required rows={5} value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} placeholder="Tell me about your project..." className="input resize-none" />
               </div>
-
-              <button
-                type="submit"
-                disabled={sending}
-                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl
-                           bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-medium
-                           transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-0.5"
-              >
+              <button type="submit" disabled={sending} className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-medium transition-all shadow-lg shadow-blue-500/20 hover:-translate-y-0.5">
                 {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                 {sending ? 'Sending…' : 'Send Message'}
               </button>
             </form>
 
-            {/* Contact info */}
             <div className="reveal reveal-d2 space-y-7">
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3>
                 <div className="flex flex-wrap gap-3">
-                  {social.github && (
-                    <a href={social.github} target="_blank" rel="noopener noreferrer"
-                      className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110">
-                      <Github size={20} />
-                    </a>
-                  )}
-                  {social.linkedin && (
-                    <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
-                      className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110">
-                      <Linkedin size={20} />
-                    </a>
-                  )}
-                  {social.twitter && (
-                    <a href={social.twitter} target="_blank" rel="noopener noreferrer"
-                      className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110">
-                      <Twitter size={20} />
-                    </a>
-                  )}
-                  {profile?.email && (
-                    <a href={`mailto:${profile.email}`}
-                      className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110">
-                      <Mail size={20} />
-                    </a>
-                  )}
+                  {social.github && <a href={social.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110"><Github size={20} /></a>}
+                  {social.linkedin && <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110"><Linkedin size={20} /></a>}
+                  {social.twitter && <a href={social.twitter} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110"><Twitter size={20} /></a>}
+                  {profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all hover:scale-110"><Mail size={20} /></a>}
                 </div>
               </div>
-
               {profile?.email && (
                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
                   <Mail size={16} className="text-blue-500 shrink-0" />
-                  <a href={`mailto:${profile.email}`} className="hover:text-blue-500 transition-colors text-sm">
-                    {profile.email}
-                  </a>
+                  <a href={`mailto:${profile.email}`} className="hover:text-blue-500 transition-colors text-sm">{profile.email}</a>
                 </div>
               )}
-
               {profile?.location && (
                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
                   <MapPin size={16} className="text-blue-500 shrink-0" />
                   <span className="text-sm">{profile.location}</span>
                 </div>
               )}
-
-              <a
-                href="/resume.pdf"
-                download
-                onClick={trackResume}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-blue-500/30
-                           text-blue-500 hover:bg-blue-500 hover:text-white transition-all text-sm font-medium
-                           hover:-translate-y-0.5"
-              >
+              <a href="/resume.pdf" download onClick={trackResume} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all text-sm font-medium hover:-translate-y-0.5">
                 <Download size={16} /> Download Resume
               </a>
             </div>
