@@ -6,6 +6,7 @@ const profileSchema = new mongoose.Schema({
   bio: { type: String, default: '' },
   location: { type: String, default: 'Kigali, Rwanda' },
   email: { type: String, default: '' },
+  avatar: { type: String, default: '' },
   availability: { type: String, default: 'Available Now' },
   yearsOfExperience: { type: Number, default: 2 },
   socialLinks: {

@@ -371,44 +371,8 @@ export default function Home() {
             </div>
 
             {/* Right — avatar card */}
-<div className="hidden lg:flex justify-center">
-  <div className="relative animate-float">
-    <div className="w-80 h-80 rounded-3xl overflow-hidden border-2 border-blue-500/30
-                    bg-gradient-to-br from-slate-800 to-slate-900
-                    flex items-center justify-center shadow-2xl">
-      {profile?.avatar ? (
-        <img 
-          src={profile.avatar} 
-          alt={profile?.name || 'Samuel'} 
-          className="w-full h-full object-cover scale-105 hover:scale-110 transition-transform duration-500"
-        />
-      ) : (
-        <span className="text-8xl font-black text-blue-500/20 select-none tracking-tight">
-          {profile?.name?.charAt(0) || 'S'}{profile?.name?.split(' ')[1]?.charAt(0) || 'A'}
-        </span>
-      )}
-      <div className="absolute inset-0 opacity-10 pointer-events-none"
-           style={{
-             backgroundImage: 'radial-gradient(circle, #3b82f6 1px, transparent 1px)',
-             backgroundSize: '32px 32px',
-           }} />
-    </div>
-    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap
-                    flex items-center gap-2 bg-white dark:bg-slate-800
-                    border border-slate-200 dark:border-slate-700
-                    rounded-full px-5 py-2 shadow-lg text-sm font-medium">
-      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-      <span className="text-slate-700 dark:text-slate-300">{profile?.availability || 'Open to Work'}</span>
-    </div>
-  </div>
-</div>
-                {/* Glow ring */}
-                <div className="absolute inset-0 rounded-3xl bg-blue-500/20 blur-2xl scale-110" />
-                <div className="relative w-80 h-80 rounded-3xl overflow-hidden border border-blue-500/30
-                                bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800
-                                flex items-center justify-center shadow-2xl">
-                  <span className="text-8xl font-black text-blue-500/20 select-none tracking-tight">SA</span>
-
+            <div className="hidden lg:flex justify-center">
+              <div className="relative animate
                   {/* Floating grid decoration */}
                   <div className="absolute inset-0 opacity-10"
                        style={{

@@ -1,0 +1,31 @@
+404: Not Found// Inside ProfileTab, add this avatar section right after the opening form tag
+// Look for: <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
+// Then add this after that line:
+
+<div>
+  <label className={LABEL}>Profile Avatar (Image URL)</label>
+  <div className="flex items-start gap-4">
+    {form?.avatar && (
+      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-blue-500 shadow-md">
+        <img 
+          src={form.avatar} 
+          alt="Avatar" 
+          className="w-full h-full object-cover"
+          onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=' + (form?.name || 'SA') + '&background=3B82F6&color=fff'; }}
+        />
+      </div>
+    )}
+    <div className="flex-1">
+      <input
+        type="url"
+        placeholder="https://your-image-url.com/avatar.jpg"
+        value={form?.avatar || ''}
+        onChange={(e) => set('avatar', e.target.value)}
+        className={INPUT}
+      />
+      <p className="text-xs text-slate-400 mt-1">
+        Upload image to Cloudinary, ImgBB, or use any image URL. Recommended size: 400x400px
+      </p>
+    </div>
+  </div>
+</div>

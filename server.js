@@ -47,6 +47,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/profile', profileRoutes);
+app.use(/api/upload, uploadRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/experience', experienceRoutes);
