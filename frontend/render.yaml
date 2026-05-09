@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: samuelak-portfolio
+    runtime: static
+    repo: https://github.com/Samuel-AKINGENEYE/AS_Portfolio
+    rootDir: frontend
+    buildCommand: npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://samuel-ak-portfolio-api.onrender.com/api
