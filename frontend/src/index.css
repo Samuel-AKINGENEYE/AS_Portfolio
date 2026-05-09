@@ -13,9 +13,7 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-slate-800; }
@@ -26,7 +24,7 @@
 @layer utilities {
   /* ── Text ── */
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent;
   }
 
   /* ── Cards ── */
@@ -36,13 +34,13 @@
 
   .card-glass {
     @apply rounded-2xl border border-white/20 dark:border-white/10;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
   .dark .card-glass {
-    background: rgba(15, 23, 42, 0.7);
+    background: rgba(15, 23, 42, 0.72);
   }
 
   /* ── Hover glow ── */
@@ -50,64 +48,67 @@
     transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
   }
   .glow-hover:hover {
-    @apply border-blue-500/50;
-    box-shadow: 0 0 24px rgba(59, 130, 246, 0.18);
-    transform: translateY(-2px);
+    @apply border-blue-500/40;
+    box-shadow: 0 0 28px rgba(59, 130, 246, 0.15);
+    transform: translateY(-3px);
   }
 
-  /* ── Layout ── */
+  /* ── Layout helpers ── */
   .section {
     @apply py-24 px-6;
   }
-
   .container-max {
     @apply max-w-6xl mx-auto;
   }
-
   .section-title {
     @apply text-3xl md:text-4xl font-bold text-slate-900 dark:text-white;
   }
-
   .section-sub {
-    @apply text-slate-500 dark:text-slate-400 mt-3 max-w-xl mx-auto;
+    @apply text-slate-500 dark:text-slate-400 mt-3 max-w-xl mx-auto text-sm;
   }
 
-  /* ── Reveal animation (JS toggled) ── */
+  /* ── Scroll reveal ── */
   .reveal {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
   }
-
   .reveal.visible {
     opacity: 1;
     transform: translateY(0);
   }
+  .reveal-d1 { transition-delay: 0.08s; }
+  .reveal-d2 { transition-delay: 0.16s; }
+  .reveal-d3 { transition-delay: 0.24s; }
+  .reveal-d4 { transition-delay: 0.32s; }
 
-  .reveal-d1 { transition-delay: 0.1s; }
-  .reveal-d2 { transition-delay: 0.2s; }
-  .reveal-d3 { transition-delay: 0.3s; }
-  .reveal-d4 { transition-delay: 0.4s; }
-
-  /* ── Animated gradient bg ── */
+  /* ── Gradient background ── */
   .gradient-bg {
     background: linear-gradient(-45deg, #0f172a, #1e3a8a, #0f172a, #1d4ed8);
     background-size: 300%;
-    animation: gradientShift 8s ease infinite;
+    animation: gradientShift 9s ease infinite;
   }
 
   /* ── WhatsApp pulse ── */
   .wa-pulse {
-    animation: pulseGlow 2s ease-in-out infinite;
+    animation: pulseGlow 2.2s ease-in-out infinite;
   }
 
   /* ── Stat counter ── */
   .stat-num {
     font-variant-numeric: tabular-nums;
   }
+
+  /* ── Input base ── */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600
+           bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white
+           placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500
+           focus:border-transparent transition-colors text-sm;
+  }
 }
 
-/* ── Keyframes (not in Tailwind keyframe map) ── */
+/* ── Keyframes ── */
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }

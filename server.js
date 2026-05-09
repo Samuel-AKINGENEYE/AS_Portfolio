@@ -10,6 +10,8 @@ import skillRoutes from './routes/skills.js';
 import educationRoutes from './routes/education.js';
 import experienceRoutes from './routes/experience.js';
 import uploadRoutes from './routes/upload.js';
+import analyticsRoutes from './routes/analytics.js';
+import contactRoutes from './routes/contact.js';
 
 dotenv.config();
 
@@ -31,6 +33,8 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/experience', experienceRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/contact', contactRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'API is running' });

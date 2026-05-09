@@ -1,13 +1,12 @@
 import { useState } from 'react';
 
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '250788000000';
+const WHATSAPP_NUMBER = '250790663921';
 const PREFILLED_MSG = encodeURIComponent(
-  "Hi Samuel! I found your portfolio and I'd like to get in touch."
+  "Hi Samuel! I found your portfolio and I'd like to connect."
 );
 
 export default function WhatsAppButton() {
   const [hovered, setHovered] = useState(false);
-
   const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${PREFILLED_MSG}`;
 
   return (
@@ -32,18 +31,16 @@ export default function WhatsAppButton() {
         Chat with me
       </span>
 
-      {/* Button */}
+      {/* Button with breathing pulse */}
       <div
         className={`
           w-14 h-14 rounded-full flex items-center justify-center
-          shadow-lg cursor-pointer
+          shadow-lg cursor-pointer wa-pulse
           transition-transform duration-200
           ${hovered ? 'scale-110' : 'scale-100'}
-          wa-pulse
         `}
         style={{ backgroundColor: '#25D366' }}
       >
-        {/* WhatsApp SVG icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 32 32"

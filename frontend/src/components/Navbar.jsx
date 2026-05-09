@@ -6,7 +6,8 @@ const NAV_LINKS = [
   { label: 'Home', href: '#hero' },
   { label: 'Projects', href: '#projects' },
   { label: 'Skills', href: '#skills' },
-  { label: 'About', href: '#about' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Education', href: '#education' },
   { label: 'Contact', href: '#contact' },
 ];
 
@@ -24,7 +25,7 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-slate-200/80 dark:border-slate-800/80'
+          ? 'bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm border-b border-slate-200/60 dark:border-slate-800/60'
           : 'bg-transparent'
       }`}
     >
@@ -33,7 +34,7 @@ export default function Navbar() {
           SA<span className="text-blue-500">.</span>
         </a>
 
-        <div className="hidden md:flex items-center gap-7">
+        <div className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map(({ label, href }) => (
             <a
               key={label}
@@ -58,8 +59,9 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 pb-5 animate-fade-in">
+        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 pb-4 animate-fade-in">
           {NAV_LINKS.map(({ label, href }) => (
             <a
               key={label}
