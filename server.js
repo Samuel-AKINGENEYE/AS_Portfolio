@@ -18,13 +18,35 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: ['https://samuelak.netlify.app', 'http://localhost:5173'], credentials: true }));
+// Allow multiple origins
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://samuelak.netlify.app',
+  'https://as-portfolio-livid-one.vercel.app',
+  'https://samuelak-portfolio.onrender.com',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('Blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '10mb' }));
 
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('MongoDB error:', err));
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/certificates', certificateRoutes);
@@ -42,4 +64,5 @@ app.get('/api/health', (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`✅ CORS enabled for: ${allowedOrigins.join(', ')}`);
 });
