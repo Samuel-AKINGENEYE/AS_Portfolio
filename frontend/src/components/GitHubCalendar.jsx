@@ -5,29 +5,35 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
   const [stats, setStats] = useState({ repos: 0, followers: 0, following: 0, name: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = import.meta.env.VITE_API_URL || '/api';
+  
+  // Use the full Render backend URL directly (no relative path)
+  const BACKEND_URL = 'https://samuel-ak-portfolio-api.onrender.com';
 
   useEffect(() => {
     const fetchGitHubData = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`${apiBase}/github-proxy/user/${username}`);
+        const url = `${BACKEND_URL}/api/github-proxy/user/${username}`;
+        console.log('Fetching GitHub data from:', url);
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.success) {
           setStats(data.data);
         } else {
-          setError(data.error);
+          setError(data.error || 'Failed to load data');
         }
       } catch (err) {
         console.error('GitHub fetch error:', err);
-        setError(err.message);
+        setError('Cannot connect to server');
       } finally {
         setLoading(false);
       }
     };
     
     fetchGitHubData();
-  }, [username, apiBase]);
+  }, [username]);
 
   if (loading) {
     return (
@@ -54,6 +60,7 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
     return (
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 text-center">
         <p className="text-red-500 mb-2">Unable to load GitHub data</p>
+        <p className="text-xs text-slate-500 mb-3">{error}</p>
         <a href={`https://github.com/${username}`} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-600 inline-flex items-center gap-1">
           <Github size={14} /> View on GitHub <ExternalLink size={12} />
         </a>
@@ -69,7 +76,7 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
         </div>
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white">{stats.name || username}</h3>
-          <p className="text-sm text-slate-500">GitHub Profile</p>
+          {stats.location && <p className="text-xs text-slate-500">{stats.location}</p>}
         </div>
       </div>
       
