@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
-  Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2,
-  Calendar, Users, GitFork, Star as StarIcon,
+  Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2, Calendar,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -63,7 +62,7 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
-// GitHub Calendar Component - Similar to GitHub's interface
+// GitHub Contributions Calendar Component
 function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
   const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,12 +71,10 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
   useEffect(() => {
     const fetchContributions = async () => {
       try {
-        // Use a more reliable API for GitHub contributions
         const response = await fetch(`https://github-contributions-api.jogruber.vercel.app/${username}?y=last`);
         const data = await response.json();
         
         if (data && data.contributions) {
-          // Process contributions data
           const weeks = data.contributions.slice(-52);
           setContributions(weeks);
           setTotalContributions(data.total || 0);
@@ -93,83 +90,52 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
   }, [username]);
 
   if (loading) {
-    return <div className="h-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
+    return <div className="h-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
   }
 
-  // Generate day labels (Mon, Wed, Fri)
-  const dayLabels = ['Mon', 'Wed', 'Fri'];
-  const monthLabels = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'];
-
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <h3 className="font-semibold text-slate-900 dark:text-white">
-          {totalContributions} contributions in the last year
-        </h3>
-        <div className="flex gap-4 text-xs text-slate-500">
-          <button className="hover:text-blue-500">Contribution settings ▼</button>
-        </div>
+    <div>
+      <div className="mb-3">
+        <p className="text-sm text-slate-600 dark:text-slate-400">{totalContributions} contributions in the last year</p>
       </div>
-      
       <div className="overflow-x-auto">
-        <div className="min-w-[750px]">
-          <div className="flex mb-2">
-            <div className="w-8"></div>
-            <div className="flex-1 flex justify-between text-xs text-slate-500">
-              {monthLabels.map((month, i) => (
-                <span key={i}>{month}</span>
-              ))}
-            </div>
-          </div>
-          <div className="flex">
-            <div className="w-8 flex flex-col justify-between text-xs text-slate-500 py-1">
-              {dayLabels.map((day, i) => (
-                <div key={i} className="h-3 mb-1">{day}</div>
-              ))}
-            </div>
-            <div className="flex-1">
-              <div className="flex gap-1">
-                {contributions.map((week, wi) => (
-                  <div key={wi} className="flex flex-col gap-1">
-                    {week.days && week.days.slice(0, 7).map((day, di) => {
-                      let color = '#ebedf0';
-                      const count = day?.count || 0;
-                      if (count > 0) {
-                        if (count <= 3) color = '#9be9a8';
-                        else if (count <= 6) color = '#40c463';
-                        else if (count <= 9) color = '#30a14e';
-                        else color = '#216e39';
-                      }
-                      return (
-                        <div
-                          key={di}
-                          className="w-3 h-3 rounded-sm"
-                          style={{ backgroundColor: color }}
-                          title={`${count} contributions on ${day?.date || ''}`}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
+        <div className="min-w-[650px]">
+          <div className="flex gap-1">
+            {contributions.map((week, wi) => (
+              <div key={wi} className="flex flex-col gap-1">
+                {week.days && week.days.slice(0, 7).map((day, di) => {
+                  let color = '#ebedf0';
+                  const count = day?.count || 0;
+                  if (count > 0) {
+                    if (count <= 3) color = '#9be9a8';
+                    else if (count <= 6) color = '#40c463';
+                    else if (count <= 9) color = '#30a14e';
+                    else color = '#216e39';
+                  }
+                  return (
+                    <div
+                      key={di}
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: color }}
+                      title={`${count} contributions`}
+                    />
+                  );
+                })}
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
-      
-      <div className="flex justify-between items-center mt-4 text-xs text-slate-500">
-        <span>Learn how we count contributions</span>
-        <div className="flex items-center gap-2">
-          <span>Less</span>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 rounded-sm bg-[#ebedf0]"></div>
-            <div className="w-3 h-3 rounded-sm bg-[#9be9a8]"></div>
-            <div className="w-3 h-3 rounded-sm bg-[#40c463]"></div>
-            <div className="w-3 h-3 rounded-sm bg-[#30a14e]"></div>
-            <div className="w-3 h-3 rounded-sm bg-[#216e39]"></div>
-          </div>
-          <span>More</span>
+      <div className="flex justify-end items-center mt-2 gap-2 text-xs text-slate-500">
+        <span>Less</span>
+        <div className="flex gap-1">
+          <div className="w-3 h-3 rounded-sm bg-[#ebedf0]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#9be9a8]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#40c463]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#30a14e]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#216e39]"></div>
         </div>
+        <span>More</span>
       </div>
     </div>
   );
@@ -419,74 +385,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GitHub Section - Similar to GitHub Profile Interface */}
+      {/* GitHub Section - Clean and Simple */}
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-            {/* GitHub Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
-                  S
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Samuel AKINGENEYE</h2>
-                  <p className="text-slate-500 dark:text-slate-400">Samuel-AKINGENEYE · he/him</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Software Engineer | Full Stack Developer</p>
-                </div>
-                <button className="px-4 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  Edit profile
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-4 mt-4 text-sm">
-                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
-                  <Users size={16} /> <span className="font-semibold">{githubStats.followers}</span> followers
-                  <span className="mx-1">·</span>
-                  <span className="font-semibold">{githubStats.following}</span> following
-                </div>
-                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
-                  <MapPin size={16} /> Kigali, Rwanda
-                </div>
-                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
-                  <Mail size={16} /> freshtalent491@gmail.com
-                </div>
-                <div className="flex items-center gap-1 text-blue-500">
-                  <Globe size={16} /> <a href="https://as-portfolio-livid-one.vercel.app" target="_blank" rel="noopener noreferrer">portfolio</a>
-                </div>
-              </div>
-            </div>
-            
+          <SectionHeader title="GitHub Presence" subtitle="Open source contributions and activity" />
+          
+          <div className="grid md:grid-cols-2 gap-8">
             {/* GitHub Stats */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <Github size={20} className="text-blue-500" /> GitHub Stats
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                   <p className="text-2xl font-bold text-blue-500"><CountUp end={githubStats.repos} /></p>
                   <p className="text-xs text-slate-500">Repositories</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                   <p className="text-2xl font-bold text-green-500"><CountUp end={githubStats.followers} /></p>
                   <p className="text-xs text-slate-500">Followers</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                   <p className="text-2xl font-bold text-purple-500"><CountUp end={githubStats.following} /></p>
                   <p className="text-xs text-slate-500">Following</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
                   <p className="text-2xl font-bold text-orange-500"><CountUp end={githubStats.gists} /></p>
                   <p className="text-xs text-slate-500">Gists</p>
                 </div>
               </div>
+              <div className="mt-4 text-center">
+                <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600">
+                  View GitHub Profile →
+                </a>
+              </div>
             </div>
-            
+
             {/* GitHub Contributions Calendar */}
-            <div className="p-6">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <Calendar size={20} className="text-green-500" /> Contribution Calendar
+              </h3>
               <GitHubCalendar username="Samuel-AKINGENEYE" />
-            </div>
-            
-            <div className="p-6 text-center border-t border-slate-200 dark:border-slate-700">
-              <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600">
-                <Github size={18} /> View full GitHub profile →
-              </a>
             </div>
           </div>
         </div>
