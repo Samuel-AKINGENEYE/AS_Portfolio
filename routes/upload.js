@@ -26,18 +26,16 @@ const upload = multer({
   }
 });
 
-// Upload avatar to Cloudinary
+// Upload avatar
 router.post('/avatar', verifyToken, upload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
 
-    // Convert buffer to base64
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${b64}`;
     
-    // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(dataURI, {
       folder: 'portfolio/avatars',
       width: 400,
@@ -45,12 +43,33 @@ router.post('/avatar', verifyToken, upload.single('avatar'), async (req, res) =>
       crop: 'fill'
     });
     
-    res.json({ 
-      success: true, 
-      data: { url: result.secure_url }
-    });
+    res.json({ success: true, data: { url: result.secure_url } });
   } catch (error) {
-    console.error('Upload error details:', error);
+    console.error('Upload error:', error);
+    res.status(500).json({ success: false, error: error.message || 'Upload failed' });
+  }
+});
+
+// Upload certificate image
+router.post('/certificate', verifyToken, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
+    }
+
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: 'portfolio/certificates',
+      width: 400,
+      height: 300,
+      crop: 'fill'
+    });
+    
+    res.json({ success: true, data: { url: result.secure_url } });
+  } catch (error) {
+    console.error('Certificate upload error:', error);
     res.status(500).json({ success: false, error: error.message || 'Upload failed' });
   }
 });
