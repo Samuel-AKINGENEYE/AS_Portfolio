@@ -18,14 +18,6 @@ import {
   educationApi, experienceApi, analyticsApi, contactApi,
 } from '../services/api.js';
 
-const CATEGORY_CFG = {
-  Frontend: { icon: Globe, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  Backend: { icon: Code2, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20' },
-  Database: { icon: Database, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  Tools: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
-  Other: { icon: Star, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
-};
-
 const HERO_TEXTS = ['Full Stack Developer', 'React & Node.js Expert', 'API Builder', 'Problem Solver'];
 
 const TESTIMONIALS = [
@@ -55,7 +47,7 @@ function StarRating({ rating }) {
 
 function SectionHeader({ title, subtitle }) {
   return (
-    <div className="text-center mb-14">
+    <div className="text-center mb-12">
       <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{title}</h2>
       {subtitle && <p className="text-slate-500 dark:text-slate-400 mt-3">{subtitle}</p>}
     </div>
@@ -67,15 +59,18 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
   const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalContributions, setTotalContributions] = useState(0);
+  const [selectedYear, setSelectedYear] = useState('2025');
+  const years = ['2026', '2025', '2024', '2023'];
 
   useEffect(() => {
     const fetchContributions = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`https://github-contributions-api.jogruber.vercel.app/${username}?y=last`);
+        const response = await fetch(`https://github-contributions-api.jogruber.vercel.app/${username}?y=${selectedYear}`);
         const data = await response.json();
         
         if (data && data.contributions) {
-          const weeks = data.contributions.slice(-52);
+          const weeks = data.contributions;
           setContributions(weeks);
           setTotalContributions(data.total || 0);
         }
@@ -87,55 +82,111 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
     };
 
     fetchContributions();
-  }, [username]);
+  }, [username, selectedYear]);
 
   if (loading) {
-    return <div className="h-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
+    return <div className="h-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
   }
 
+  // Month labels
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  // Get month positions
+  const getMonthPositions = () => {
+    const positions = [];
+    const currentDate = new Date();
+    currentDate.setFullYear(parseInt(selectedYear), 0, 1);
+    for (let i = 0; i < 12; i++) {
+      const firstDayOfMonth = new Date(parseInt(selectedYear), i, 1);
+      const dayOfWeek = firstDayOfMonth.getDay();
+      const weekIndex = Math.floor((firstDayOfMonth.getDate() + dayOfWeek) / 7);
+      positions.push({ month: months[i], weekIndex });
+    }
+    return positions.slice(0, 7);
+  };
+
+  const monthPositions = getMonthPositions();
+
+  // Day labels
+  const dayLabels = ['Mon', 'Wed', 'Fri'];
+
   return (
-    <div>
-      <div className="mb-3">
-        <p className="text-sm text-slate-600 dark:text-slate-400">{totalContributions} contributions in the last year</p>
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+      <div className="flex flex-wrap gap-4 mb-4">
+        {years.map(year => (
+          <button
+            key={year}
+            onClick={() => setSelectedYear(year)}
+            className={`text-sm font-medium transition-colors ${
+              selectedYear === year 
+                ? 'text-blue-500 border-b-2 border-blue-500' 
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            {year}
+          </button>
+        ))}
       </div>
+      
       <div className="overflow-x-auto">
-        <div className="min-w-[650px]">
-          <div className="flex gap-1">
-            {contributions.map((week, wi) => (
-              <div key={wi} className="flex flex-col gap-1">
-                {week.days && week.days.slice(0, 7).map((day, di) => {
-                  let color = '#ebedf0';
-                  const count = day?.count || 0;
-                  if (count > 0) {
-                    if (count <= 3) color = '#9be9a8';
-                    else if (count <= 6) color = '#40c463';
-                    else if (count <= 9) color = '#30a14e';
-                    else color = '#216e39';
-                  }
-                  return (
-                    <div
-                      key={di}
-                      className="w-3 h-3 rounded-sm"
-                      style={{ backgroundColor: color }}
-                      title={`${count} contributions`}
-                    />
-                  );
-                })}
+        <div className="min-w-[750px]">
+          <div className="flex mb-2">
+            <div className="w-8"></div>
+            <div className="flex-1 flex justify-between text-xs text-slate-500">
+              {months.map((month, i) => (
+                <span key={i}>{month}</span>
+              ))}
+            </div>
+          </div>
+          <div className="flex">
+            <div className="w-8 flex flex-col justify-between text-xs text-slate-500 py-1">
+              {dayLabels.map((day, i) => (
+                <div key={i} className="h-3 mb-1">{day}</div>
+              ))}
+            </div>
+            <div className="flex-1">
+              <div className="flex gap-1">
+                {contributions.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-1">
+                    {week.days && week.days.slice(0, 7).map((day, di) => {
+                      let color = '#ebedf0';
+                      const count = day?.count || 0;
+                      if (count > 0) {
+                        if (count <= 3) color = '#9be9a8';
+                        else if (count <= 6) color = '#40c463';
+                        else if (count <= 9) color = '#30a14e';
+                        else color = '#216e39';
+                      }
+                      return (
+                        <div
+                          key={di}
+                          className="w-3 h-3 rounded-sm"
+                          style={{ backgroundColor: color }}
+                          title={`${count} contributions`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
-      <div className="flex justify-end items-center mt-2 gap-2 text-xs text-slate-500">
-        <span>Less</span>
-        <div className="flex gap-1">
-          <div className="w-3 h-3 rounded-sm bg-[#ebedf0]"></div>
-          <div className="w-3 h-3 rounded-sm bg-[#9be9a8]"></div>
-          <div className="w-3 h-3 rounded-sm bg-[#40c463]"></div>
-          <div className="w-3 h-3 rounded-sm bg-[#30a14e]"></div>
-          <div className="w-3 h-3 rounded-sm bg-[#216e39]"></div>
+      
+      <div className="flex justify-between items-center mt-4 text-xs text-slate-500">
+        <span>{totalContributions} contributions in {selectedYear}</span>
+        <div className="flex items-center gap-2">
+          <span>Less</span>
+          <div className="flex gap-1">
+            <div className="w-3 h-3 rounded-sm bg-[#ebedf0]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#9be9a8]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#40c463]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#30a14e]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#216e39]"></div>
+          </div>
+          <span>More</span>
         </div>
-        <span>More</span>
       </div>
     </div>
   );
@@ -201,10 +252,19 @@ export default function Home() {
     load();
   }, []);
 
-  const skillsByCategory = skills.reduce((acc, s) => {
-    (acc[s.category] = acc[s.category] || []).push(s);
+  // Group skills by category for display
+  const skillsByCategory = {
+    Frontend: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'HTML/CSS', 'JavaScript'],
+    Backend: ['Node.js', 'Express', 'Python', 'Java', 'PHP'],
+    Database: ['PostgreSQL', 'MongoDB', 'Redis', 'MySQL'],
+    Tools: ['Git', 'Docker', 'AWS', 'Vercel', 'Figma'],
+  };
+
+  // Or use skills from API if available
+  const displaySkills = skills.length > 0 ? skills.reduce((acc, s) => {
+    (acc[s.category] = acc[s.category] || []).push(s.name);
     return acc;
-  }, {});
+  }, {}) : skillsByCategory;
 
   const allTechs = ['All', ...new Set(projects.flatMap(p => p.techStack || []))].slice(0, 9);
   const filteredProjects = techFilter === 'All' ? projects : projects.filter(p => p.techStack?.includes(techFilter));
@@ -231,7 +291,7 @@ export default function Home() {
 
   const projectCount = projects.length;
   const certificateCount = certificates.length;
-  const skillCount = skills.length;
+  const skillCount = Object.values(displaySkills).flat().length;
   const experienceCount = experience.length;
 
   if (loading) {
@@ -300,7 +360,7 @@ export default function Home() {
             </div>
             <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
               <p className="text-4xl font-bold text-purple-500"><CountUp end={skillCount} /></p>
-              <p className="text-sm text-slate-500 mt-1">Skills Mastered</p>
+              <p className="text-sm text-slate-500 mt-1">Skills</p>
             </div>
             <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
               <p className="text-4xl font-bold text-orange-500"><CountUp end={experienceCount} /></p>
@@ -329,28 +389,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Skills Section */}
+      {/* Skills Section - Clean Categorized List like screenshot */}
       <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Skills & Tech Stack" subtitle="Technologies I work with daily" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(skillsByCategory).map(([cat, catSkills]) => {
-              const cfg = CATEGORY_CFG[cat] || CATEGORY_CFG.Other;
-              const Icon = cfg.icon;
-              return (
-                <div key={cat} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
-                  <div className="mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
-                    <div className={`inline-flex items-center gap-2 ${cfg.bg} rounded-xl px-3 py-2`}>
-                      <Icon size={16} className={cfg.color} />
-                      <h3 className={`font-bold ${cfg.color}`}>{cat}</h3>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {catSkills.map(skill => <span key={skill._id} className={`px-3 py-1.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} border ${cfg.border}`}>{skill.name}</span>)}
-                  </div>
-                </div>
-              );
-            })}
+          <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Object.entries(displaySkills).map(([category, skillList]) => (
+              <div key={category} className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                  {category}
+                </h3>
+                <ul className="space-y-2">
+                  {skillList.map((skill, idx) => (
+                    <li key={idx} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -385,10 +443,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GitHub Section - Clean and Simple */}
+      {/* GitHub Section */}
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="GitHub Presence" subtitle="Open source contributions and activity" />
+          <SectionHeader title="GitHub Activity" subtitle="Open source contributions and activity" />
           
           <div className="grid md:grid-cols-2 gap-8">
             {/* GitHub Stats */}
@@ -423,9 +481,6 @@ export default function Home() {
 
             {/* GitHub Contributions Calendar */}
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <Calendar size={20} className="text-green-500" /> Contribution Calendar
-              </h3>
               <GitHubCalendar username="Samuel-AKINGENEYE" />
             </div>
           </div>
