@@ -61,3 +61,25 @@ router.post('/project', verifyToken, upload.single('image'), async (req, res) =>
 });
 
 export default router;
+
+// Upload resume (PDF)
+router.post('/resume', verifyToken, upload.single('resume'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
+    
+    // Check if PDF
+    if (req.file.mimetype !== 'application/pdf') {
+      return res.status(400).json({ success: false, error: 'Only PDF files allowed' });
+    }
+    
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataURI, { 
+      folder: 'portfolio/resumes',
+      resource_type: 'auto'
+    });
+    res.json({ success: true, data: { url: result.secure_url } });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});

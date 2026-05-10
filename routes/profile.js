@@ -4,30 +4,25 @@ import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/profile (public)
 router.get('/', async (_req, res) => {
   try {
     let profile = await Profile.findOne();
-    if (!profile) {
-      profile = await Profile.create({});
-    }
+    if (!profile) profile = await Profile.create({});
     res.json({ success: true, data: profile });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: 'Failed to fetch profile.' });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// PUT /api/profile (admin)
 router.put('/', verifyToken, async (req, res) => {
   try {
     const allowed = [
       'name', 'title', 'bio', 'location', 'email', 
-      'avatar',              // ← Make sure avatar is here
-      'availability', 'yearsOfExperience', 'socialLinks'
+      'avatar', 'resumeUrl', 'availability', 
+      'yearsOfExperience', 'socialLinks'
     ];
     const updates = {};
-    allowed.forEach((key) => {
+    allowed.forEach(key => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
     updates.updatedAt = new Date();
@@ -37,10 +32,8 @@ router.put('/', verifyToken, async (req, res) => {
       upsert: true,
       runValidators: true,
     });
-
     res.json({ success: true, data: profile });
   } catch (err) {
-    console.error('Profile update error:', err);
     res.status(400).json({ success: false, error: err.message });
   }
 });

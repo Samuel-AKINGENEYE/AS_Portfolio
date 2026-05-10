@@ -202,7 +202,6 @@ export default function Home() {
                 <a href="#projects" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 text-sm">
                   View My Work <ChevronRight size={16} />
                 </a>
-                <a href="/resume.pdf" download onClick={trackResume} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-600 text-slate-300 hover:border-blue-500 hover:text-blue-400 font-medium transition-all hover:-translate-y-0.5 text-sm">
                   <Download size={16} /> Resume
                 </a>
               </div>
@@ -366,7 +365,6 @@ export default function Home() {
               <div><h3 className="font-semibold mb-4">Connect with me</h3><div className="flex flex-wrap gap-3">{social.github && <a href={social.github} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}{social.linkedin && <a href={social.linkedin} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}{social.twitter && <a href={social.twitter} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}{profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Mail size={20} /></a>}</div></div>
               {profile?.email && <div className="flex items-center gap-3"><Mail size={16} className="text-blue-500"/><a href={`mailto:${profile.email}`} className="hover:text-blue-500 text-sm">{profile.email}</a></div>}
               {profile?.location && <div className="flex items-center gap-3"><MapPin size={16} className="text-blue-500"/><span className="text-sm">{profile.location}</span></div>}
-              <a href="/resume.pdf" download onClick={trackResume} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all text-sm font-medium">Download Resume</a>
             </div>
           </div>
         </div>

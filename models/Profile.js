@@ -7,6 +7,7 @@ const profileSchema = new mongoose.Schema({
   location: { type: String, default: 'Kigali, Rwanda' },
   email: { type: String, default: '' },
   avatar: { type: String, default: '' },
+  resumeUrl: { type: String, default: '' },
   availability: { type: String, default: 'Available Now' },
   yearsOfExperience: { type: Number, default: 2 },
   socialLinks: {
