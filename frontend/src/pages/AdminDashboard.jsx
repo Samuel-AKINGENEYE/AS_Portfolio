@@ -18,10 +18,7 @@ const LABEL  = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-
 const BTN    = 'inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed';
 const BTN_G  = 'px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors';
 
-// ─── Micro-components ─────────────────────────────────────────────────────
-function Spinner() {
-  return <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />;
-}
+function Spinner() { return <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />; }
 
 function SkeletonRows({ count = 3 }) {
   return (
@@ -58,8 +55,8 @@ function ItemRow({ children, onEdit, onDelete }) {
     <div className="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
       <div className="flex-1 min-w-0">{children}</div>
       <div className="flex items-center gap-1 shrink-0">
-        {onEdit   && <button onClick={onEdit}   className="p-2 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"><Edit2   size={14} /></button>}
-        {onDelete && <button onClick={onDelete} className="p-2 rounded-lg text-slate-400 hover:text-red-500  hover:bg-red-50  dark:hover:bg-red-500/10  transition-colors"><Trash2  size={14} /></button>}
+        {onEdit && <button onClick={onEdit} className="p-2 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"><Edit2 size={14} /></button>}
+        {onDelete && <button onClick={onDelete} className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"><Trash2 size={14} /></button>}
       </div>
     </div>
   );
@@ -68,8 +65,8 @@ function ItemRow({ children, onEdit, onDelete }) {
 // ─── PROJECTS TAB ─────────────────────────────────────────────────────────
 function ProjectsTab() {
   const [projects, setProjects] = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [modal,    setModal]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,7 +78,8 @@ function ProjectsTab() {
 
   const handleSave = async (data) => {
     try {
-      modal === 'add' ? await projectsApi.create(data) : await projectsApi.update(modal._id, data);
+      if (modal === 'add') await projectsApi.create(data);
+      else await projectsApi.update(modal._id, data);
       toast.success(`Project ${modal === 'add' ? 'created' : 'updated'}!`);
       setModal(null); load();
     } catch (err) { toast.error(err.response?.data?.error ?? 'Save failed'); }
@@ -131,9 +129,8 @@ function ProjectForm({ initial, onSave, onCancel }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSaving(true);
-    try {
-      await onSave({ ...form, techStack: form.techStack.split(',').map(t => t.trim()).filter(Boolean) });
-    } finally { setSaving(false); }
+    try { await onSave({ ...form, techStack: form.techStack.split(',').map(t => t.trim()).filter(Boolean) }); }
+    finally { setSaving(false); }
   };
 
   return (
@@ -159,11 +156,11 @@ function ProjectForm({ initial, onSave, onCancel }) {
   );
 }
 
-// ─── CERTIFICATES TAB ─────────────────────────────────────────────────────
+// ─── CERTIFICATES TAB WITH UPLOAD ─────────────────────────────────────────
 function CertificatesTab() {
-  const [certs,   setCerts]   = useState([]);
+  const [certs, setCerts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal,   setModal]   = useState(null);
+  const [modal, setModal] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,7 +172,8 @@ function CertificatesTab() {
 
   const handleSave = async (data) => {
     try {
-      modal === 'add' ? await certificatesApi.create(data) : await certificatesApi.update(modal._id, data);
+      if (modal === 'add') await certificatesApi.create(data);
+      else await certificatesApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
     } catch (err) { toast.error(err.response?.data?.error ?? 'Save failed'); }
   };
@@ -207,19 +205,51 @@ function CertificatesTab() {
       )}
       {modal && (
         <Modal title={modal === 'add' ? 'Add Certificate' : 'Edit Certificate'} onClose={() => setModal(null)}>
-          <CertificateForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
+          <CertificateFormWithUpload initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
         </Modal>
       )}
     </div>
   );
 }
 
-function CertificateForm({ initial, onSave, onCancel }) {
+// ─── CERTIFICATE FORM WITH IMAGE UPLOAD ───────────────────────────────────
+function CertificateFormWithUpload({ initial, onSave, onCancel }) {
   const blank = { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Other' };
   const toInput = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
   const [form, setForm] = useState(initial ? { ...initial, issueDate: toInput(initial.issueDate) } : blank);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be less than 5MB'); return; }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/certificate`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        set('imageUrl', data.data.url);
+        toast.success('Certificate image uploaded!');
+      } else {
+        toast.error('Upload failed');
+      }
+    } catch (err) {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSaving(true);
@@ -239,10 +269,29 @@ function CertificateForm({ initial, onSave, onCancel }) {
           </select>
         </div>
       </div>
-      <div><label className={LABEL}>Credential URL</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Image URL</label><input type="url" value={form.imageUrl} onChange={e => set('imageUrl', e.target.value)} className={INPUT} /></div>
+
+      <div>
+        <label className={LABEL}>Certificate Image</label>
+        <div className="flex items-start gap-4">
+          {form.imageUrl && (
+            <div className="w-20 h-20 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+              <img src={form.imageUrl} alt="Certificate" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="flex-1 space-y-2">
+            <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors inline-flex items-center gap-2">
+              <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Certificate Image'}
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+            </label>
+            <input type="url" placeholder="Or paste image URL directly" value={form.imageUrl || ''} onChange={e => set('imageUrl', e.target.value)} className={INPUT} />
+            <p className="text-xs text-slate-400">Upload certificate image (JPEG/PNG, max 5MB) or paste URL</p>
+          </div>
+        </div>
+      </div>
+
+      <div><label className={LABEL}>Credential URL</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} placeholder="https://example.com/verify" /></div>
       <div className="flex gap-3 pt-2">
-        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}{saving ? 'Saving…' : 'Save'}</button>
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}{saving ? 'Saving…' : 'Save Certificate'}</button>
         <button type="button" onClick={onCancel} className={BTN_G}>Cancel</button>
       </div>
     </form>
@@ -260,9 +309,9 @@ const CAT_COLORS = {
 };
 
 function SkillsTab() {
-  const [skills,  setSkills]  = useState([]);
+  const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal,   setModal]   = useState(null);
+  const [modal, setModal] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -274,7 +323,8 @@ function SkillsTab() {
 
   const handleSave = async (data) => {
     try {
-      modal === 'add' ? await skillsApi.create(data) : await skillsApi.update(modal._id, data);
+      if (modal === 'add') await skillsApi.create(data);
+      else await skillsApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
     } catch (err) { toast.error(err.response?.data?.error ?? 'Save failed'); }
   };
@@ -352,9 +402,9 @@ function SkillForm({ initial, onSave, onCancel }) {
 
 // ─── EDUCATION TAB ────────────────────────────────────────────────────────
 function EducationTab() {
-  const [edu,     setEdu]     = useState([]);
+  const [edu, setEdu] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal,   setModal]   = useState(null);
+  const [modal, setModal] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -366,7 +416,8 @@ function EducationTab() {
 
   const handleSave = async (data) => {
     try {
-      modal === 'add' ? await educationApi.create(data) : await educationApi.update(modal._id, data);
+      if (modal === 'add') await educationApi.create(data);
+      else await educationApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
     } catch (err) { toast.error(err.response?.data?.error ?? 'Save failed'); }
   };
@@ -396,7 +447,6 @@ function EducationTab() {
               </p>
             </ItemRow>
           ))}
-          {edu.length === 0 && <p className="text-sm text-slate-500 text-center py-8">No education entries yet.</p>}
         </div>
       )}
       {modal && (
@@ -447,9 +497,9 @@ function EducationForm({ initial, onSave, onCancel }) {
 
 // ─── EXPERIENCE TAB ───────────────────────────────────────────────────────
 function ExperienceTab() {
-  const [exp,     setExp]     = useState([]);
+  const [exp, setExp] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal,   setModal]   = useState(null);
+  const [modal, setModal] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -461,7 +511,8 @@ function ExperienceTab() {
 
   const handleSave = async (data) => {
     try {
-      modal === 'add' ? await experienceApi.create(data) : await experienceApi.update(modal._id, data);
+      if (modal === 'add') await experienceApi.create(data);
+      else await experienceApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
     } catch (err) { toast.error(err.response?.data?.error ?? 'Save failed'); }
   };
@@ -491,7 +542,6 @@ function ExperienceTab() {
               </p>
             </ItemRow>
           ))}
-          {exp.length === 0 && <p className="text-sm text-slate-500 text-center py-8">No experience entries yet.</p>}
         </div>
       )}
       {modal && (
@@ -512,7 +562,7 @@ function ExperienceForm({ initial, onSave, onCancel }) {
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const addAchievement    = () => set('achievements', [...form.achievements, '']);
+  const addAchievement = () => set('achievements', [...form.achievements, '']);
   const removeAchievement = (i) => set('achievements', form.achievements.filter((_, j) => j !== i));
   const updateAchievement = (i, v) => set('achievements', form.achievements.map((a, j) => j === i ? v : a));
 
@@ -561,16 +611,16 @@ function ExperienceForm({ initial, onSave, onCancel }) {
 
 // ─── PROFILE TAB ──────────────────────────────────────────────────────────
 function ProfileTab() {
-  const [form,      setForm]      = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [saving,    setSaving]    = useState(false);
+  const [form, setForm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     profileApi.get().then(r => setForm(r.data.data)).catch(() => toast.error('Failed to load profile')).finally(() => setLoading(false));
   }, []);
 
-  const setField  = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSocial = (k, v) => setForm(f => ({ ...f, socialLinks: { ...f.socialLinks, [k]: v } }));
 
   const handleImageUpload = async (e) => {
@@ -600,8 +650,6 @@ function ProfileTab() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
       <h2 className="text-lg font-semibold">Profile Settings</h2>
-
-      {/* Avatar */}
       <div>
         <label className={LABEL}>Profile Avatar</label>
         <div className="flex items-start gap-4">
@@ -620,7 +668,6 @@ function ProfileTab() {
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div><label className={LABEL}>Name</label><input value={form.name ?? ''} onChange={e => setField('name', e.target.value)} className={INPUT} /></div>
         <div><label className={LABEL}>Title</label><input value={form.title ?? ''} onChange={e => setField('title', e.target.value)} className={INPUT} /></div>
@@ -634,7 +681,6 @@ function ProfileTab() {
         <div><label className={LABEL}>Availability</label><input value={form.availability ?? ''} onChange={e => setField('availability', e.target.value)} className={INPUT} /></div>
         <div><label className={LABEL}>Years of Experience</label><input type="number" value={form.yearsOfExperience ?? 0} onChange={e => setField('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div>
       </div>
-
       <div>
         <h3 className="text-sm font-medium mb-3 text-slate-700 dark:text-slate-300">Social Links</h3>
         <div className="space-y-3">
@@ -646,7 +692,6 @@ function ProfileTab() {
           ))}
         </div>
       </div>
-
       <button type="submit" disabled={saving} className={BTN}>
         {saving ? <Spinner /> : <Save size={14} />}
         {saving ? 'Saving…' : 'Save Profile'}
@@ -674,10 +719,7 @@ function MiniBar({ label, value, max }) {
     <div className="flex items-center gap-3 text-sm">
       <span className="text-slate-500 text-xs w-20 text-right shrink-0 font-mono">{label}</span>
       <div className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-700"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
       </div>
       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 w-8 shrink-0">{value}</span>
     </div>
@@ -685,9 +727,9 @@ function MiniBar({ label, value, max }) {
 }
 
 function AnalyticsTab() {
-  const [stats,   setStats]   = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [days,    setDays]    = useState(30);
+  const [days, setDays] = useState(30);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -697,11 +739,7 @@ function AnalyticsTab() {
   }, [days]);
   useEffect(() => { load(); }, [load]);
 
-  const maxDailyViews = stats?.dailyViews?.length
-    ? Math.max(...stats.dailyViews.map(d => d.count))
-    : 1;
-
-  // Show last 14 days of daily data
+  const maxDailyViews = stats?.dailyViews?.length ? Math.max(...stats.dailyViews.map(d => d.count)) : 1;
   const chartData = stats?.dailyViews?.slice(-14) ?? [];
 
   return (
@@ -709,11 +747,7 @@ function AnalyticsTab() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Analytics</h2>
         <div className="flex items-center gap-3">
-          <select
-            value={days}
-            onChange={e => setDays(Number(e.target.value))}
-            className={INPUT + ' w-36'}
-          >
+          <select value={days} onChange={e => setDays(Number(e.target.value))} className={INPUT + ' w-36'}>
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
@@ -723,40 +757,28 @@ function AnalyticsTab() {
           </button>
         </div>
       </div>
-
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => <div key={i} className="h-28 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse" />)}
         </div>
       ) : (
         <>
-          {/* Stat cards */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={Eye}           label="Page Views"         value={stats?.totalViews}       color="text-blue-500" />
-            <StatCard icon={TrendingUp}    label="Unique Visitors"    value={stats?.uniqueVisitors}    color="text-green-500" />
-            <StatCard icon={Download}      label="Resume Downloads"   value={stats?.resumeDownloads}   color="text-purple-500" />
-            <StatCard icon={MessageSquare} label="Contact Submissions" value={stats?.contactForms}     color="text-orange-500" />
+            <StatCard icon={Eye} label="Page Views" value={stats?.totalViews} color="text-blue-500" />
+            <StatCard icon={TrendingUp} label="Unique Visitors" value={stats?.uniqueVisitors} color="text-green-500" />
+            <StatCard icon={Download} label="Resume Downloads" value={stats?.resumeDownloads} color="text-purple-500" />
+            <StatCard icon={MessageSquare} label="Contact Submissions" value={stats?.contactForms} color="text-orange-500" />
           </div>
-
-          {/* Daily views chart */}
           {chartData.length > 0 && (
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-5 flex items-center gap-2">
                 <BarChart2 size={16} className="text-blue-500" /> Daily Page Views
               </h3>
               <div className="space-y-2.5">
-                {chartData.map(d => (
-                  <MiniBar
-                    key={d._id}
-                    label={d._id.slice(5)} // Show MM-DD
-                    value={d.count}
-                    max={maxDailyViews}
-                  />
-                ))}
+                {chartData.map(d => <MiniBar key={d._id} label={d._id.slice(5)} value={d.count} max={maxDailyViews} />)}
               </div>
             </div>
           )}
-
           {chartData.length === 0 && (
             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-10 text-center">
               <BarChart2 size={32} className="text-slate-300 mx-auto mb-3" />
@@ -772,13 +794,13 @@ function AnalyticsTab() {
 
 // ─── TAB CONFIG & SHELL ───────────────────────────────────────────────────
 const TABS = [
-  { id: 'projects',     label: 'Projects',     Icon: Layers    },
-  { id: 'certificates', label: 'Certificates', Icon: Award     },
-  { id: 'skills',       label: 'Skills',       Icon: Code      },
-  { id: 'education',    label: 'Education',    Icon: BookOpen  },
-  { id: 'experience',   label: 'Experience',   Icon: Briefcase },
-  { id: 'analytics',    label: 'Analytics',    Icon: BarChart2 },
-  { id: 'profile',      label: 'Profile',      Icon: User      },
+  { id: 'projects', label: 'Projects', Icon: Layers },
+  { id: 'certificates', label: 'Certificates', Icon: Award },
+  { id: 'skills', label: 'Skills', Icon: Code },
+  { id: 'education', label: 'Education', Icon: BookOpen },
+  { id: 'experience', label: 'Experience', Icon: Briefcase },
+  { id: 'analytics', label: 'Analytics', Icon: BarChart2 },
+  { id: 'profile', label: 'Profile', Icon: User },
 ];
 
 export default function AdminDashboard() {
@@ -793,7 +815,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <span className="font-bold text-slate-900 dark:text-white">
@@ -804,19 +825,14 @@ export default function AdminDashboard() {
               View site →
             </Link>
             <DarkModeToggle />
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-colors"
-            >
+            <button onClick={handleLogout} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 transition-colors">
               <LogOut size={14} />
               <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
       </header>
-
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Tab bar */}
         <div className="flex flex-wrap gap-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 mb-8 overflow-x-auto">
           {TABS.map(({ id, label, Icon }) => (
             <button
@@ -833,16 +849,14 @@ export default function AdminDashboard() {
             </button>
           ))}
         </div>
-
-        {/* Tab content */}
         <div className="pb-16">
-          {tab === 'projects'     && <ProjectsTab />}
+          {tab === 'projects' && <ProjectsTab />}
           {tab === 'certificates' && <CertificatesTab />}
-          {tab === 'skills'       && <SkillsTab />}
-          {tab === 'education'    && <EducationTab />}
-          {tab === 'experience'   && <ExperienceTab />}
-          {tab === 'analytics'    && <AnalyticsTab />}
-          {tab === 'profile'      && <ProfileTab />}
+          {tab === 'skills' && <SkillsTab />}
+          {tab === 'education' && <EducationTab />}
+          {tab === 'experience' && <ExperienceTab />}
+          {tab === 'analytics' && <AnalyticsTab />}
+          {tab === 'profile' && <ProfileTab />}
         </div>
       </div>
     </div>
