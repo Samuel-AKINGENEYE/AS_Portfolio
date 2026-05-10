@@ -1,66 +1,65 @@
 import { useState, useEffect } from 'react';
-import { Github, ExternalLink, Star, GitFork, Users, Code, Award, Briefcase, GraduationCap, Layers } from 'lucide-react';
+import { Github, ExternalLink, GitCommit, GitPullRequest, AlertCircle, Calendar } from 'lucide-react';
 
-const GitHubStats = ({ username = 'Samuel-AKINGENEYE' }) => {
-  const [githubStats, setGithubStats] = useState({ repos: 0, followers: 0, following: 0 });
-  const [dbStats, setDbStats] = useState({
-    projects: 0,
-    certificates: 0,
-    skills: 0,
-    education: 0,
-    experience: 0
+const GitHubPresence = ({ username = 'Samuel-AKINGENEYE' }) => {
+  const [stats, setStats] = useState({
+    contributions: 0,
+    commits: 0,
+    pullRequests: 0,
+    issues: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const apiBase = import.meta.env.VITE_API_URL || '/api';
 
   useEffect(() => {
-    const fetchAllStats = async () => {
+    const fetchGitHubData = async () => {
       try {
-        // Fetch GitHub stats
-        const githubRes = await fetch(`https://api.github.com/users/${username}`);
-        const githubData = await githubRes.json();
+        // Fetch user events to count contributions
+        const eventsRes = await fetch(`https://api.github.com/users/${username}/events?per_page=100`);
+        const events = await eventsRes.json();
         
-        // Fetch database stats
-        const [projectsRes, certificatesRes, skillsRes, educationRes, experienceRes] = await Promise.all([
-          fetch(`${apiBase}/projects`),
-          fetch(`${apiBase}/certificates`),
-          fetch(`${apiBase}/skills`),
-          fetch(`${apiBase}/education`),
-          fetch(`${apiBase}/experience`)
-        ]);
-        
-        const projects = await projectsRes.json();
-        const certificates = await certificatesRes.json();
-        const skills = await skillsRes.json();
-        const education = await educationRes.json();
-        const experience = await experienceRes.json();
-        
-        if (githubData && !githubData.message) {
-          setGithubStats({
-            repos: githubData.public_repos || 0,
-            followers: githubData.followers || 0,
-            following: githubData.following || 0,
+        if (Array.isArray(events)) {
+          let commits = 0;
+          let pullRequests = 0;
+          let issues = 0;
+          const currentYear = new Date().getFullYear();
+          
+          events.forEach(event => {
+            const eventYear = new Date(event.created_at).getFullYear();
+            if (eventYear === currentYear) {
+              if (event.type === 'PushEvent') {
+                commits += event.payload?.commits?.length || 1;
+              }
+              if (event.type === 'PullRequestEvent') {
+                pullRequests++;
+              }
+              if (event.type === 'IssuesEvent') {
+                issues++;
+              }
+            }
+          });
+          
+          // Get total contributions from the API
+          const contribRes = await fetch(`https://github-contributions-api.jogruber.vercel.app/${username}?y=${currentYear}`);
+          const contribData = await contribRes.json();
+          
+          setStats({
+            contributions: contribData?.total || commits,
+            commits,
+            pullRequests,
+            issues
           });
         }
-        
-        setDbStats({
-          projects: projects.data?.length || 0,
-          certificates: certificates.data?.length || 0,
-          skills: skills.data?.length || 0,
-          education: education.data?.length || 0,
-          experience: experience.data?.length || 0,
-        });
       } catch (err) {
-        console.error('Error fetching stats:', err);
-        setError('Failed to load some stats');
+        console.error('Error fetching GitHub data:', err);
+        setError('Unable to load GitHub data');
       } finally {
         setLoading(false);
       }
     };
-    fetchAllStats();
-  }, [username, apiBase]);
+    
+    fetchGitHubData();
+  }, [username]);
 
   if (loading) {
     return (
@@ -68,8 +67,8 @@ const GitHubStats = ({ username = 'Samuel-AKINGENEYE' }) => {
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-32"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="h-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            {[1,2,3,4].map(i => (
+              <div key={i} className="h-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
             ))}
           </div>
         </div>
@@ -77,33 +76,48 @@ const GitHubStats = ({ username = 'Samuel-AKINGENEYE' }) => {
     );
   }
 
-  const allStats = [
-    { icon: Code, label: 'Repositories', value: githubStats.repos, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { icon: Users, label: 'GitHub Followers', value: githubStats.followers, color: 'text-green-500', bg: 'bg-green-500/10' },
-    { icon: Star, label: 'Following', value: githubStats.following, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
-    { icon: Layers, label: 'Projects', value: dbStats.projects, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { icon: Award, label: 'Certificates', value: dbStats.certificates, color: 'text-pink-500', bg: 'bg-pink-500/10' },
-    { icon: GraduationCap, label: 'Education', value: dbStats.education, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { icon: Briefcase, label: 'Experience', value: dbStats.experience, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-    { icon: GitFork, label: 'Skills', value: dbStats.skills, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
+  if (error) {
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 text-center">
+        <p className="text-red-500">{error}</p>
+        <a href={`https://github.com/${username}`} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-sm mt-2 inline-block">
+          View GitHub Profile →
+        </a>
+      </div>
+    );
+  }
+
+  const statCards = [
+    { icon: Calendar, label: 'Contributions', value: stats.contributions, color: 'text-green-500', bg: 'bg-green-500/10' },
+    { icon: GitCommit, label: 'Commits', value: stats.commits, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { icon: GitPullRequest, label: 'Pull Requests', value: stats.pullRequests, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { icon: AlertCircle, label: 'Issues', value: stats.issues, color: 'text-orange-500', bg: 'bg-orange-500/10' },
   ];
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-      {/* Stats Grid */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+          {username.charAt(0)}
+        </div>
+        <div>
+          <h3 className="font-semibold text-slate-900 dark:text-white">GitHub Presence</h3>
+          <p className="text-sm text-slate-500">Activity in {new Date().getFullYear()}</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {allStats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <div key={index} className={`p-4 rounded-xl ${stat.bg} border border-slate-200 dark:border-slate-700`}>
             <div className="flex items-center gap-2 mb-2">
               <stat.icon size={16} className={stat.color} />
               <span className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</span>
             </div>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value.toLocaleString()}</p>
           </div>
         ))}
       </div>
 
-      {/* GitHub Profile Link */}
       <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
         <a
           href={`https://github.com/${username}`}
@@ -118,4 +132,4 @@ const GitHubStats = ({ username = 'Samuel-AKINGENEYE' }) => {
   );
 };
 
-export default GitHubStats;
+export default GitHubPresence;
