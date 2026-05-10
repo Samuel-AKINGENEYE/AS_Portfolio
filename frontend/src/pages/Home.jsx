@@ -8,16 +8,24 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import CertificateCard from '../components/CertificateCard.jsx';
+import GitHubCalendar from '../components/GitHubCalendar.jsx';
 import WhatsAppButton from '../components/WhatsAppButton.jsx';
 import StarBackground from '../components/StarBackground.jsx';
 import TypingText from '../components/TypingText.jsx';
 import CountUp from '../components/CountUp.jsx';
 import Timeline from '../components/Timeline.jsx';
 import {
-import GitHubCalendar from "../components/GitHubCalendar.jsx";
   projectsApi, certificatesApi, profileApi, skillsApi,
   educationApi, experienceApi, analyticsApi, contactApi,
 } from '../services/api.js';
+
+const CATEGORY_CFG = {
+  Frontend: { icon: Globe, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  Backend: { icon: Code2, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+  Database: { icon: Database, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+  Tools: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+  Other: { icon: Star, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+};
 
 const HERO_TEXTS = ['Full Stack Developer', 'React & Node.js Expert', 'API Builder', 'Problem Solver'];
 
@@ -26,49 +34,6 @@ const TESTIMONIALS = [
   { feedback: 'The product interface is clean, performant, and easy to maintain.', author: 'Jean Mukamana', role: 'Product Lead', rating: 5 },
   { feedback: 'Reliable, detail-oriented, and responsive — Samuel consistently delivered.', author: 'Emily S.', role: 'CTO, LearnHub Rwanda', rating: 5 },
 ];
-
-// Skill icons using proper SVG-like emoji representations (since Lucide doesn't have all tech icons)
-// For production, consider using react-icons or @icons-pack/react-simple-icons
-const skillIcons = {
-  'React': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-  'Next.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
-  'TypeScript': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-  'Tailwind CSS': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg',
-  'HTML/CSS': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
-  'JavaScript': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-  'Node.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-  'Express': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
-  'Python': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-  'Java': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-  'PHP': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-  'PostgreSQL': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
-  'MongoDB': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg',
-  'Redis': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg',
-  'MySQL': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-  'Git': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
-  'Docker': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
-  'AWS': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg',
-  'Vercel': 'https://assets.vercel.com/image/upload/v1607554385/repositories/vercel/logo.png',
-  'Figma': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
-};
-
-function SkillIcon({ name }) {
-  const [imgError, setImgError] = useState(false);
-  const iconUrl = skillIcons[name];
-  
-  if (!iconUrl || imgError) {
-    return <span className="text-base">💻</span>;
-  }
-  
-  return (
-    <img 
-      src={iconUrl} 
-      alt={name} 
-      className="w-5 h-5 object-contain"
-      onError={() => setImgError(true)}
-    />
-  );
-}
 
 function getVisitorId() {
   let id = localStorage.getItem('_vid');
@@ -98,7 +63,37 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
-// GitHub Contributions Calendar Component - Real Data from GitHub API
+export default function Home() {
+  const [projects, setProjects] = useState([]);
+  const [certificates, setCerts] = useState([]);
+  const [profile, setProfile] = useState(null);
+  const [skills, setSkills] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [experience, setExperience] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [techFilter, setTechFilter] = useState('All');
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    analyticsApi.track({ page: '/', visitorId: getVisitorId() }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [projRes, certRes, profRes, skillRes, eduRes, expRes] = await Promise.all([
+          projectsApi.getAll(true),
+          certificatesApi.getAll(),
+          profileApi.get(),
+          skillsApi.getAll(),
+          educationApi.getAll(),
+          experienceApi.getAll(),
+        ]);
+        setProjects(projRes.data.data ?? []);
+        setCerts(certRes.data.data ?? []);
+        setProfile(profRes.data.data ?? null);
+        setSkills(skillRes.data.data ?? []);
         setEducation(eduRes.data.data ?? []);
         setExperience(expRes.data.data ?? []);
       } catch (err) {
@@ -110,18 +105,10 @@ function SectionHeader({ title, subtitle }) {
     load();
   }, []);
 
-  // Skills with icons - categorized display
-  const skillsWithIcons = {
-    Frontend: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'HTML/CSS', 'JavaScript'],
-    Backend: ['Node.js', 'Express', 'Python', 'Java', 'PHP'],
-    Database: ['PostgreSQL', 'MongoDB', 'Redis', 'MySQL'],
-    Tools: ['Git', 'Docker', 'AWS', 'Vercel', 'Figma'],
-  };
-
-  const projectCount = projects.length;
-  const certificateCount = certificates.length;
-  const skillCount = Object.values(skillsWithIcons).flat().length;
-  const experienceCount = experience.length;
+  const skillsByCategory = skills.reduce((acc, s) => {
+    (acc[s.category] = acc[s.category] || []).push(s);
+    return acc;
+  }, {});
 
   const allTechs = ['All', ...new Set(projects.flatMap(p => p.techStack || []))].slice(0, 9);
   const filteredProjects = techFilter === 'All' ? projects : projects.filter(p => p.techStack?.includes(techFilter));
@@ -145,6 +132,11 @@ function SectionHeader({ title, subtitle }) {
   const trackResume = useCallback(() => {
     analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
   }, []);
+
+  const projectCount = projects.length;
+  const certificateCount = certificates.length;
+  const skillCount = skills.length;
+  const experienceCount = experience.length;
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Loading...</div>;
@@ -241,26 +233,28 @@ function SectionHeader({ title, subtitle }) {
         </div>
       </section>
 
-      {/* Skills Section with Real Icons */}
+      {/* Skills Section */}
       <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {Object.entries(skillsWithIcons).map(([category, skillList]) => (
-              <div key={category} className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
-                  {category}
-                </h3>
-                <ul className="space-y-2">
-                  {skillList.map((skill, idx) => (
-                    <li key={idx} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2">
-                      <SkillIcon name={skill} />
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <SectionHeader title="Skills & Tech Stack" subtitle="Technologies I work with daily" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Object.entries(skillsByCategory).map(([cat, catSkills]) => {
+              const cfg = CATEGORY_CFG[cat] || CATEGORY_CFG.Other;
+              const Icon = cfg.icon;
+              return (
+                <div key={cat} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
+                  <div className="mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <div className={`inline-flex items-center gap-2 ${cfg.bg} rounded-xl px-3 py-2`}>
+                      <Icon size={16} className={cfg.color} />
+                      <h3 className={`font-bold ${cfg.color}`}>{cat}</h3>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {catSkills.map(skill => <span key={skill._id} className={`px-3 py-1.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} border ${cfg.border}`}>{skill.name}</span>)}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -295,7 +289,7 @@ function SectionHeader({ title, subtitle }) {
         </div>
       </section>
 
-      {/* GitHub Activity - Full Width with Real Data */}
+      {/* GitHub Activity Section */}
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="GitHub Activity" subtitle="Open source contributions and activity" />
