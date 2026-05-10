@@ -1,87 +1,37 @@
 import { useState, useEffect } from 'react';
-import { Github, ExternalLink, RefreshCw } from 'lucide-react';
+import { Github, ExternalLink } from 'lucide-react';
 
 const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
-  const currentYear = new Date().getFullYear();
-  const years = [2022, 2023, 2024, 2025, 2026];
-  
   const [selectedYear, setSelectedYear] = useState(2025);
   const [weeks, setWeeks] = useState([]);
-  const [totalContributions, setTotalContributions] = useState(0);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   
   const BACKEND_URL = 'https://samuel-ak-portfolio-api.onrender.com';
 
   useEffect(() => {
-    const fetchContributions = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      setError(null);
-      
       try {
-        const response = await fetch(`${BACKEND_URL}/api/github-contributions/${username}/${selectedYear}`);
+        const url = `${BACKEND_URL}/api/github/contributions/${username}/${selectedYear}`;
+        console.log('Fetching from:', url);
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.success && data.data) {
-          setWeeks(data.data.weeks);
-          setTotalContributions(data.data.total);
-        } else {
-          setWeeks([]);
-          setTotalContributions(0);
+          setWeeks(data.data.weeks || []);
+          setTotal(data.data.total || 0);
         }
       } catch (err) {
-        console.error('Error fetching contributions:', err);
-        setError(err.message);
-        // Generate sample data for visual demonstration
-        generateSampleData();
+        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
     };
     
-    const generateSampleData = () => {
-      const sampleWeeks = [];
-      const startDate = new Date(selectedYear, 0, 1);
-      const endDate = new Date(selectedYear, 11, 31);
-      let currentWeek = [];
-      let currentDate = new Date(startDate);
-      let total = 0;
-      
-      while (currentDate <= endDate) {
-        const dayOfWeek = currentDate.getDay();
-        let count = 0;
-        
-        // Simulate realistic pattern: more contributions on weekdays
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-          count = Math.random() > 0.7 ? Math.floor(Math.random() * 5) + 1 : 0;
-        } else {
-          count = Math.random() > 0.85 ? Math.floor(Math.random() * 2) + 1 : 0;
-        }
-        
-        total += count;
-        
-        currentWeek.push({
-          date: currentDate.toISOString().split('T')[0],
-          count: count
-        });
-        
-        if (currentWeek.length === 7) {
-          sampleWeeks.push([...currentWeek]);
-          currentWeek = [];
-        }
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      
-      if (currentWeek.length > 0) {
-        sampleWeeks.push(currentWeek);
-      }
-      
-      setWeeks(sampleWeeks);
-      setTotalContributions(total);
-    };
-    
-    fetchContributions();
-  }, [selectedYear, username, BACKEND_URL]);
+    fetchData();
+  }, [selectedYear, username]);
 
   const getColor = (count) => {
     if (count === 0) return '#ebedf0';
@@ -90,45 +40,19 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
     if (count <= 5) return '#30a14e';
     return '#0e4429';
   };
-  
-  // Check dark mode
-  const [isDark, setIsDark] = useState(false);
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'));
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
-    observer.observe(document.documentElement, { attributes: true });
-    return () => observer.disconnect();
-  }, []);
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const weekdays = ['Mon', 'Wed', 'Fri'];
+  const years = [2022, 2023, 2024, 2025, 2026];
 
   if (loading) {
-    return (
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-        <div className="animate-pulse space-y-4">
-          <div className="flex justify-between">
-            <div className="h-8 w-40 bg-slate-200 dark:bg-slate-700 rounded"></div>
-            <div className="flex gap-2">
-              {[2022, 2023, 2024, 2025, 2026].map(i => (
-                <div key={i} className="h-8 w-14 bg-slate-200 dark:bg-slate-700 rounded"></div>
-              ))}
-            </div>
-          </div>
-          <div className="h-40 bg-slate-200 dark:bg-slate-700 rounded"></div>
-        </div>
-      </div>
-    );
+    return <div className="bg-white dark:bg-slate-800 rounded-xl p-6 animate-pulse h-64"></div>;
   }
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-      {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
         <div>
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">{totalContributions}</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-white">{total}</span>
           <span className="text-slate-500 dark:text-slate-400 ml-2">contributions in {selectedYear}</span>
         </div>
         <div className="flex gap-1">
@@ -145,54 +69,32 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
               {year}
             </button>
           ))}
-          <button 
-            onClick={() => setSelectedYear(selectedYear)} 
-            className="p-1.5 rounded-md text-slate-400 hover:text-blue-500"
-          >
-            <RefreshCw size={14} />
-          </button>
         </div>
       </div>
       
-      {/* Contribution Grid */}
       {weeks.length === 0 ? (
-        <div className="text-center py-8 text-slate-500">
-          No contribution data for {selectedYear}
-        </div>
+        <div className="text-center py-8 text-slate-500">No data for {selectedYear}</div>
       ) : (
         <div className="overflow-x-auto">
           <div className="min-w-[800px]">
-            {/* Month Labels */}
             <div className="flex ml-8 mb-2">
-              {months.map(month => (
-                <div key={month} className="text-xs text-slate-400 w-14 text-center">{month}</div>
-              ))}
+              {months.map(month => <div key={month} className="text-xs text-slate-400 w-14 text-center">{month}</div>)}
             </div>
-            
             <div className="flex gap-1">
-              {/* Day Labels */}
               <div className="flex flex-col gap-1 w-12">
-                {weekdays.map(day => (
-                  <div key={day} className="h-3 text-[10px] text-slate-400 text-right pr-2">{day}</div>
-                ))}
+                {['Mon', 'Wed', 'Fri'].map(day => <div key={day} className="h-3 text-[10px] text-slate-400 text-right pr-2">{day}</div>)}
               </div>
-              
-              {/* Contribution Cells */}
               <div className="flex gap-1">
-                {weeks.map((week, weekIdx) => (
-                  <div key={weekIdx} className="flex flex-col gap-1">
-                    {week.map((day, dayIdx) => {
-                      const actualCount = day?.count || 0;
-                      const bgColor = isDark && actualCount === 0 ? '#1e1e2e' : getColor(actualCount);
-                      return (
-                        <div
-                          key={dayIdx}
-                          className="w-3 h-3 rounded-sm transition-all hover:scale-125 cursor-help"
-                          style={{ backgroundColor: bgColor }}
-                          title={`${actualCount} contribution${actualCount !== 1 ? 's' : ''} on ${day?.date || 'unknown'}`}
-                        />
-                      );
-                    })}
+                {weeks.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-1">
+                    {week.map((day, di) => (
+                      <div
+                        key={di}
+                        className="w-3 h-3 rounded-sm transition-all hover:scale-125 cursor-help"
+                        style={{ backgroundColor: getColor(day.count) }}
+                        title={`${day.count} contributions on ${day.date}`}
+                      />
+                    ))}
                   </div>
                 ))}
               </div>
@@ -201,15 +103,9 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
         </div>
       )}
       
-      {/* Legend & Footer */}
-      <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <a 
-          href={`https://github.com/${username}`} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
-        >
-          <Github size={14} /> View full GitHub profile <ExternalLink size={12} />
+      <div className="flex justify-between items-center mt-6 pt-4 border-t">
+        <a href={`https://github.com/${username}`} target="_blank" className="text-sm text-blue-500 flex items-center gap-1">
+          <Github size={14} /> View on GitHub <ExternalLink size={12} />
         </a>
         <div className="flex items-center gap-1 text-xs text-slate-500">
           <span>Less</span>

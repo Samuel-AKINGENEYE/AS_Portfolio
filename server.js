@@ -12,8 +12,7 @@ import experienceRoutes from './routes/experience.js';
 import uploadRoutes from './routes/upload.js';
 import analyticsRoutes from './routes/analytics.js';
 import contactRoutes from './routes/contact.js';
-import githubProxyRoutes from './routes/github-proxy.js';
-import githubContribRoutes from "./routes/github-contributions.js";
+import githubTestRoutes from './routes/github-test.js';
 
 dotenv.config();
 
@@ -33,7 +32,6 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('Blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -56,8 +54,7 @@ app.use('/api/experience', experienceRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/contact', contactRoutes);
-app.use('/api/github-proxy', githubProxyRoutes);
-app.use("/api/github-contributions", githubContribRoutes);
+app.use('/api/github', githubTestRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'API is running' });
@@ -65,5 +62,4 @@ app.get('/api/health', (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`✅ CORS enabled for: ${allowedOrigins.join(', ')}`);
 });
