@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
-  Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2, Calendar,
+  Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -18,14 +18,6 @@ import {
   projectsApi, certificatesApi, profileApi, skillsApi,
   educationApi, experienceApi, analyticsApi, contactApi,
 } from '../services/api.js';
-
-const CATEGORY_CFG = {
-  Frontend: { icon: Globe, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  Backend: { icon: Code2, color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/20' },
-  Database: { icon: Database, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-  Tools: { icon: Wrench, color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
-  Other: { icon: Star, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
-};
 
 const HERO_TEXTS = ['Full Stack Developer', 'React & Node.js Expert', 'API Builder', 'Problem Solver'];
 
@@ -147,6 +139,7 @@ export default function Home() {
       <Navbar />
       <WhatsAppButton />
 
+      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-16 px-6 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 transition-colors duration-300">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl" />
@@ -189,6 +182,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Stats Section */}
       <section className="py-16 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -212,6 +206,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Projects Section */}
       <section id="projects" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Featured Projects" subtitle="Things I've built and shipped" />
@@ -230,12 +225,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Skills Section with Real Icons */}
+      {/* Skills Section */}
       <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Frontend */}
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Frontend</h3>
               <ul className="space-y-3">
@@ -248,8 +242,6 @@ export default function Home() {
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="Figma" size={18} /> Figma</li>
               </ul>
             </div>
-
-            {/* Backend */}
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Backend</h3>
               <ul className="space-y-3">
@@ -260,8 +252,6 @@ export default function Home() {
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="PHP" size={18} /> PHP</li>
               </ul>
             </div>
-
-            {/* Database */}
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Database</h3>
               <ul className="space-y-3">
@@ -271,8 +261,6 @@ export default function Home() {
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="MySQL" size={18} /> MySQL</li>
               </ul>
             </div>
-
-            {/* Tools */}
             <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Tools</h3>
               <ul className="space-y-3">
@@ -286,6 +274,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Experience Section */}
       <section id="experience" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Work Experience" subtitle="My professional journey" />
@@ -295,6 +284,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Education Section */}
       <section id="education" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Education" subtitle="My academic background" />
@@ -304,6 +294,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Certificates Section */}
       <section id="certificates" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
@@ -313,6 +304,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
       <section id="testimonials" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
@@ -331,6 +323,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Contact Section with Resume Button */}
       <section id="contact" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
@@ -346,6 +339,20 @@ export default function Home() {
               <div><h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3><div className="flex flex-wrap gap-3">{social.github && <a href={social.github} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}{social.linkedin && <a href={social.linkedin} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}{social.twitter && <a href={social.twitter} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}{profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white"><Mail size={20} /></a>}</div></div>
               {profile?.location && (<div className="flex items-center gap-3 text-slate-600 dark:text-slate-400"><MapPin size={16} className="text-blue-500" /><span>{profile.location}</span></div>)}
               {profile?.email && (<div className="flex items-center gap-3 text-slate-600 dark:text-slate-400"><Mail size={16} className="text-blue-500" /><a href={`mailto:${profile.email}`} className="hover:text-blue-500">{profile.email}</a></div>)}
+              
+              {/* Resume Download Button */}
+              <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <a
+                  href={profile?.resumeUrl || '/resume.pdf'}
+                  download
+                  onClick={trackResume}
+                  className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border-2 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 font-medium"
+                >
+                  <Download size={16} />
+                  Download Resume (PDF)
+                </a>
+                <p className="text-xs text-slate-400 text-center mt-2">PDF format, ready for printing</p>
+              </div>
             </div>
           </div>
         </div>
