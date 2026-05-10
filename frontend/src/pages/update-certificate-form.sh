@@ -1,0 +1,94 @@
+#!/bin/bash
+# This script replaces the CertificateForm in AdminDashboard.jsx
+cd /home/samuel/Projects/AS_Portfolio/frontend/src/pages
+
+# Create a temporary file with the new CertificateForm
+cat > new-certificate-form.txt << 'EOF'
+function CertificateForm({ initial, onSave, onCancel }) {
+  const blank = { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Other' };
+  const toInput = (d) => d ? new Date(d).toISOString().split('T')[0] : '';
+  const [form, setForm] = useState(initial ? { ...initial, issueDate: toInput(initial.issueDate) } : blank);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be less than 5MB'); return; }
+    
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/certificate`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        set('imageUrl', data.data.url);
+        toast.success('Certificate image uploaded!');
+      } else {
+        toast.error('Upload failed');
+      }
+    } catch (err) {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); setSaving(true);
+    try { await onSave(form); } finally { setSaving(false); }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div><label className={LABEL}>Certificate Name *</label><input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>Issuer *</label><input required value={form.issuer} onChange={e => set('issuer', e.target.value)} className={INPUT} /></div>
+      <div className="grid grid-cols-2 gap-3">
+        <div><label className={LABEL}>Issue Date</label><input type="date" value={form.issueDate} onChange={e => set('issueDate', e.target.value)} className={INPUT} /></div>
+        <div>
+          <label className={LABEL}>Category</label>
+          <select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}>
+            {['AI/ML', 'Web Dev', 'Cybersecurity', 'Other'].map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label className={LABEL}>Certificate Image</label>
+        <div className="flex items-start gap-4">
+          {form.imageUrl && (
+            <div className="w-20 h-20 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0">
+              <img src={form.imageUrl} alt="Certificate" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="flex-1 space-y-2">
+            <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors inline-flex items-center gap-2">
+              <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Certificate Image'}
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
+            </label>
+            <input type="url" placeholder="Or paste image URL directly" value={form.imageUrl || ''} onChange={e => set('imageUrl', e.target.value)} className={INPUT} />
+            <p className="text-xs text-slate-400">Upload certificate image (JPEG/PNG, max 5MB) or paste URL</p>
+          </div>
+        </div>
+      </div>
+      
+      <div><label className={LABEL}>Credential URL</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} placeholder="https://example.com/verify" /></div>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}{saving ? 'Saving…' : 'Save Certificate'}</button>
+        <button type="button" onClick={onCancel} className={BTN_G}>Cancel</button>
+      </div>
+    </form>
+  );
+}
+EOF
+
+echo "CertificateForm code saved to new-certificate-form.txt"
+echo "You need to manually replace the CertificateForm function in AdminDashboard.jsx"
