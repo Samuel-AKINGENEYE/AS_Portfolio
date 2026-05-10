@@ -23,13 +23,13 @@ export default function WhatsAppButton() {
         Chat with me
       </span>
 
-      {/* WhatsApp button with breathing animation */}
+      {/* WhatsApp button - opposite breathing animation (bi-directional) */}
       <div
         className={`
           w-14 h-14 rounded-full flex items-center justify-center
           shadow-lg cursor-pointer transition-transform duration-200
           ${hovered ? 'scale-110' : 'scale-100'}
-          animate-float
+          animate-float-opposite
         `}
         style={{ backgroundColor: '#25D366' }}
       >

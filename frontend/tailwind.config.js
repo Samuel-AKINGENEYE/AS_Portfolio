@@ -23,6 +23,7 @@ export default {
         'slide-up-d2': 'slideUp 0.7s ease-out 0.25s both',
         'slide-up-d3': 'slideUp 0.7s ease-out 0.4s both',
         'float': 'float 3.5s ease-in-out infinite',
+        'float-opposite': 'floatOpposite 3.5s ease-in-out infinite',
         'pulse-glow': 'pulseGlow 2.2s ease-in-out infinite',
         'blink': 'blink 0.8s step-end infinite',
         'spin-slow': 'spin 4s linear infinite',
@@ -41,6 +42,10 @@ export default {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-14px)' },
+        },
+        floatOpposite: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(14px)' },
         },
         pulseGlow: {
           '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(37,211,102,0.7)' },
