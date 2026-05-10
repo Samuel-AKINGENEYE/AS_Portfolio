@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Github, ExternalLink, ChevronDown } from 'lucide-react';
+import { Github, ExternalLink } from 'lucide-react';
 
 const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
   const [selectedYear, setSelectedYear] = useState(2026);
   const [weeks, setWeeks] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,97 +26,69 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
     fetchData();
   }, [selectedYear, username]);
 
-  // GitHub's official contribution colors
+  // Same colors as GitHub
   const getColor = (count) => {
-    if (count === 0) return '#ebedf0';
-    if (count === 1 || count === 2) return '#9be9a8';
-    if (count === 3 || count === 4) return '#40c463';
-    if (count === 5 || count === 6) return '#30a14e';
-    return '#216e39';
+    if (count === 0) return '#161b22';      // Dark mode empty cell
+    if (count === 1) return '#0e4429';
+    if (count === 2) return '#006d32';
+    if (count === 3) return '#26a641';
+    return '#39d353';
   };
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const years = [2026, 2025, 2024];
-
-  // Calculate month positions for the header
-  const getMonthPositions = () => {
-    if (!weeks.length) return [];
-    const positions = [];
-    let currentMonth = -1;
-    weeks.forEach((week, weekIndex) => {
-      if (week.length > 0 && week[0].date) {
-        const month = new Date(week[0].date).getMonth();
-        if (month !== currentMonth) {
-          positions.push({ month: months[month], weekIndex });
-          currentMonth = month;
-        }
-      }
-    });
-    return positions;
-  };
-
-  const monthPositions = getMonthPositions();
+  const days = ['Mon', 'Wed', 'Fri'];
 
   if (loading) {
-    return <div className="bg-white dark:bg-slate-800 rounded-xl p-6 animate-pulse h-48"></div>;
+    return <div className="p-4"><div className="animate-pulse h-32 bg-slate-200 dark:bg-slate-700 rounded"></div></div>;
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-6">
-      {/* Header with contribution count and year selector */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-semibold text-slate-900 dark:text-white">{total}</span>
-          <span className="text-slate-600 dark:text-slate-400">contributions in {selectedYear}</span>
-        </div>
-        <div className="relative">
-          <button 
-            onClick={() => setShowSettings(!showSettings)}
-            className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-          >
-            Contribution settings <ChevronDown size={14} />
-          </button>
+    <div className="p-4">
+      {/* Header with year selector */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-2xl font-bold text-slate-900 dark:text-white">{total}</div>
+        <div className="flex gap-4">
+          {years.map(year => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`text-sm ${selectedYear === year ? 'text-blue-500 font-semibold' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+              {year}
+            </button>
+          ))}
+          <span className="text-slate-400 text-sm">▼</span>
         </div>
       </div>
 
-      {/* Calendar Grid */}
+      {/* Calendar grid */}
       <div className="overflow-x-auto">
-        <div className="min-w-[750px]">
-          {/* Month labels */}
-          <div className="flex mb-1 text-xs text-slate-500">
-            <div className="w-8"></div>
-            <div className="flex-1 flex">
-              {monthPositions.map((pos, i) => (
-                <div 
-                  key={i} 
-                  className="text-left"
-                  style={{ width: `${(pos.weekIndex === 0 ? pos.weekIndex + 1 : pos.weekIndex) * 13}px` }}
-                >
-                  <span className="ml-1">{pos.month}</span>
-                </div>
-              ))}
-            </div>
+        <div className="min-w-[650px]">
+          {/* Month labels row */}
+          <div className="flex mb-1 ml-7">
+            {months.map(month => (
+              <div key={month} className="text-xs text-slate-500 w-10 text-center">{month}</div>
+            ))}
           </div>
 
-          {/* Day labels and contribution grid */}
+          {/* Day labels + contribution cells */}
           <div className="flex">
-            {/* Day labels */}
-            <div className="w-8 flex flex-col text-xs text-slate-500">
-              <div className="h-3 mb-1">Mon</div>
-              <div className="h-3 mb-1"></div>
-              <div className="h-3 mb-1">Wed</div>
-              <div className="h-3 mb-1"></div>
-              <div className="h-3 mb-1">Fri</div>
+            {/* Day labels column */}
+            <div className="flex flex-col justify-between text-xs text-slate-500 pr-2 py-0.5">
+              {days.map(day => (
+                <div key={day} className="h-3 mb-1">{day}</div>
+              ))}
             </div>
 
-            {/* Contribution weeks */}
+            {/* Contribution cells */}
             <div className="flex gap-1">
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
-                  {week.slice(0, 7).map((day, dayIndex) => (
+              {weeks.map((week, wi) => (
+                <div key={wi} className="flex flex-col gap-1">
+                  {week.slice(0, 7).map((day, di) => (
                     <div
-                      key={dayIndex}
-                      className="w-3 h-3 rounded-sm transition-all hover:ring-1 hover:ring-slate-400"
+                      key={di}
+                      className="w-3 h-3 rounded-sm"
                       style={{ backgroundColor: getColor(day.count) }}
                       title={`${day.count} contributions on ${day.date}`}
                     />
@@ -129,35 +100,26 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
         </div>
       </div>
 
-      {/* Footer with legend and GitHub link */}
-      <div className="flex justify-between items-center mt-4 text-xs text-slate-500">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span>Learn how we count contributions</span>
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="flex justify-between items-center mt-4 text-xs">
+        <span className="text-slate-500">Learn how we count contributions</span>
         <div className="flex items-center gap-2">
-          <span>Less</span>
+          <span className="text-slate-500">Less</span>
           <div className="flex gap-0.5">
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#ebedf0' }}></div>
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#9be9a8' }}></div>
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#40c463' }}></div>
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#30a14e' }}></div>
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#216e39' }}></div>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#161b22' }}></div>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#0e4429' }}></div>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#006d32' }}></div>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#26a641' }}></div>
+            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#39d353' }}></div>
           </div>
-          <span>More</span>
+          <span className="text-slate-500">More</span>
         </div>
       </div>
 
-      {/* Footer link */}
-      <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <a 
-          href={`https://github.com/${username}`} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
-        >
-          <Github size={14} /> View full GitHub profile <ExternalLink size={12} />
+      {/* GitHub link */}
+      <div className="mt-4">
+        <a href={`https://github.com/${username}`} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">
+          View full GitHub profile →
         </a>
       </div>
     </div>
