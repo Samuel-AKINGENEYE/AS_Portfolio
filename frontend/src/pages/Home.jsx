@@ -292,8 +292,6 @@ export default function Home() {
       {/* GitHub Activity Section */}
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="GitHub Activity" subtitle="Open source contributions and activity" />
-          <GitHubStats username="Samuel-AKINGENEYE" />
         </div>
       </section>
 
