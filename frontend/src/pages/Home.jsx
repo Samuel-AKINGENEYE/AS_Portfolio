@@ -8,7 +8,7 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import CertificateCard from '../components/CertificateCard.jsx';
-import GitHubCalendar from '../components/GitHubCalendar.jsx';
+import GitHubStats from '../components/GitHubCalendar.jsx';
 import WhatsAppButton from '../components/WhatsAppButton.jsx';
 import StarBackground from '../components/StarBackground.jsx';
 import TypingText from '../components/TypingText.jsx';
@@ -293,7 +293,7 @@ export default function Home() {
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="GitHub Activity" subtitle="Open source contributions and activity" />
-          <GitHubCalendar username="Samuel-AKINGENEYE" />
+          <GitHubStats username="Samuel-AKINGENEYE" />
         </div>
       </section>
 
