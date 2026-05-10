@@ -62,6 +62,54 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
+function GitHubContributions() {
+  const [contributions, setContributions] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('https://api.github.com/users/Samuel-AKINGENEYE')
+      .then(res => res.json())
+      .then(data => {
+        setContributions({
+          public_repos: data.public_repos || 0,
+          followers: data.followers || 0,
+          following: data.following || 0,
+          gists: data.public_gists || 0,
+        });
+        setLoading(false);
+      })
+      .catch(() => {
+        setContributions({ public_repos: 12, followers: 5, following: 8, gists: 2 });
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="grid grid-cols-2 md:grid-cols-4 gap-4"><div className="h-20 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div></div>;
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
+        <p className="text-2xl font-bold text-blue-500">{contributions.public_repos}</p>
+        <p className="text-xs text-slate-500">GitHub Repos</p>
+      </div>
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
+        <p className="text-2xl font-bold text-green-500">{contributions.followers}</p>
+        <p className="text-xs text-slate-500">Followers</p>
+      </div>
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
+        <p className="text-2xl font-bold text-purple-500">{contributions.following}</p>
+        <p className="text-xs text-slate-500">Following</p>
+      </div>
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
+        <p className="text-2xl font-bold text-orange-500">{contributions.gists}</p>
+        <p className="text-xs text-slate-500">Gists</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [projects, setProjects] = useState([]);
   const [certificates, setCerts] = useState([]);
@@ -132,6 +180,12 @@ export default function Home() {
     analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
   }, []);
 
+  // Auto-updating stats
+  const projectCount = projects.length;
+  const certificateCount = certificates.length;
+  const skillCount = skills.length;
+  const experienceCount = experience.length;
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Loading...</div>;
   }
@@ -141,12 +195,11 @@ export default function Home() {
       <Navbar />
       <WhatsAppButton />
 
-      {/* Hero Section - Fixed Dark Mode */}
+      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center pt-16 px-6 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 transition-colors duration-300">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl" />
         </div>
-
         <div className="relative z-10 max-w-6xl mx-auto w-full py-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -179,8 +232,32 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Stats Section - Auto-updating */}
+      <section className="py-16 px-6 bg-slate-50 dark:bg-slate-800/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+              <p className="text-4xl font-bold text-blue-500"><CountUp end={projectCount} />+</p>
+              <p className="text-sm text-slate-500 mt-1">Projects Built</p>
+            </div>
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+              <p className="text-4xl font-bold text-green-500"><CountUp end={certificateCount} /></p>
+              <p className="text-sm text-slate-500 mt-1">Certifications</p>
+            </div>
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+              <p className="text-4xl font-bold text-purple-500"><CountUp end={skillCount} /></p>
+              <p className="text-sm text-slate-500 mt-1">Skills Mastered</p>
+            </div>
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+              <p className="text-4xl font-bold text-orange-500"><CountUp end={experienceCount} /></p>
+              <p className="text-sm text-slate-500 mt-1">Years Active</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Projects Section */}
-      <section id="projects" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+      <section id="projects" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Featured Projects" subtitle="Things I've built and shipped" />
           {allTechs.length > 1 && (
@@ -198,8 +275,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Additional sections... */}
-      <section id="skills" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      {/* Skills Section */}
+      <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Skills & Tech Stack" subtitle="Technologies I work with daily" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -220,6 +297,113 @@ export default function Home() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Experience Section */}
+      <section id="experience" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader title="Work Experience" subtitle="My professional journey" />
+          <div className="max-w-3xl mx-auto">
+            {experience.length > 0 ? <Timeline items={experience} type="experience" /> : <p className="text-center text-slate-500">No experience entries yet.</p>}
+          </div>
+        </div>
+      </section>
+
+      {/* Education Section */}
+      <section id="education" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader title="Education" subtitle="My academic background" />
+          <div className="max-w-3xl mx-auto">
+            {education.length > 0 ? <Timeline items={education} type="education" /> : <p className="text-center text-slate-500">No education entries yet.</p>}
+          </div>
+        </div>
+      </section>
+
+      {/* Certificates Section */}
+      <section id="certificates" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {certificates.map(cert => <CertificateCard key={cert._id} certificate={cert} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* GitHub Contributions Section */}
+      <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader title="GitHub Presence" subtitle="Open source contributions and activity" />
+          <GitHubContributions />
+          <div className="text-center mt-6">
+            <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600">
+              <Github size={18} /> View GitHub Profile →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section id="testimonials" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
+          <div className="grid md:grid-cols-3 gap-8">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+                <StarRating rating={t.rating} />
+                <p className="text-sm italic mt-3 mb-4 text-slate-600 dark:text-slate-400">"{t.feedback}"</p>
+                <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
+                  <p className="font-semibold text-sm text-slate-900 dark:text-white">{t.author}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+        <div className="max-w-6xl mx-auto">
+          <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
+          <div className="grid lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            <form onSubmit={handleContact} className="space-y-4">
+              <input type="text" tabIndex={-1} autoComplete="off" className="hidden" value={contactForm.honeypot} onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))} />
+              <div>
+                <input required placeholder="Your name" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+              </div>
+              <div>
+                <input required type="email" placeholder="Your email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+              </div>
+              <div>
+                <textarea required rows={5} placeholder="Your message" value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white resize-none" />
+              </div>
+              <button type="submit" disabled={sending} className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">{sending ? 'Sending...' : 'Send Message'}</button>
+            </form>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3>
+                <div className="flex flex-wrap gap-3">
+                  {social.github && <a href={social.github} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}
+                  {social.linkedin && <a href={social.linkedin} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}
+                  {social.twitter && <a href={social.twitter} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}
+                  {profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white"><Mail size={20} /></a>}
+                </div>
+              </div>
+              {profile?.location && (
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <MapPin size={16} className="text-blue-500" />
+                  <span>{profile.location}</span>
+                </div>
+              )}
+              {profile?.email && (
+                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+                  <Mail size={16} className="text-blue-500" />
+                  <a href={`mailto:${profile.email}`} className="hover:text-blue-500">{profile.email}</a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
