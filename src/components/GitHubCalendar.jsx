@@ -1,339 +1,285 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { RefreshCw, Github, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const CACHE_KEY = 'gh_cal';
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-// Mon, Wed, Fri visible; empty string = no label for that row
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+const LEGEND = ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'];
 
-// Eye-friendly soft greens (as specified)
-const COLORS = {
-  empty_light: '#ebedf0',
-  empty_dark:  '#2d333b',
-  low:    '#9be9a8', // 1–3
-  mid:    '#40c463', // 4–6
-  high:   '#30a14e', // 7–9
-  max:    '#216e39', // 10+
-};
+const CELL     = 10;   // px
+const GAP      = 2;    // px
+const STEP     = CELL + GAP; // 12 px per week column
+const LEFT_COL = 28;   // day-of-week label column width
 
-const LEGEND = [COLORS.empty_light, COLORS.low, COLORS.mid, COLORS.high, COLORS.max];
+function cellColor(count) {
+  if (count <= 0) return '#161b22';
+  if (count === 1) return '#0e4429';
+  if (count === 2) return '#006d32';
+  if (count === 3) return '#26a641';
+  return '#39d353';
+}
 
-// Cell geometry
-const CELL = 11; // px
-const GAP  = 2;  // px
-const STEP = CELL + GAP; // 13px per column/row
+// Avoid toISOString() — it uses UTC, which can shift the date in +UTC timezones
+function localDateStr(d) {
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, '0');
+  const dy = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dy}`;
+}
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+function buildContribMap(weeks) {
+  const map = {};
+  for (const week of (weeks || [])) {
+    for (const day of (week || [])) {
+      if (day?.date) map[day.date] = day.count || 0;
+    }
+  }
+  return map;
+}
 
-function getColor(count, isDark) {
-  if (count === 0) return isDark ? COLORS.empty_dark : COLORS.empty_light;
-  if (count <= 3)  return COLORS.low;
-  if (count <= 6)  return COLORS.mid;
-  if (count <= 9)  return COLORS.high;
-  return COLORS.max;
+// Generate the full-year grid (52–53 week columns × 7 rows).
+// For the current year, cells after today are treated as 0 (future).
+// Cells outside the calendar year (overflow days) are marked inYear=false.
+function buildGrid(year, map, currentYear) {
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // today counts as not-future
+
+  const jan1  = new Date(year, 0, 1);
+  const dec31 = new Date(year, 11, 31);
+
+  // Start on the Sunday on or before Jan 1
+  const start = new Date(jan1);
+  start.setDate(jan1.getDate() - jan1.getDay());
+
+  // End on the Saturday on or after Dec 31
+  const end = new Date(dec31);
+  end.setDate(dec31.getDate() + (6 - dec31.getDay()));
+
+  const weeks = [];
+  const cur   = new Date(start);
+
+  while (cur <= end) {
+    const week = [];
+    for (let i = 0; i < 7; i++) {
+      const ds     = localDateStr(cur);
+      const inYear = cur.getFullYear() === year;
+      const future = year === currentYear && cur > today;
+      week.push({
+        date:   ds,
+        count:  inYear && !future ? (map[ds] ?? 0) : 0,
+        inYear,
+        future,
+      });
+      cur.setDate(cur.getDate() + 1);
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+// For each of the 12 months, record the first week-column index that contains
+// a day belonging to that year AND that month.
+function getMonthCols(weeks) {
+  const cols = Array(12).fill(-1);
+  weeks.forEach((week, wi) => {
+    for (const day of week) {
+      if (!day.inYear) continue;
+      const m = new Date(day.date + 'T12:00:00').getMonth();
+      if (cols[m] < 0) cols[m] = wi;
+    }
+  });
+  return cols;
 }
 
 // ── Cache ─────────────────────────────────────────────────────────────────────
+const CACHE_KEY = 'gh_cal_v2';
+const CACHE_TTL = 6 * 3600 * 1000; // 6 hours
 
-function getCached(year) {
+function readCache(year, ignoreExpiry = false) {
   try {
     const raw = localStorage.getItem(`${CACHE_KEY}_${year}`);
     if (!raw) return null;
-    const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts < CACHE_TTL) return data;
+    const { payload, ts } = JSON.parse(raw);
+    if (ignoreExpiry || Date.now() - ts < CACHE_TTL) return payload;
   } catch {}
   return null;
 }
 
-function setCache(year, data) {
+function writeCache(year, payload) {
   try {
-    localStorage.setItem(`${CACHE_KEY}_${year}`, JSON.stringify({ data, ts: Date.now() }));
+    localStorage.setItem(
+      `${CACHE_KEY}_${year}`,
+      JSON.stringify({ payload, ts: Date.now() })
+    );
   } catch {}
 }
 
-// ── Data normalisation ────────────────────────────────────────────────────────
-
-// jogruber API → { totalContributions, weeks[] } matching GitHub GraphQL shape
-function normalizePublicData(raw) {
-  const { contributions = [], total = {} } = raw;
-  if (!contributions.length) return null;
-
-  const totalContributions = Object.values(total).reduce((a, b) => a + Number(b), 0);
-
-  // Sort ascending, then bucket into Sunday-start weeks
-  const sorted = [...contributions].sort((a, b) => a.date.localeCompare(b.date));
-  const weekMap = new Map();
-
-  for (const day of sorted) {
-    const d   = new Date(day.date + 'T00:00:00');
-    const dow = d.getDay(); // 0 = Sun
-    const sun = new Date(d);
-    sun.setDate(d.getDate() - dow);
-    const key = sun.toISOString().slice(0, 10);
-    if (!weekMap.has(key)) weekMap.set(key, []);
-    weekMap.get(key).push({ contributionCount: day.count, date: day.date });
-  }
-
-  const weeks = Array.from(weekMap.values()).map(days => ({ contributionDays: days }));
-  return { totalContributions, weeks };
-}
-
-// Build a 7-slot array (indexed by day-of-week 0=Sun…6=Sat) for one week
-function buildWeekGrid(week) {
-  const grid = Array(7).fill(null);
-  for (const day of week.contributionDays) {
-    grid[new Date(day.date + 'T00:00:00').getDay()] = day;
-  }
-  return grid;
-}
-
-// Find the week index where each month label should appear
-function computeMonthLabels(weeks) {
-  const labels = [];
-  let lastMonth = -1;
-  weeks.forEach((week, wi) => {
-    if (!week.contributionDays.length) return;
-    const month = new Date(week.contributionDays[0].date + 'T00:00:00').getMonth();
-    if (month !== lastMonth) {
-      labels.push({ label: MONTHS[month], wi });
-      lastMonth = month;
-    }
-  });
-  return labels;
-}
-
 // ── Skeleton ──────────────────────────────────────────────────────────────────
-
-function CalendarSkeleton() {
+function Skeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
+    <div className="animate-pulse space-y-3">
       <div className="flex justify-between items-center">
-        <div className="h-8 w-52 rounded-lg bg-slate-200 dark:bg-slate-700" />
-        <div className="flex gap-2">
-          <div className="h-8 w-14 rounded-lg bg-slate-200 dark:bg-slate-700" />
-          <div className="h-8 w-14 rounded-lg bg-slate-200 dark:bg-slate-700" />
-          <div className="h-8 w-14 rounded-lg bg-slate-200 dark:bg-slate-700" />
+        <div className="h-5 w-52 rounded bg-[#21262d]" />
+        <div className="flex gap-1">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="h-6 w-12 rounded bg-[#21262d]" />
+          ))}
         </div>
       </div>
-      <div className="h-[120px] rounded-xl skeleton-shimmer" />
-      <div className="flex justify-between items-center">
-        <div className="h-5 w-44 rounded-lg bg-slate-200 dark:bg-slate-700" />
-        <div className="h-5 w-36 rounded-lg bg-slate-200 dark:bg-slate-700" />
+      <div className="h-28 rounded bg-[#161b22]" />
+      <div className="flex justify-between">
+        <div className="h-4 w-44 rounded bg-[#21262d]" />
+        <div className="h-4 w-32 rounded bg-[#21262d]" />
       </div>
     </div>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
+// ── Component ─────────────────────────────────────────────────────────────────
 const GitHubCalendar = memo(function GitHubCalendar({ username }) {
-  const apiBase    = import.meta.env.VITE_API_URL || '/api';
+  const apiBase     = import.meta.env.VITE_API_URL || '/api';
   const currentYear = new Date().getFullYear();
 
-  // Available years: 2024 → current year
-  const years = useMemo(
-    () => Array.from({ length: currentYear - 2024 + 1 }, (_, i) => 2024 + i),
-    [currentYear]
-  );
+  const [year,    setYear]    = useState(currentYear);
+  const [map,     setMap]     = useState({});
+  const [total,   setTotal]   = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState(null);
+  const [tooltip, setTooltip] = useState(null);
 
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [calendarData, setCalendarData] = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState(null);
-  const [fromCache, setFromCache] = useState(false);
-  const [tooltip, setTooltip]   = useState(null);
-  const [isDark, setIsDark]     = useState(
-    () => document.documentElement.classList.contains('dark')
-  );
-
-  // Track dark-mode class changes
-  useEffect(() => {
-    const obs = new MutationObserver(() =>
-      setIsDark(document.documentElement.classList.contains('dark'))
-    );
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => obs.disconnect();
-  }, []);
-
-  const fetchContributions = useCallback(async (year, force = false) => {
+  const fetchData = useCallback(async (yr, force = false) => {
     setLoading(true);
     setError(null);
-    setFromCache(false);
 
-    // Serve from cache unless forced
     if (!force) {
-      const cached = getCached(year);
+      const cached = readCache(yr);
       if (cached) {
-        setCalendarData(cached);
-        setFromCache(true);
+        setMap(cached.map);
+        setTotal(cached.total);
         setLoading(false);
         return;
       }
     }
 
-    // 1️⃣ Try backend proxy (uses GITHUB_TOKEN for real GraphQL data)
     try {
+      // Year as path param: /api/github/contributions/:username/:year
       const res = await fetch(
-        `${apiBase}/github/contributions/${username}?year=${year}`,
-        { signal: AbortSignal.timeout(8000) }
+        `${apiBase}/github/contributions/${username}/${yr}`,
+        { signal: AbortSignal.timeout(10_000) }
       );
       if (res.ok) {
         const json = await res.json();
-        if (json.success && json.data?.user) {
-          const cal = json.data.user.contributionsCollection.contributionCalendar;
-          setCache(year, cal);
-          setCalendarData(cal);
+        if (json.success && json.data) {
+          const m = buildContribMap(json.data.weeks);
+          const t = json.data.total ?? 0;
+          writeCache(yr, { map: m, total: t });
+          setMap(m);
+          setTotal(t);
           setLoading(false);
           return;
         }
       }
     } catch {}
 
-    // 2️⃣ Fallback: public jogruber API (no token needed)
-    try {
-      const res = await fetch(
-        `https://github-contributions-api.jogruber.vercel.app/${username}?y=${year}`,
-        { signal: AbortSignal.timeout(8000) }
-      );
-      if (res.ok) {
-        const json = await res.json();
-        const normalized = normalizePublicData(json);
-        if (normalized) {
-          setCache(year, normalized);
-          setCalendarData(normalized);
-          setLoading(false);
-          return;
-        }
-      }
-    } catch {}
-
-    // 3️⃣ Last resort: stale cache (even if expired)
-    const stale = getCached(year);
+    // Stale-cache fallback (ignore TTL expiry after API failure)
+    const stale = readCache(yr, true);
     if (stale) {
-      setCalendarData(stale);
-      setFromCache(true);
+      setMap(stale.map);
+      setTotal(stale.total);
       setLoading(false);
       return;
     }
 
-    setError('Unable to load contribution data. Check your connection and try again.');
+    setError('Could not load contribution data.');
     setLoading(false);
   }, [username, apiBase]);
 
-  useEffect(() => {
-    fetchContributions(selectedYear);
-  }, [selectedYear, fetchContributions]);
+  useEffect(() => { fetchData(year); }, [year, fetchData]);
 
-  // Derived data
-  const weeks     = calendarData?.weeks ?? [];
-  const total     = calendarData?.totalContributions ?? 0;
-  const weekGrids = useMemo(() => weeks.map(buildWeekGrid), [weeks]);
-  const monthLabels = useMemo(() => computeMonthLabels(weeks), [weeks]);
+  const weeks     = useMemo(() => buildGrid(year, map, currentYear), [year, map, currentYear]);
+  const monthCols = useMemo(() => getMonthCols(weeks), [weeks]);
+  const nWeeks    = weeks.length;
 
-  // ── Render states ────────────────────────────────────────────────────────────
+  // ── States ───────────────────────────────────────────────────────────────────
 
-  if (loading) return <CalendarSkeleton />;
+  if (loading) return <Skeleton />;
 
   if (error) {
     return (
-      <div className="text-center py-10">
-        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">{error}</p>
+      <div className="text-center py-8 space-y-3">
+        <p className="text-sm text-[#7d8590]">{error}</p>
         <button
-          onClick={() => fetchContributions(selectedYear, true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-400 hover:border-blue-500 hover:text-blue-500 transition-colors"
+          onClick={() => fetchData(year, true)}
+          className="text-sm text-blue-400 hover:underline"
         >
-          <RefreshCw size={14} />
           Retry
         </button>
       </div>
     );
   }
 
-  // ── Full calendar ─────────────────────────────────────────────────────────────
+  // ── Calendar ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
 
-      {/* ── Header: count + year selector ───────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">
-            {total.toLocaleString()}
-          </span>
-          <span className="text-slate-500 dark:text-slate-400 text-sm">
-            contributions in {selectedYear}
-          </span>
-          {fromCache && (
-            <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-              cached
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {years.map(y => (
+      {/* Header: total count + year selector */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <span className="text-base font-semibold text-white">
+          {total.toLocaleString()} contributions in {year}
+        </span>
+        <div className="flex items-center gap-1">
+          {[currentYear, currentYear - 1, currentYear - 2].map(y => (
             <button
               key={y}
-              onClick={() => setSelectedYear(y)}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
-                selectedYear === y
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              onClick={() => setYear(y)}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                y === year
+                  ? 'bg-blue-600 text-white'
+                  : 'text-[#7d8590] hover:bg-[#21262d] hover:text-white'
               }`}
             >
               {y}
             </button>
           ))}
-          <button
-            onClick={() => fetchContributions(selectedYear, true)}
-            title="Refresh data"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-1"
-          >
-            <RefreshCw size={14} />
-          </button>
         </div>
       </div>
 
-      {/* ── Calendar grid (scrollable on small screens) ──────────────────────── */}
-      <div className="overflow-x-auto pb-2 -mx-1 px-1">
-        <div style={{ minWidth: `${weeks.length * STEP + 34}px` }}>
+      {/* Grid (horizontally scrollable on small screens) */}
+      <div className="overflow-x-auto">
+        <div style={{ minWidth: `${LEFT_COL + 4 + nWeeks * STEP}px` }}>
 
-          {/* Month labels */}
-          <div className="flex mb-1" style={{ paddingLeft: '30px' }}>
-            {monthLabels.map(({ label, wi }, idx) => {
-              const left  = wi * STEP;
-              const next  = idx < monthLabels.length - 1
-                ? monthLabels[idx + 1].wi * STEP
-                : weeks.length * STEP;
+          {/* Month labels — absolutely positioned so all 12 are always visible */}
+          <div
+            className="relative mb-1"
+            style={{ height: '13px', marginLeft: `${LEFT_COL + 4}px` }}
+          >
+            {MONTHS.map((label, m) => {
+              const col = monthCols[m];
+              if (col < 0) return null;
               return (
-                <div
-                  key={`${label}-${wi}`}
-                  className="text-xs text-slate-400 dark:text-slate-500 shrink-0 select-none"
-                  style={{ width: `${next - left}px` }}
+                <span
+                  key={label}
+                  className="absolute text-xs text-[#7d8590] select-none whitespace-nowrap"
+                  style={{ left: `${col * STEP}px`, top: 0 }}
                 >
                   {label}
-                </div>
+                </span>
               );
             })}
           </div>
 
-          {/* Day labels + week columns */}
-          <div className="flex" style={{ gap: 0 }}>
-            {/* Day-of-week labels column */}
+          {/* Day-of-week labels + week columns */}
+          <div className="flex">
+
+            {/* Day labels: only Mon, Wed, Fri are shown */}
             <div
-              className="flex flex-col shrink-0 mr-1"
-              style={{ gap: `${GAP}px`, width: '28px' }}
+              className="flex flex-col shrink-0"
+              style={{ width: `${LEFT_COL}px`, gap: `${GAP}px`, marginRight: '4px' }}
             >
               {DAY_LABELS.map((lbl, i) => (
                 <div
                   key={i}
-                  className="text-xs text-slate-400 dark:text-slate-500 flex items-center select-none"
+                  className="text-xs text-[#7d8590] flex items-center select-none"
                   style={{ height: `${CELL}px` }}
                 >
                   {lbl}
@@ -341,85 +287,99 @@ const GitHubCalendar = memo(function GitHubCalendar({ username }) {
               ))}
             </div>
 
-            {/* Weeks */}
+            {/* 52–53 week columns */}
             <div className="flex" style={{ gap: `${GAP}px` }}>
-              {weekGrids.map((grid, wi) => (
+              {weeks.map((week, wi) => (
                 <div key={wi} className="flex flex-col" style={{ gap: `${GAP}px` }}>
-                  {grid.map((day, di) => (
+                  {week.map((day, di) => (
                     <div
                       key={di}
-                      className="rounded-[2px] transition-opacity"
                       style={{
                         width:           `${CELL}px`,
                         height:          `${CELL}px`,
-                        backgroundColor: day
-                          ? getColor(day.contributionCount, isDark)
-                          : (isDark ? COLORS.empty_dark : COLORS.empty_light),
-                        cursor: day ? 'pointer' : 'default',
-                        opacity: 1,
+                        borderRadius:    '2px',
+                        // Overflow days (outside the year) are transparent gaps
+                        backgroundColor: day.inYear
+                          ? cellColor(day.count)
+                          : 'transparent',
+                        cursor:          day.inYear && !day.future
+                          ? 'pointer'
+                          : 'default',
                       }}
-                      onMouseEnter={(e) => {
-                        if (!day) return;
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setTooltip({ day, x: rect.left + CELL / 2, y: rect.top });
+                      onMouseEnter={e => {
+                        if (!day.inYear || day.future) return;
+                        const r = e.currentTarget.getBoundingClientRect();
+                        setTooltip({
+                          count: day.count,
+                          date:  day.date,
+                          x:     r.left + CELL / 2,
+                          y:     r.top,
+                        });
                       }}
                       onMouseLeave={() => setTooltip(null)}
-                      onClick={() => {
-                        if (day) console.log('GitHub contribution day:', day);
-                      }}
                     />
                   ))}
                 </div>
               ))}
             </div>
+
           </div>
         </div>
       </div>
 
-      {/* ── Tooltip (fixed-position, above hovered cell) ─────────────────────── */}
+      {/* Tooltip (portal-like fixed position) */}
       {tooltip && (
         <div
-          className="fixed z-50 px-2.5 py-2 rounded-lg bg-slate-900 dark:bg-slate-700 text-white text-xs pointer-events-none shadow-xl border border-slate-700 dark:border-slate-600"
-          style={{ left: tooltip.x, top: tooltip.y - 48, transform: 'translateX(-50%)' }}
+          className="fixed z-50 px-2.5 py-1.5 rounded-md text-xs pointer-events-none shadow-lg whitespace-nowrap"
+          style={{
+            left:       tooltip.x,
+            top:        tooltip.y - 46,
+            transform:  'translateX(-50%)',
+            background: '#1b1f23',
+            border:     '1px solid #30363d',
+            color:      '#e6edf3',
+          }}
         >
-          <div className="font-semibold">
-            {tooltip.day.contributionCount === 0
+          <strong>
+            {tooltip.count === 0
               ? 'No contributions'
-              : `${tooltip.day.contributionCount} contribution${tooltip.day.contributionCount !== 1 ? 's' : ''}`}
-          </div>
-          <div className="text-slate-300 mt-0.5">
-            {new Date(tooltip.day.date + 'T00:00:00').toLocaleDateString('en-US', {
-              weekday: 'short', month: 'long', day: 'numeric', year: 'numeric',
-            })}
-          </div>
+              : `${tooltip.count} contribution${tooltip.count !== 1 ? 's' : ''}`}
+          </strong>
+          {' on '}
+          {new Date(tooltip.date + 'T12:00:00').toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+          })}
         </div>
       )}
 
-      {/* ── Footer: GitHub link + legend ─────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3 pt-1">
+      {/* Footer: GitHub link + legend */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <a
           href={`https://github.com/${username}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors group"
+          className="text-xs text-[#7d8590] hover:text-blue-400 transition-colors inline-flex items-center gap-1"
         >
-          <Github size={14} />
-          View full GitHub profile
-          <ExternalLink size={12} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          Learn how we count contributions
+          <ExternalLink size={10} />
         </a>
-
-        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 select-none">
+        <div className="flex items-center gap-1 select-none text-xs text-[#7d8590]">
           <span>Less</span>
           {LEGEND.map((c, i) => (
             <div
               key={i}
-              className="rounded-[2px]"
-              style={{ width: `${CELL}px`, height: `${CELL}px`, backgroundColor: c }}
+              style={{
+                width:           `${CELL}px`,
+                height:          `${CELL}px`,
+                borderRadius:    '2px',
+                backgroundColor: c,
+              }}
             />
           ))}
           <span>More</span>
         </div>
       </div>
+
     </div>
   );
 });
