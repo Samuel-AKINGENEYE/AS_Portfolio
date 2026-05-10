@@ -477,9 +477,6 @@ export default function Home() {
                   <span className="text-sm">{profile.location}</span>
                 </div>
               )}
-              <a href="/resume.pdf" download onClick={trackResume} className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-blue-500/30 text-blue-500 hover:bg-blue-500 hover:text-white transition-all text-sm font-medium hover:-translate-y-0.5">
-                <Download size={16} /> Download Resume
-              </a>
             </div>
           </div>
         </div>
