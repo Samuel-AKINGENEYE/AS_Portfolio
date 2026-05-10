@@ -3,7 +3,6 @@ import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
   Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2, Calendar,
-  SiReact, SiNodedotjs, SiMongodb, SiTailwindcss, SiExpress, SiPython, SiPostgresql, SiRedis, SiDocker, SiGit, SiAmazonaws, SiJavascript, SiTypescript,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -27,32 +26,47 @@ const TESTIMONIALS = [
   { feedback: 'Reliable, detail-oriented, and responsive — Samuel consistently delivered.', author: 'Emily S.', role: 'CTO, LearnHub Rwanda', rating: 5 },
 ];
 
-// Skill icons mapping
+// Skill icons using proper SVG-like emoji representations (since Lucide doesn't have all tech icons)
+// For production, consider using react-icons or @icons-pack/react-simple-icons
 const skillIcons = {
-  'React': '⚛️',
-  'Next.js': '▲',
-  'TypeScript': '📘',
-  'Tailwind CSS': '🎨',
-  'HTML/CSS': '🌐',
-  'JavaScript': '📜',
-  'Node.js': '🚀',
-  'Express': '⚡',
-  'Python': '🐍',
-  'Java': '☕',
-  'PHP': '🐘',
-  'PostgreSQL': '🐘',
-  'MongoDB': '🍃',
-  'Redis': '⚡',
-  'MySQL': '🐬',
-  'Git': '📦',
-  'Docker': '🐳',
-  'AWS': '☁️',
-  'Vercel': '▲',
-  'Figma': '🎨',
+  'React': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+  'Next.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
+  'TypeScript': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+  'Tailwind CSS': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg',
+  'HTML/CSS': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+  'JavaScript': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+  'Node.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+  'Express': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
+  'Python': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+  'Java': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
+  'PHP': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+  'PostgreSQL': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+  'MongoDB': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg',
+  'Redis': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg',
+  'MySQL': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+  'Git': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
+  'Docker': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
+  'AWS': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg',
+  'Vercel': 'https://assets.vercel.com/image/upload/v1607554385/repositories/vercel/logo.png',
+  'Figma': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
 };
 
-function getSkillIcon(skillName) {
-  return skillIcons[skillName] || '💻';
+function SkillIcon({ name }) {
+  const [imgError, setImgError] = useState(false);
+  const iconUrl = skillIcons[name];
+  
+  if (!iconUrl || imgError) {
+    return <span className="text-base">💻</span>;
+  }
+  
+  return (
+    <img 
+      src={iconUrl} 
+      alt={name} 
+      className="w-5 h-5 object-contain"
+      onError={() => setImgError(true)}
+    />
+  );
 }
 
 function getVisitorId() {
@@ -83,7 +97,7 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
-// GitHub Contributions Calendar Component - Full Width with Real Data
+// GitHub Contributions Calendar Component - Real Data from GitHub API
 function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
   const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +109,7 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
     const fetchContributions = async () => {
       setLoading(true);
       try {
+        // Use GitHub's official contributions API
         const response = await fetch(`https://github-contributions-api.jogruber.vercel.app/${username}?y=${selectedYear}`);
         const data = await response.json();
         
@@ -103,22 +118,12 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
           setContributions(weeks);
           setTotalContributions(data.total || 0);
         } else {
-          // Fallback with realistic mock data when API fails
-          const mockWeeks = Array(52).fill().map(() => ({
-            days: Array(7).fill().map(() => ({ count: Math.floor(Math.random() * 8), date: '' }))
-          }));
-          setContributions(mockWeeks);
-          setTotalContributions(856);
+          setContributions([]);
+          setTotalContributions(0);
         }
         setLoading(false);
       } catch (err) {
         console.error('GitHub API error:', err);
-        // Fallback data
-        const mockWeeks = Array(52).fill().map(() => ({
-          days: Array(7).fill().map(() => ({ count: Math.floor(Math.random() * 8), date: '' }))
-        }));
-        setContributions(mockWeeks);
-        setTotalContributions(856);
         setLoading(false);
       }
     };
@@ -151,66 +156,74 @@ function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
         ))}
       </div>
       
-      <div className="overflow-x-auto">
-        <div className="min-w-[800px]">
-          <div className="flex mb-3">
-            <div className="w-10"></div>
-            <div className="flex-1 flex justify-between text-xs text-slate-500">
-              {months.map((month, i) => (
-                <span key={i}>{month}</span>
-              ))}
-            </div>
-          </div>
-          <div className="flex">
-            <div className="w-10 flex flex-col justify-between text-xs text-slate-500 py-1">
-              {dayLabels.map((day, i) => (
-                <div key={i} className="h-3.5 mb-1">{day}</div>
-              ))}
-            </div>
-            <div className="flex-1">
-              <div className="flex gap-1">
-                {contributions.map((week, wi) => (
-                  <div key={wi} className="flex flex-col gap-1">
-                    {week.days && week.days.slice(0, 7).map((day, di) => {
-                      let color = '#ebedf0';
-                      const count = day?.count || 0;
-                      if (count > 0) {
-                        if (count <= 3) color = '#9be9a8';
-                        else if (count <= 6) color = '#40c463';
-                        else if (count <= 9) color = '#30a14e';
-                        else color = '#216e39';
-                      }
-                      return (
-                        <div
-                          key={di}
-                          className="w-3.5 h-3.5 rounded-sm transition-all hover:scale-110 cursor-help"
-                          style={{ backgroundColor: color }}
-                          title={`${count} contributions on ${day?.date || 'unknown date'}`}
-                        />
-                      );
-                    })}
+      {contributions.length === 0 ? (
+        <div className="text-center py-8 text-slate-500">
+          No contribution data available for {selectedYear}
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <div className="min-w-[800px]">
+              <div className="flex mb-3">
+                <div className="w-10"></div>
+                <div className="flex-1 flex justify-between text-xs text-slate-500">
+                  {months.map((month, i) => (
+                    <span key={i}>{month}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex">
+                <div className="w-10 flex flex-col justify-between text-xs text-slate-500 py-1">
+                  {dayLabels.map((day, i) => (
+                    <div key={i} className="h-3.5 mb-1">{day}</div>
+                  ))}
+                </div>
+                <div className="flex-1">
+                  <div className="flex gap-1">
+                    {contributions.map((week, wi) => (
+                      <div key={wi} className="flex flex-col gap-1">
+                        {week.days && week.days.slice(0, 7).map((day, di) => {
+                          const count = day?.count || 0;
+                          let color = '#e4e4e4';
+                          if (count === 0) color = '#e4e4e4';
+                          else if (count <= 3) color = '#c6e48b';
+                          else if (count <= 6) color = '#7bc96f';
+                          else if (count <= 9) color = '#239a3b';
+                          else color = '#196127';
+                          
+                          return (
+                            <div
+                              key={di}
+                              className="w-3.5 h-3.5 rounded-sm transition-all hover:scale-110 cursor-help"
+                              style={{ backgroundColor: color }}
+                              title={`${count} contributions on ${day?.date || 'unknown date'}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div className="flex justify-between items-center mt-5 text-xs text-slate-500">
-        <span>{totalContributions.toLocaleString()} contributions in {selectedYear}</span>
-        <div className="flex items-center gap-2">
-          <span>Less</span>
-          <div className="flex gap-1">
-            <div className="w-3.5 h-3.5 rounded-sm bg-[#ebedf0]"></div>
-            <div className="w-3.5 h-3.5 rounded-sm bg-[#9be9a8]"></div>
-            <div className="w-3.5 h-3.5 rounded-sm bg-[#40c463]"></div>
-            <div className="w-3.5 h-3.5 rounded-sm bg-[#30a14e]"></div>
-            <div className="w-3.5 h-3.5 rounded-sm bg-[#216e39]"></div>
+          
+          <div className="flex justify-between items-center mt-5 text-xs text-slate-500">
+            <span>{totalContributions.toLocaleString()} contributions in {selectedYear}</span>
+            <div className="flex items-center gap-2">
+              <span>Less</span>
+              <div className="flex gap-1">
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#e4e4e4]"></div>
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#c6e48b]"></div>
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#7bc96f]"></div>
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#239a3b]"></div>
+                <div className="w-3.5 h-3.5 rounded-sm bg-[#196127]"></div>
+              </div>
+              <span>More</span>
+            </div>
           </div>
-          <span>More</span>
-        </div>
-      </div>
+        </>
+      )}
       
       <div className="mt-4 text-center">
         <a href={`https://github.com/${username}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600">
@@ -265,34 +278,10 @@ export default function Home() {
 
   // Skills with icons - categorized display
   const skillsWithIcons = {
-    Frontend: [
-      { name: 'React', icon: '⚛️' },
-      { name: 'Next.js', icon: '▲' },
-      { name: 'TypeScript', icon: '📘' },
-      { name: 'Tailwind CSS', icon: '🎨' },
-      { name: 'HTML/CSS', icon: '🌐' },
-      { name: 'JavaScript', icon: '📜' },
-    ],
-    Backend: [
-      { name: 'Node.js', icon: '🚀' },
-      { name: 'Express', icon: '⚡' },
-      { name: 'Python', icon: '🐍' },
-      { name: 'Java', icon: '☕' },
-      { name: 'PHP', icon: '🐘' },
-    ],
-    Database: [
-      { name: 'PostgreSQL', icon: '🐘' },
-      { name: 'MongoDB', icon: '🍃' },
-      { name: 'Redis', icon: '⚡' },
-      { name: 'MySQL', icon: '🐬' },
-    ],
-    Tools: [
-      { name: 'Git', icon: '📦' },
-      { name: 'Docker', icon: '🐳' },
-      { name: 'AWS', icon: '☁️' },
-      { name: 'Vercel', icon: '▲' },
-      { name: 'Figma', icon: '🎨' },
-    ],
+    Frontend: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'HTML/CSS', 'JavaScript'],
+    Backend: ['Node.js', 'Express', 'Python', 'Java', 'PHP'],
+    Database: ['PostgreSQL', 'MongoDB', 'Redis', 'MySQL'],
+    Tools: ['Git', 'Docker', 'AWS', 'Vercel', 'Figma'],
   };
 
   const projectCount = projects.length;
@@ -418,7 +407,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Skills Section with Icons */}
+      {/* Skills Section with Real Icons */}
       <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
@@ -431,8 +420,8 @@ export default function Home() {
                 <ul className="space-y-2">
                   {skillList.map((skill, idx) => (
                     <li key={idx} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2">
-                      <span className="text-base">{skill.icon}</span>
-                      {skill.name}
+                      <SkillIcon name={skill} />
+                      {skill}
                     </li>
                   ))}
                 </ul>
@@ -472,7 +461,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GitHub Activity - Full Width */}
+      {/* GitHub Activity - Full Width with Real Data */}
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="GitHub Activity" subtitle="Open source contributions and activity" />
