@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
   Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2,
+  Calendar, Users, GitFork, Star as StarIcon,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -62,55 +63,113 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
-function GitHubCalendar() {
-  const [contributions, setContributions] = useState({ total: 0, weeks: [] });
+// GitHub Calendar Component - Similar to GitHub's interface
+function GitHubCalendar({ username = 'Samuel-AKINGENEYE' }) {
+  const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalContributions, setTotalContributions] = useState(0);
 
   useEffect(() => {
-    // Fetch GitHub contributions using the graphql API
-    fetch('https://github-contributions-api.jogruber.vercel.app/Samuel-AKINGENEYE')
-      .then(res => res.json())
-      .then(data => {
+    const fetchContributions = async () => {
+      try {
+        // Use a more reliable API for GitHub contributions
+        const response = await fetch(`https://github-contributions-api.jogruber.vercel.app/${username}?y=last`);
+        const data = await response.json();
+        
         if (data && data.contributions) {
-          setContributions({
-            total: data.total || 0,
-            weeks: data.contributions || []
-          });
+          // Process contributions data
+          const weeks = data.contributions.slice(-52);
+          setContributions(weeks);
+          setTotalContributions(data.total || 0);
         }
         setLoading(false);
-      })
-      .catch(() => {
-        // Fallback data if API fails
-        setContributions({ total: 448, weeks: [] });
+      } catch (err) {
+        console.error('GitHub API error:', err);
         setLoading(false);
-      });
-  }, []);
+      }
+    };
+
+    fetchContributions();
+  }, [username]);
 
   if (loading) {
-    return <div className="h-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
+    return <div className="h-40 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
   }
+
+  // Generate day labels (Mon, Wed, Fri)
+  const dayLabels = ['Mon', 'Wed', 'Fri'];
+  const monthLabels = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'];
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-slate-900 dark:text-white">{contributions.total} contributions in the last year</h3>
-        <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">View on GitHub →</a>
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+        <h3 className="font-semibold text-slate-900 dark:text-white">
+          {totalContributions} contributions in the last year
+        </h3>
+        <div className="flex gap-4 text-xs text-slate-500">
+          <button className="hover:text-blue-500">Contribution settings ▼</button>
+        </div>
       </div>
-      <div className="flex flex-wrap gap-1">
-        {contributions.weeks.slice(-52).map((week, i) => (
-          week.days.map((day, j) => (
-            <div
-              key={`${i}-${j}`}
-              className="w-3 h-3 rounded-sm"
-              style={{
-                backgroundColor: day && day.count > 0 
-                  ? `rgba(59, 130, 246, ${Math.min(0.2 + (day.count / 20), 1)})` 
-                  : '#e2e8f0'
-              }}
-              title={`${day?.count || 0} contributions on ${day?.date || ''}`}
-            />
-          ))
-        ))}
+      
+      <div className="overflow-x-auto">
+        <div className="min-w-[750px]">
+          <div className="flex mb-2">
+            <div className="w-8"></div>
+            <div className="flex-1 flex justify-between text-xs text-slate-500">
+              {monthLabels.map((month, i) => (
+                <span key={i}>{month}</span>
+              ))}
+            </div>
+          </div>
+          <div className="flex">
+            <div className="w-8 flex flex-col justify-between text-xs text-slate-500 py-1">
+              {dayLabels.map((day, i) => (
+                <div key={i} className="h-3 mb-1">{day}</div>
+              ))}
+            </div>
+            <div className="flex-1">
+              <div className="flex gap-1">
+                {contributions.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-1">
+                    {week.days && week.days.slice(0, 7).map((day, di) => {
+                      let color = '#ebedf0';
+                      const count = day?.count || 0;
+                      if (count > 0) {
+                        if (count <= 3) color = '#9be9a8';
+                        else if (count <= 6) color = '#40c463';
+                        else if (count <= 9) color = '#30a14e';
+                        else color = '#216e39';
+                      }
+                      return (
+                        <div
+                          key={di}
+                          className="w-3 h-3 rounded-sm"
+                          style={{ backgroundColor: color }}
+                          title={`${count} contributions on ${day?.date || ''}`}
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-center mt-4 text-xs text-slate-500">
+        <span>Learn how we count contributions</span>
+        <div className="flex items-center gap-2">
+          <span>Less</span>
+          <div className="flex gap-1">
+            <div className="w-3 h-3 rounded-sm bg-[#ebedf0]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#9be9a8]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#40c463]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#30a14e]"></div>
+            <div className="w-3 h-3 rounded-sm bg-[#216e39]"></div>
+          </div>
+          <span>More</span>
+        </div>
       </div>
     </div>
   );
@@ -123,6 +182,7 @@ export default function Home() {
   const [skills, setSkills] = useState([]);
   const [education, setEducation] = useState([]);
   const [experience, setExperience] = useState([]);
+  const [githubStats, setGithubStats] = useState({ repos: 0, followers: 0, following: 0, gists: 0 });
   const [loading, setLoading] = useState(true);
   const [techFilter, setTechFilter] = useState('All');
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
@@ -130,6 +190,23 @@ export default function Home() {
 
   useEffect(() => {
     analyticsApi.track({ page: '/', visitorId: getVisitorId() }).catch(() => {});
+  }, []);
+
+  // Fetch real GitHub stats
+  useEffect(() => {
+    fetch('https://api.github.com/users/Samuel-AKINGENEYE')
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.message) {
+          setGithubStats({
+            repos: data.public_repos || 0,
+            followers: data.followers || 0,
+            following: data.following || 0,
+            gists: data.public_gists || 0,
+          });
+        }
+      })
+      .catch(err => console.error('GitHub API error:', err));
   }, []);
 
   useEffect(() => {
@@ -231,7 +308,6 @@ export default function Home() {
                 <div className="relative w-80 h-80 rounded-[2rem] overflow-hidden border border-blue-500/20 shadow-2xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
                   {profile?.avatar ? <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="text-8xl font-black text-blue-500/30 dark:text-blue-500/20">SA</span></div>}
                 </div>
-                {/* Location on Avatar */}
                 {profile?.location && (
                   <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap border border-slate-200 dark:border-slate-700">
                     <MapPin size={14} className="text-blue-500" />
@@ -343,40 +419,75 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GitHub Section */}
+      {/* GitHub Section - Similar to GitHub Profile Interface */}
       <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="GitHub Presence" subtitle="Open source contributions and activity" />
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-3">GitHub Stats</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-500"><CountUp end={12} /></p>
-                    <p className="text-xs text-slate-500">Public Repos</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-500"><CountUp end={5} /></p>
-                    <p className="text-xs text-slate-500">Followers</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-500"><CountUp end={8} /></p>
-                    <p className="text-xs text-slate-500">Following</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-orange-500"><CountUp end={2} /></p>
-                    <p className="text-xs text-slate-500">Gists</p>
-                  </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* GitHub Header */}
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="flex items-start gap-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
+                  S
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Samuel AKINGENEYE</h2>
+                  <p className="text-slate-500 dark:text-slate-400">Samuel-AKINGENEYE · he/him</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">Software Engineer | Full Stack Developer</p>
+                </div>
+                <button className="px-4 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  Edit profile
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-4 mt-4 text-sm">
+                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                  <Users size={16} /> <span className="font-semibold">{githubStats.followers}</span> followers
+                  <span className="mx-1">·</span>
+                  <span className="font-semibold">{githubStats.following}</span> following
+                </div>
+                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                  <MapPin size={16} /> Kigali, Rwanda
+                </div>
+                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                  <Mail size={16} /> freshtalent491@gmail.com
+                </div>
+                <div className="flex items-center gap-1 text-blue-500">
+                  <Globe size={16} /> <a href="https://as-portfolio-livid-one.vercel.app" target="_blank" rel="noopener noreferrer">portfolio</a>
                 </div>
               </div>
             </div>
-            <GitHubCalendar />
-          </div>
-          <div className="text-center mt-6">
-            <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600">
-              <Github size={18} /> View GitHub Profile →
-            </a>
+            
+            {/* GitHub Stats */}
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-500"><CountUp end={githubStats.repos} /></p>
+                  <p className="text-xs text-slate-500">Repositories</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-500"><CountUp end={githubStats.followers} /></p>
+                  <p className="text-xs text-slate-500">Followers</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-500"><CountUp end={githubStats.following} /></p>
+                  <p className="text-xs text-slate-500">Following</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-orange-500"><CountUp end={githubStats.gists} /></p>
+                  <p className="text-xs text-slate-500">Gists</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* GitHub Contributions Calendar */}
+            <div className="p-6">
+              <GitHubCalendar username="Samuel-AKINGENEYE" />
+            </div>
+            
+            <div className="p-6 text-center border-t border-slate-200 dark:border-slate-700">
+              <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600">
+                <Github size={18} /> View full GitHub profile →
+              </a>
+            </div>
           </div>
         </div>
       </section>
