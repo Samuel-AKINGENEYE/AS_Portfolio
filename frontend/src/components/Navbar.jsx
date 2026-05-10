@@ -27,12 +27,10 @@ export default function Navbar() {
         : 'bg-transparent'
     }`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo - {SA} */}
         <a href="#hero" className="font-bold text-2xl text-slate-900 dark:text-white tracking-tight hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
           <span className="text-blue-500">{'{'}</span>SA<span className="text-blue-500">{'}'}</span>
         </a>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map(({ label, href }) => (
             <a
@@ -45,15 +43,11 @@ export default function Navbar() {
             </a>
           ))}
           
-          {/* Hire Me Button - Styled */}
           <a
             href="#contact"
             className="relative px-6 py-2.5 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-green-500 hover:from-blue-600 hover:via-blue-700 hover:to-green-600 text-white font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 overflow-hidden group"
           >
-            <span className="relative z-10 flex items-center gap-1">
-              Hire Me ✨
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-green-500 via-blue-500 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10 flex items-center gap-1">Hire Me ✨</span>
           </a>
         </div>
 
@@ -65,15 +59,14 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 pb-5 animate-fade-in">
+        <div className="md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-6 pb-5">
           {NAV_LINKS.map(({ label, href }) => (
             <a
               key={label}
               href={href}
               onClick={() => setOpen(false)}
-              className="block py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
+              className="block py-3 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-500 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
             >
               {label}
             </a>

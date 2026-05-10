@@ -20,15 +20,27 @@ export default function Footer({ profile }) {
           </div>
 
           <div className="flex items-center gap-4">
-            {Object.entries(ICON_MAP).map(([key, Icon]) =>
-              social[key] ? (
-                <a key={key} href={social[key]} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all duration-200">
-                  <Icon size={17} />
-                </a>
-              ) : null
+            {social.github && (
+              <a href={social.github} target="_blank" rel="noopener noreferrer" 
+                className="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all duration-200">
+                <Github size={17} />
+              </a>
+            )}
+            {social.linkedin && (
+              <a href={social.linkedin} target="_blank" rel="noopener noreferrer" 
+                className="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all duration-200">
+                <Linkedin size={17} />
+              </a>
+            )}
+            {social.twitter && (
+              <a href={social.twitter} target="_blank" rel="noopener noreferrer" 
+                className="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all duration-200">
+                <Twitter size={17} />
+              </a>
             )}
             {profile?.email && (
-              <a href={`mailto:${profile.email}`} className="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all duration-200">
+              <a href={`mailto:${profile.email}`} 
+                className="w-9 h-9 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all duration-200">
                 <Mail size={17} />
               </a>
             )}
