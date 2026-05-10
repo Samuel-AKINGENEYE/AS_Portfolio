@@ -13,6 +13,7 @@ import uploadRoutes from './routes/upload.js';
 import analyticsRoutes from './routes/analytics.js';
 import contactRoutes from './routes/contact.js';
 import githubProxyRoutes from './routes/github-proxy.js';
+import githubContribRoutes from "./routes/github-contributions.js";
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/github-proxy', githubProxyRoutes);
+app.use("/api/github-contributions", githubContribRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'API is running' });
