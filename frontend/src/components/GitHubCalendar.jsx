@@ -14,8 +14,6 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
       setLoading(true);
       try {
         const url = `${BACKEND_URL}/api/github/contributions/${username}/${selectedYear}`;
-        console.log('Fetching from:', url);
-        
         const response = await fetch(url);
         const data = await response.json();
         
@@ -45,7 +43,21 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
   const years = [2022, 2023, 2024, 2025, 2026];
 
   if (loading) {
-    return <div className="bg-white dark:bg-slate-800 rounded-xl p-6 animate-pulse h-64"></div>;
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+        <div className="animate-pulse space-y-4">
+          <div className="flex justify-between">
+            <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded"></div>
+            <div className="flex gap-2">
+              {[2022, 2023, 2024, 2025, 2026].map(y => (
+                <div key={y} className="h-8 w-14 bg-slate-200 dark:bg-slate-700 rounded"></div>
+              ))}
+            </div>
+          </div>
+          <div className="h-40 bg-slate-200 dark:bg-slate-700 rounded"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -55,7 +67,7 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
           <span className="text-2xl font-bold text-slate-900 dark:text-white">{total}</span>
           <span className="text-slate-500 dark:text-slate-400 ml-2">contributions in {selectedYear}</span>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {years.map(year => (
             <button
               key={year}
@@ -72,40 +84,45 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
         </div>
       </div>
       
-      {weeks.length === 0 ? (
-        <div className="text-center py-8 text-slate-500">No data for {selectedYear}</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <div className="min-w-[800px]">
-            <div className="flex ml-8 mb-2">
-              {months.map(month => <div key={month} className="text-xs text-slate-400 w-14 text-center">{month}</div>)}
+      <div className="overflow-x-auto">
+        <div className="min-w-[800px]">
+          <div className="flex ml-8 mb-2">
+            {months.map(month => (
+              <div key={month} className="text-xs text-slate-400 w-14 text-center">{month}</div>
+            ))}
+          </div>
+          <div className="flex gap-1">
+            <div className="flex flex-col gap-1 w-12 mt-1">
+              <div className="h-3 text-[10px] text-slate-400 text-right">Mon</div>
+              <div className="h-3 text-[10px] text-slate-400 text-right">Wed</div>
+              <div className="h-3 text-[10px] text-slate-400 text-right">Fri</div>
             </div>
             <div className="flex gap-1">
-              <div className="flex flex-col gap-1 w-12">
-                {['Mon', 'Wed', 'Fri'].map(day => <div key={day} className="h-3 text-[10px] text-slate-400 text-right pr-2">{day}</div>)}
-              </div>
-              <div className="flex gap-1">
-                {weeks.map((week, wi) => (
-                  <div key={wi} className="flex flex-col gap-1">
-                    {week.map((day, di) => (
-                      <div
-                        key={di}
-                        className="w-3 h-3 rounded-sm transition-all hover:scale-125 cursor-help"
-                        style={{ backgroundColor: getColor(day.count) }}
-                        title={`${day.count} contributions on ${day.date}`}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
+              {weeks.map((week, wi) => (
+                <div key={wi} className="flex flex-col gap-1">
+                  {week.map((day, di) => (
+                    <div
+                      key={di}
+                      className="w-3 h-3 rounded-sm transition-transform hover:scale-125 cursor-help"
+                      style={{ backgroundColor: getColor(day.count) }}
+                      title={`${day.count} contribution${day.count !== 1 ? 's' : ''} on ${day.date}`}
+                    />
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </div>
       
-      <div className="flex justify-between items-center mt-6 pt-4 border-t">
-        <a href={`https://github.com/${username}`} target="_blank" className="text-sm text-blue-500 flex items-center gap-1">
-          <Github size={14} /> View on GitHub <ExternalLink size={12} />
+      <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+        <a 
+          href={`https://github.com/${username}`} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
+        >
+          <Github size={14} /> View full GitHub profile <ExternalLink size={12} />
         </a>
         <div className="flex items-center gap-1 text-xs text-slate-500">
           <span>Less</span>
