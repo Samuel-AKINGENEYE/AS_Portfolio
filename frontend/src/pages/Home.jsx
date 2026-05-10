@@ -62,49 +62,55 @@ function SectionHeader({ title, subtitle }) {
   );
 }
 
-function GitHubContributions() {
-  const [contributions, setContributions] = useState(null);
+function GitHubCalendar() {
+  const [contributions, setContributions] = useState({ total: 0, weeks: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://api.github.com/users/Samuel-AKINGENEYE')
+    // Fetch GitHub contributions using the graphql API
+    fetch('https://github-contributions-api.jogruber.vercel.app/Samuel-AKINGENEYE')
       .then(res => res.json())
       .then(data => {
-        setContributions({
-          public_repos: data.public_repos || 0,
-          followers: data.followers || 0,
-          following: data.following || 0,
-          gists: data.public_gists || 0,
-        });
+        if (data && data.contributions) {
+          setContributions({
+            total: data.total || 0,
+            weeks: data.contributions || []
+          });
+        }
         setLoading(false);
       })
       .catch(() => {
-        setContributions({ public_repos: 12, followers: 5, following: 8, gists: 2 });
+        // Fallback data if API fails
+        setContributions({ total: 448, weeks: [] });
         setLoading(false);
       });
   }, []);
 
   if (loading) {
-    return <div className="grid grid-cols-2 md:grid-cols-4 gap-4"><div className="h-20 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div></div>;
+    return <div className="h-32 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-xl"></div>;
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
-        <p className="text-2xl font-bold text-blue-500">{contributions.public_repos}</p>
-        <p className="text-xs text-slate-500">GitHub Repos</p>
+    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-semibold text-slate-900 dark:text-white">{contributions.total} contributions in the last year</h3>
+        <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline">View on GitHub →</a>
       </div>
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
-        <p className="text-2xl font-bold text-green-500">{contributions.followers}</p>
-        <p className="text-xs text-slate-500">Followers</p>
-      </div>
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
-        <p className="text-2xl font-bold text-purple-500">{contributions.following}</p>
-        <p className="text-xs text-slate-500">Following</p>
-      </div>
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
-        <p className="text-2xl font-bold text-orange-500">{contributions.gists}</p>
-        <p className="text-xs text-slate-500">Gists</p>
+      <div className="flex flex-wrap gap-1">
+        {contributions.weeks.slice(-52).map((week, i) => (
+          week.days.map((day, j) => (
+            <div
+              key={`${i}-${j}`}
+              className="w-3 h-3 rounded-sm"
+              style={{
+                backgroundColor: day && day.count > 0 
+                  ? `rgba(59, 130, 246, ${Math.min(0.2 + (day.count / 20), 1)})` 
+                  : '#e2e8f0'
+              }}
+              title={`${day?.count || 0} contributions on ${day?.date || ''}`}
+            />
+          ))
+        ))}
       </div>
     </div>
   );
@@ -180,7 +186,6 @@ export default function Home() {
     analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
   }, []);
 
-  // Auto-updating stats
   const projectCount = projects.length;
   const certificateCount = certificates.length;
   const skillCount = skills.length;
@@ -226,13 +231,20 @@ export default function Home() {
                 <div className="relative w-80 h-80 rounded-[2rem] overflow-hidden border border-blue-500/20 shadow-2xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
                   {profile?.avatar ? <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="text-8xl font-black text-blue-500/30 dark:text-blue-500/20">SA</span></div>}
                 </div>
+                {/* Location on Avatar */}
+                {profile?.location && (
+                  <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap border border-slate-200 dark:border-slate-700">
+                    <MapPin size={14} className="text-blue-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{profile.location}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section - Auto-updating */}
+      {/* Stats Section */}
       <section className="py-16 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -257,7 +269,7 @@ export default function Home() {
       </section>
 
       {/* Projects Section */}
-      <section id="projects" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <section id="projects" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Featured Projects" subtitle="Things I've built and shipped" />
           {allTechs.length > 1 && (
@@ -276,7 +288,7 @@ export default function Home() {
       </section>
 
       {/* Skills Section */}
-      <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+      <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Skills & Tech Stack" subtitle="Technologies I work with daily" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -302,7 +314,7 @@ export default function Home() {
       </section>
 
       {/* Experience Section */}
-      <section id="experience" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <section id="experience" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Work Experience" subtitle="My professional journey" />
           <div className="max-w-3xl mx-auto">
@@ -312,7 +324,7 @@ export default function Home() {
       </section>
 
       {/* Education Section */}
-      <section id="education" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+      <section id="education" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Education" subtitle="My academic background" />
           <div className="max-w-3xl mx-auto">
@@ -322,7 +334,7 @@ export default function Home() {
       </section>
 
       {/* Certificates Section */}
-      <section id="certificates" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <section id="certificates" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -331,11 +343,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GitHub Contributions Section */}
-      <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+      {/* GitHub Section */}
+      <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="GitHub Presence" subtitle="Open source contributions and activity" />
-          <GitHubContributions />
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3">GitHub Stats</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-500"><CountUp end={12} /></p>
+                    <p className="text-xs text-slate-500">Public Repos</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-500"><CountUp end={5} /></p>
+                    <p className="text-xs text-slate-500">Followers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-500"><CountUp end={8} /></p>
+                    <p className="text-xs text-slate-500">Following</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-orange-500"><CountUp end={2} /></p>
+                    <p className="text-xs text-slate-500">Gists</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <GitHubCalendar />
+          </div>
           <div className="text-center mt-6">
             <a href="https://github.com/Samuel-AKINGENEYE" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-600">
               <Github size={18} /> View GitHub Profile →
@@ -345,7 +382,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <section id="testimonials" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
           <div className="grid md:grid-cols-3 gap-8">
@@ -364,45 +401,21 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20 transition-colors duration-300">
+      <section id="contact" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
           <div className="grid lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
             <form onSubmit={handleContact} className="space-y-4">
               <input type="text" tabIndex={-1} autoComplete="off" className="hidden" value={contactForm.honeypot} onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))} />
-              <div>
-                <input required placeholder="Your name" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
-              </div>
-              <div>
-                <input required type="email" placeholder="Your email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
-              </div>
-              <div>
-                <textarea required rows={5} placeholder="Your message" value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white resize-none" />
-              </div>
+              <div><input required placeholder="Your name" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
+              <div><input required type="email" placeholder="Your email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
+              <div><textarea required rows={5} placeholder="Your message" value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white resize-none" /></div>
               <button type="submit" disabled={sending} className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">{sending ? 'Sending...' : 'Send Message'}</button>
             </form>
             <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3>
-                <div className="flex flex-wrap gap-3">
-                  {social.github && <a href={social.github} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}
-                  {social.linkedin && <a href={social.linkedin} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}
-                  {social.twitter && <a href={social.twitter} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}
-                  {profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white"><Mail size={20} /></a>}
-                </div>
-              </div>
-              {profile?.location && (
-                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                  <MapPin size={16} className="text-blue-500" />
-                  <span>{profile.location}</span>
-                </div>
-              )}
-              {profile?.email && (
-                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                  <Mail size={16} className="text-blue-500" />
-                  <a href={`mailto:${profile.email}`} className="hover:text-blue-500">{profile.email}</a>
-                </div>
-              )}
+              <div><h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3><div className="flex flex-wrap gap-3">{social.github && <a href={social.github} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}{social.linkedin && <a href={social.linkedin} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}{social.twitter && <a href={social.twitter} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}{profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white"><Mail size={20} /></a>}</div></div>
+              {profile?.location && (<div className="flex items-center gap-3 text-slate-600 dark:text-slate-400"><MapPin size={16} className="text-blue-500" /><span>{profile.location}</span></div>)}
+              {profile?.email && (<div className="flex items-center gap-3 text-slate-600 dark:text-slate-400"><Mail size={16} className="text-blue-500" /><a href={`mailto:${profile.email}`} className="hover:text-blue-500">{profile.email}</a></div>)}
             </div>
           </div>
         </div>
