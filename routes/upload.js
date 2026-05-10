@@ -12,24 +12,51 @@ cloudinary.config({
 });
 
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) cb(null, true);
-    else cb(new Error('Only images allowed'), false);
+    if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF and image files are allowed'), false);
+    }
   }
 });
 
 // Upload avatar
 router.post('/avatar', verifyToken, upload.single('avatar'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${b64}`;
     const result = await cloudinary.uploader.upload(dataURI, { folder: 'portfolio/avatars', width: 400, height: 400, crop: 'fill' });
     res.json({ success: true, data: { url: result.secure_url } });
   } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Upload resume (PDF)
+router.post('/resume', verifyToken, upload.single('resume'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
+    
+    if (req.file.mimetype !== 'application/pdf') {
+      return res.status(400).json({ success: false, error: 'Only PDF files are allowed' });
+    }
+
+    const b64 = Buffer.from(req.file.buffer).toString('base64');
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: 'portfolio/resumes',
+      resource_type: 'auto',
+      format: 'pdf'
+    });
+    res.json({ success: true, data: { url: result.secure_url } });
+  } catch (error) {
+    console.error('Resume upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -37,7 +64,7 @@ router.post('/avatar', verifyToken, upload.single('avatar'), async (req, res) =>
 // Upload certificate image
 router.post('/certificate', verifyToken, upload.single('image'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${b64}`;
     const result = await cloudinary.uploader.upload(dataURI, { folder: 'portfolio/certificates', width: 400, height: 300, crop: 'fill' });
@@ -50,7 +77,7 @@ router.post('/certificate', verifyToken, upload.single('image'), async (req, res
 // Upload project image
 router.post('/project', verifyToken, upload.single('image'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${b64}`;
     const result = await cloudinary.uploader.upload(dataURI, { folder: 'portfolio/projects', width: 600, height: 400, crop: 'fill' });
@@ -61,25 +88,3 @@ router.post('/project', verifyToken, upload.single('image'), async (req, res) =>
 });
 
 export default router;
-
-// Upload resume (PDF)
-router.post('/resume', verifyToken, upload.single('resume'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
-    
-    // Check if PDF
-    if (req.file.mimetype !== 'application/pdf') {
-      return res.status(400).json({ success: false, error: 'Only PDF files allowed' });
-    }
-    
-    const b64 = Buffer.from(req.file.buffer).toString('base64');
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
-    const result = await cloudinary.uploader.upload(dataURI, { 
-      folder: 'portfolio/resumes',
-      resource_type: 'auto'
-    });
-    res.json({ success: true, data: { url: result.secure_url } });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
