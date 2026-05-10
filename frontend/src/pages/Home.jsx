@@ -235,25 +235,63 @@ export default function Home() {
       {/* Skills Section */}
       <section id="skills" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Skills & Tech Stack" subtitle="Technologies I work with daily" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(skillsByCategory).map(([cat, catSkills]) => {
-              const cfg = CATEGORY_CFG[cat] || CATEGORY_CFG.Other;
-              const Icon = cfg.icon;
-              return (
-                <div key={cat} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
-                  <div className="mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
-                    <div className={`inline-flex items-center gap-2 ${cfg.bg} rounded-xl px-3 py-2`}>
-                      <Icon size={16} className={cfg.color} />
-                      <h3 className={`font-bold ${cfg.color}`}>{cat}</h3>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {catSkills.map(skill => <span key={skill._id} className={`px-3 py-1.5 rounded-full text-xs font-medium ${cfg.bg} ${cfg.color} border ${cfg.border}`}>{skill.name}</span>)}
-                  </div>
-                </div>
-              );
-            })}
+          <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Frontend */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                🎨 Frontend
+              </h3>
+              <ul className="space-y-2">
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">⚛️</span> React</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">▲</span> Next.js</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">📘</span> TypeScript</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🎨</span> Tailwind CSS</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🌐</span> HTML/CSS</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">📜</span> JavaScript</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🎨</span> Figma</li>
+              </ul>
+            </div>
+
+            {/* Backend */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                ⚙️ Backend
+              </h3>
+              <ul className="space-y-2">
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🚀</span> Node.js</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">⚡</span> Express</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🐍</span> Python</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">☕</span> Java</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🐘</span> PHP</li>
+              </ul>
+            </div>
+
+            {/* Database */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                🗄️ Database
+              </h3>
+              <ul className="space-y-2">
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🐘</span> PostgreSQL</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🍃</span> MongoDB</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">⚡</span> Redis</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🐬</span> MySQL</li>
+              </ul>
+            </div>
+
+            {/* Tools */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">
+                🛠️ Tools
+              </h3>
+              <ul className="space-y-2">
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🔀</span> Git</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">🐳</span> Docker</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">☁️</span> AWS</li>
+                <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2"><span className="text-base">▲</span> Vercel</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
