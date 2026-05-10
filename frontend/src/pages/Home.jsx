@@ -8,7 +8,6 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import CertificateCard from '../components/CertificateCard.jsx';
-import GitHubStats from '../components/GitHubCalendar.jsx';
 import WhatsAppButton from '../components/WhatsAppButton.jsx';
 import StarBackground from '../components/StarBackground.jsx';
 import TypingText from '../components/TypingText.jsx';
@@ -170,7 +169,7 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-3 mb-10">
                 <a href="#projects" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">View My Work <ChevronRight size={16} /></a>
-                <a href={profile?.resumeUrl || '/resume.pdf'} download onClick={trackResume} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all">Download Resume</a>
+                <a href="#contact" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all">Contact Me</a>
               </div>
             </div>
             <div className="hidden lg:flex justify-center">
@@ -289,14 +288,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GitHub Activity Section */}
-      <section className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
-        <div className="max-w-6xl mx-auto">
-        </div>
-      </section>
-
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 px-6 bg-white dark:bg-slate-900">
+      <section id="testimonials" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
           <div className="grid md:grid-cols-3 gap-8">
@@ -315,7 +308,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
+      <section id="contact" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
           <div className="grid lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
