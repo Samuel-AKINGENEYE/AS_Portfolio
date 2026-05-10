@@ -1,23 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Github, ExternalLink } from 'lucide-react';
+import { Github, ExternalLink, AlertCircle } from 'lucide-react';
 
 const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
-  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [weeks, setWeeks] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [needToken, setNeedToken] = useState(false);
   
   const BACKEND_URL = 'https://samuel-ak-portfolio-api.onrender.com';
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setNeedToken(false);
       try {
-        const url = `${BACKEND_URL}/api/github/contributions/${username}/${selectedYear}`;
-        const response = await fetch(url);
+        const response = await fetch(`${BACKEND_URL}/api/github/${username}/${selectedYear}`);
         const data = await response.json();
         
-        if (data.success && data.data) {
+        if (data.needToken) {
+          setNeedToken(true);
+        } else if (data.success && data.data) {
           setWeeks(data.data.weeks || []);
           setTotal(data.data.total || 0);
         }
@@ -40,22 +43,21 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
   };
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const years = [2022, 2023, 2024, 2025, 2026];
+  const years = [2022, 2023, 2024, 2025, 2026, 2027];
 
   if (loading) {
+    return <div className="bg-white dark:bg-slate-800 rounded-xl p-6 animate-pulse h-64"></div>;
+  }
+
+  if (needToken) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-        <div className="animate-pulse space-y-4">
-          <div className="flex justify-between">
-            <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded"></div>
-            <div className="flex gap-2">
-              {[2022, 2023, 2024, 2025, 2026].map(y => (
-                <div key={y} className="h-8 w-14 bg-slate-200 dark:bg-slate-700 rounded"></div>
-              ))}
-            </div>
-          </div>
-          <div className="h-40 bg-slate-200 dark:bg-slate-700 rounded"></div>
-        </div>
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 text-center">
+        <AlertCircle className="w-8 h-8 text-yellow-500 mx-auto mb-3" />
+        <p className="text-slate-600 dark:text-slate-400 mb-2">GitHub token not configured</p>
+        <p className="text-xs text-slate-500">Add GITHUB_TOKEN to Render environment variables for real contribution data</p>
+        <a href={`https://github.com/${username}`} target="_blank" className="text-sm text-blue-500 mt-3 inline-flex items-center gap-1">
+          <Github size={14} /> View on GitHub instead
+        </a>
       </div>
     );
   }
@@ -84,44 +86,43 @@ const GitHubCalendar = ({ username = 'Samuel-AKINGENEYE' }) => {
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <div className="min-w-[800px]">
-          <div className="flex ml-8 mb-2">
-            {months.map(month => (
-              <div key={month} className="text-xs text-slate-400 w-14 text-center">{month}</div>
-            ))}
-          </div>
-          <div className="flex gap-1">
-            <div className="flex flex-col gap-1 w-12 mt-1">
-              <div className="h-3 text-[10px] text-slate-400 text-right">Mon</div>
-              <div className="h-3 text-[10px] text-slate-400 text-right">Wed</div>
-              <div className="h-3 text-[10px] text-slate-400 text-right">Fri</div>
+      {total === 0 ? (
+        <div className="text-center py-8 text-slate-500">
+          No contribution data available for {selectedYear}
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="flex ml-8 mb-2">
+              {months.map(month => <div key={month} className="text-xs text-slate-400 w-14 text-center">{month}</div>)}
             </div>
             <div className="flex gap-1">
-              {weeks.map((week, wi) => (
-                <div key={wi} className="flex flex-col gap-1">
-                  {week.map((day, di) => (
-                    <div
-                      key={di}
-                      className="w-3 h-3 rounded-sm transition-transform hover:scale-125 cursor-help"
-                      style={{ backgroundColor: getColor(day.count) }}
-                      title={`${day.count} contribution${day.count !== 1 ? 's' : ''} on ${day.date}`}
-                    />
-                  ))}
-                </div>
-              ))}
+              <div className="flex flex-col gap-1 w-12">
+                <div className="h-3 text-[10px] text-slate-400 text-right">Mon</div>
+                <div className="h-3 text-[10px] text-slate-400 text-right">Wed</div>
+                <div className="h-3 text-[10px] text-slate-400 text-right">Fri</div>
+              </div>
+              <div className="flex gap-1">
+                {weeks.map((week, wi) => (
+                  <div key={wi} className="flex flex-col gap-1">
+                    {week.map((day, di) => (
+                      <div
+                        key={di}
+                        className="w-3 h-3 rounded-sm transition-transform hover:scale-125 cursor-help"
+                        style={{ backgroundColor: getColor(day.count) }}
+                        title={`${day.count} contribution${day.count !== 1 ? 's' : ''} on ${day.date}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
       
       <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <a 
-          href={`https://github.com/${username}`} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1"
-        >
+        <a href={`https://github.com/${username}`} target="_blank" className="text-sm text-blue-500 flex items-center gap-1">
           <Github size={14} /> View full GitHub profile <ExternalLink size={12} />
         </a>
         <div className="flex items-center gap-1 text-xs text-slate-500">
