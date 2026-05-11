@@ -21,7 +21,7 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'API running with Supabase' });
 });
 
-// Admin Login
+// Auth Login
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -36,15 +36,23 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
     
+    // Compare password using bcrypt
     const isValid = await bcrypt.compare(password, user.password);
+    
     if (!isValid) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
     
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '7d' }
+    );
+    
     res.json({ success: true, data: { token, user: { id: user.id, email: user.email } } });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 });
 
@@ -63,102 +71,6 @@ app.get('/api/projects', async (req, res) => {
   }
 });
 
-// Create project (admin only)
-app.post('/api/projects', verifyToken, async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('projects').insert(req.body).select();
-    if (error) throw error;
-    res.json({ success: true, data: data[0] });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Update project (admin only)
-app.put('/api/projects/:id', verifyToken, async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('projects')
-      .update(req.body)
-      .eq('id', req.params.id)
-      .select();
-    if (error) throw error;
-    res.json({ success: true, data: data[0] });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Delete project (admin only)
-app.delete('/api/projects/:id', verifyToken, async (req, res) => {
-  try {
-    const { error } = await supabaseAdmin.from('projects').delete().eq('id', req.params.id);
-    if (error) throw error;
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get all certificates
-app.get('/api/certificates', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('certificates')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get all skills
-app.get('/api/skills', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('skills')
-      .select('*')
-      .order('category')
-      .order('order');
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get all education
-app.get('/api/education', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('education')
-      .select('*')
-      .order('order')
-      .order('start_date', { ascending: false });
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get all experience
-app.get('/api/experience', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('experience')
-      .select('*')
-      .order('order')
-      .order('start_date', { ascending: false });
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
 // Get profile
 app.get('/api/profile', async (req, res) => {
   try {
@@ -170,35 +82,49 @@ app.get('/api/profile', async (req, res) => {
   }
 });
 
-// Update profile (admin only)
-app.put('/api/profile', verifyToken, async (req, res) => {
+// Get skills
+app.get('/api/skills', async (req, res) => {
   try {
-    const { data, error } = await supabaseAdmin
-      .from('profiles')
-      .update(req.body)
-      .eq('id', req.body.id || (await supabaseAdmin.from('profiles').select('id').single()).data.id)
-      .select();
+    const { data, error } = await supabaseAdmin.from('skills').select('*').order('category');
     if (error) throw error;
-    res.json({ success: true, data: data[0] });
+    res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// Verify token middleware
-function verifyToken(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ success: false, error: 'No token provided' });
-  }
+// Get certificates
+app.get('/api/certificates', async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
+    const { data, error } = await supabaseAdmin.from('certificates').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json({ success: true, data });
   } catch (err) {
-    return res.status(401).json({ success: false, error: 'Invalid token' });
+    res.status(500).json({ success: false, error: err.message });
   }
-}
+});
+
+// Get education
+app.get('/api/education', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin.from('education').select('*').order('start_date', { ascending: false });
+    if (error) throw error;
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Get experience
+app.get('/api/experience', async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin.from('experience').select('*').order('start_date', { ascending: false });
+    if (error) throw error;
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
