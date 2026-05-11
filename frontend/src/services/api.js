@@ -1,59 +1,70 @@
-import { supabase, getProfile, getProjects, getCertificates, getSkills, getEducation, getExperience } from './supabase.js';
+import axios from 'axios';
 
-// Re-export Supabase functions
-export const profileApi = {
-  get: async () => ({ data: { data: await getProfile() } }),
-  update: async (data) => ({ data: { data: await updateProfile(data) } }),
-};
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+  timeout: 15000,
+});
 
-export const projectsApi = {
-  getAll: async (featured = false) => ({ data: { data: await getProjects(featured) } }),
-  getOne: async (id) => ({ data: { data: await getProject(id) } }),
-  create: async (data) => ({ data: { data: await createProject(data) } }),
-  update: async (id, data) => ({ data: { data: await updateProject(id, data) } }),
-  remove: async (id) => ({ data: await deleteProject(id) }),
-};
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('adminToken');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-export const certificatesApi = {
-  getAll: async () => ({ data: { data: await getCertificates() } }),
-  create: async (data) => ({ data: { data: await createCertificate(data) } }),
-  update: async (id, data) => ({ data: { data: await updateCertificate(id, data) } }),
-  remove: async (id) => ({ data: await deleteCertificate(id) }),
-};
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401 && window.location.pathname.startsWith('/admin')) {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin/login';
+    }
+    return Promise.reject(err);
+  }
+);
 
-export const skillsApi = {
-  getAll: async () => ({ data: { data: await getSkills() } }),
-  create: async (data) => ({ data: { data: await createSkill(data) } }),
-  update: async (id, data) => ({ data: { data: await updateSkill(id, data) } }),
-  remove: async (id) => ({ data: await deleteSkill(id) }),
-};
-
-export const educationApi = {
-  getAll: async () => ({ data: { data: await getEducation() } }),
-  create: async (data) => ({ data: { data: await createEducation(data) } }),
-  update: async (id, data) => ({ data: { data: await updateEducation(id, data) } }),
-  remove: async (id) => ({ data: await deleteEducation(id) }),
-};
-
-export const experienceApi = {
-  getAll: async () => ({ data: { data: await getExperience() } }),
-  create: async (data) => ({ data: { data: await createExperience(data) } }),
-  update: async (id, data) => ({ data: { data: await updateExperience(id, data) } }),
-  remove: async (id) => ({ data: await deleteExperience(id) }),
-};
-
-// Keep existing auth and contact APIs (they still use your backend)
 export const authApi = {
   login: (email, password) => api.post('/auth/login', { email, password }),
 };
 
-export const contactApi = {
-  send: (data) => api.post('/contact/send', data),
+export const projectsApi = {
+  getAll: (featured = false) => api.get('/projects', { params: featured ? { featured: true } : {} }),
+  getOne: (id) => api.get(`/projects/${id}`),
+  create: (data) => api.post('/projects', data),
+  update: (id, data) => api.put(`/projects/${id}`, data),
+  remove: (id) => api.delete(`/projects/${id}`),
 };
 
-export const analyticsApi = {
-  track: (data) => api.post('/analytics/track', data),
-  getStats: (days = 30) => api.get('/analytics/stats', { params: { days } }),
+export const certificatesApi = {
+  getAll: (category) => api.get('/certificates', { params: category ? { category } : {} }),
+  create: (data) => api.post('/certificates', data),
+  update: (id, data) => api.put(`/certificates/${id}`, data),
+  remove: (id) => api.delete(`/certificates/${id}`),
+};
+
+export const profileApi = {
+  get: () => api.get('/profile'),
+  update: (data) => api.put('/profile', data),
+};
+
+export const skillsApi = {
+  getAll: () => api.get('/skills'),
+  create: (data) => api.post('/skills', data),
+  update: (id, data) => api.put(`/skills/${id}`, data),
+  remove: (id) => api.delete(`/skills/${id}`),
+};
+
+export const educationApi = {
+  getAll: () => api.get('/education'),
+  create: (data) => api.post('/education', data),
+  update: (id, data) => api.put(`/education/${id}`, data),
+  remove: (id) => api.delete(`/education/${id}`),
+};
+
+export const experienceApi = {
+  getAll: () => api.get('/experience'),
+  create: (data) => api.post('/experience', data),
+  update: (id, data) => api.put(`/experience/${id}`, data),
+  remove: (id) => api.delete(`/experience/${id}`),
 };
 
 export const uploadApi = {
@@ -64,11 +75,15 @@ export const uploadApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  uploadResume: (file) => {
-    const formData = new FormData();
-    formData.append('resume', file);
-    return api.post('/upload/resume', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-  },
 };
+
+export const analyticsApi = {
+  track: (data) => api.post('/analytics/track', data),
+  getStats: (days = 30) => api.get('/analytics/stats', { params: { days } }),
+};
+
+export const contactApi = {
+  send: (data) => api.post('/contact/send', data),
+};
+
+export default api;
