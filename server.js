@@ -133,3 +133,9 @@ app.listen(PORT, () => {
 // Force redeploy - Mon May 11 08:48:16 PM CAT 2026
 // Force deploy - Mon May 11 09:03:29 PM CAT 2026
 // DEPLOYMENT_MARKER: 1778526857
+
+// DEBUG: Check users in database
+app.get('/api/debug/users', async (req, res) => {
+  const { data, error } = await supabase.from('users').select('*');
+  res.json({ users: data, error, count: data?.length });
+});
