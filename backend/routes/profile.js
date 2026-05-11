@@ -22,7 +22,7 @@ router.get('/', async (_req, res) => {
 // PUT /api/profile  (admin)
 router.put('/', verifyToken, async (req, res) => {
   try {
-    const allowed = ['name', 'title', 'bio', 'location', 'email', 'socialLinks', 'availability', 'yearsOfExperience'];
+    const allowed = ['name', 'title', 'bio', 'location', 'email', 'socialLinks', 'availability', 'yearsOfExperience', 'avatar', 'resumeUrl'];
     const updates = {};
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];

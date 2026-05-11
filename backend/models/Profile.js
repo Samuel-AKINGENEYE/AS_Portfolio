@@ -8,6 +8,8 @@ const profileSchema = new mongoose.Schema({
   email: { type: String, default: '' },
   availability: { type: String, default: 'Available Now' },
   yearsOfExperience: { type: Number, default: 2 },
+  avatar: { type: String, default: '' },
+  resumeUrl: { type: String, default: '' },
   socialLinks: {
     github: { type: String, default: '' },
     linkedin: { type: String, default: '' },
