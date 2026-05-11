@@ -5,12 +5,18 @@
   "installCommand": "npm install",
   "framework": "vite",
   "functions": {
-    "api/*.js": {
+    "api/**/*.js": {
       "runtime": "nodejs18.x"
     }
   },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/frontend/dist/$1" }
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/dist/$1"
+    }
   ]
 }
