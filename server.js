@@ -1,141 +1,65 @@
 import express from 'express';
 import cors from 'cors';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { supabaseAdmin } from './lib/supabase-admin.js';
+import authRoutes from './routes/auth.js';
+import projectRoutes from './routes/projects.js';
+import certificateRoutes from './routes/certificates.js';
+import profileRoutes from './routes/profile.js';
+import skillRoutes from './routes/skills.js';
+import educationRoutes from './routes/education.js';
+import experienceRoutes from './routes/experience.js';
+import uploadRoutes from './routes/upload.js';
+import analyticsRoutes from './routes/analytics.js';
+import contactRoutes from './routes/contact.js';
+import githubTestRoutes from './routes/github-test.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://samuelak.netlify.app',
+  'https://as-portfolio-livid-one.vercel.app',
+  'https://samuelak-portfolio.onrender.com',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['https://as-portfolio-livid-one.vercel.app', 'http://localhost:5173'],
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
-app.use(express.json());
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'API running with Supabase' });
-});
+app.use(express.json({ limit: '10mb' }));
 
-// Auth Login
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    const { data: user, error } = await supabaseAdmin
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .single();
-    
-    if (error || !user) {
-      return res.status(401).json({ success: false, error: 'Invalid credentials' });
-    }
-    
-    // Compare password using bcrypt
-    const isValid = await bcrypt.compare(password, user.password);
-    
-    if (!isValid) {
-      return res.status(401).json({ success: false, error: 'Invalid credentials' });
-    }
-    
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
-    
-    res.json({ success: true, data: { token, user: { id: user.id, email: user.email } } });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ success: false, error: 'Server error' });
-  }
-});
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('MongoDB error:', err));
 
-// Get all projects
-app.get('/api/projects', async (req, res) => {
-  try {
-    let query = supabaseAdmin.from('projects').select('*').order('created_at', { ascending: false });
-    if (req.query.featured === 'true') {
-      query = query.eq('featured', true);
-    }
-    const { data, error } = await query;
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/certificates', certificateRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/education', educationRoutes);
+app.use('/api/experience', experienceRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/github', githubTestRoutes);
 
-// Get profile
-app.get('/api/profile', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('profiles').select('*').single();
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get skills
-app.get('/api/skills', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('skills').select('*').order('category');
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get certificates
-app.get('/api/certificates', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('certificates').select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get education
-app.get('/api/education', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('education').select('*').order('start_date', { ascending: false });
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// Get experience
-app.get('/api/experience', async (req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin.from('experience').select('*').order('start_date', { ascending: false });
-    if (error) throw error;
-    res.json({ success: true, data });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
-  }
+app.get('/api/health', (_req, res) => {
+  res.json({ success: true, message: 'API is running' });
 });
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`✅ Using Supabase as database`);
-});
-// Force redeploy - Mon May 11 08:48:16 PM CAT 2026
-// Force deploy - Mon May 11 09:03:29 PM CAT 2026
-// DEPLOYMENT_MARKER: 1778526857
-
-// DEBUG: Check users in database
-app.get('/api/debug/users', async (req, res) => {
-  const { data, error } = await supabase.from('users').select('*');
-  res.json({ users: data, error, count: data?.length });
 });

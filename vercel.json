@@ -3,20 +3,5 @@
   "outputDirectory": "frontend/dist",
   "devCommand": "cd frontend && npm run dev",
   "installCommand": "npm install",
-  "framework": "vite",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
-    }
-  ]
+  "framework": "vite"
 }
