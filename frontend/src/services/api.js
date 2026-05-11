@@ -67,13 +67,23 @@ export const experienceApi = {
   remove: (id) => api.delete(`/experience/${id}`),
 };
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export const uploadApi = {
-  uploadAvatar: (file) => {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    return api.post('/upload/avatar', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  uploadAvatar: async (file) => {
+    const data = await fileToBase64(file);
+    return api.post('/upload/avatar', { data, mimeType: file.type });
+  },
+  uploadResume: async (file) => {
+    const data = await fileToBase64(file);
+    return api.post('/upload/resume', { data });
   },
 };
 

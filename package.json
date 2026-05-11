@@ -1,23 +1,14 @@
 {
-  "name": "portfolio-backend",
+  "name": "portfolio-monorepo",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "seed": "node seed.js"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
     "bcryptjs": "^2.4.3",
-    "cloudinary": "^2.5.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.5.1",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^8.0.7",
-    "streamifier": "^0.1.1"
+    "cloudinary": "^2.5.1"
   }
 }

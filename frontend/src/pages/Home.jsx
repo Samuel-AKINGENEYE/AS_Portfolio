@@ -73,26 +73,32 @@ export default function Home() {
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const [projRes, certRes, profRes, skillRes, eduRes, expRes] = await Promise.all([
-          projectsApi.getAll(true),
-          certificatesApi.getAll(),
-          profileApi.get(),
-          skillsApi.getAll(),
-          educationApi.getAll(),
-          experienceApi.getAll(),
-        ]);
-        setProjects(projRes.data.data ?? []);
-        setCerts(certRes.data.data ?? []);
-        setProfile(profRes.data.data ?? null);
-        setSkills(skillRes.data.data ?? []);
-        setEducation(eduRes.data.data ?? []);
-        setExperience(expRes.data.data ?? []);
-      } catch (err) {
-        toast.error('Failed to load some data');
-      } finally {
-        setLoading(false);
+      const results = await Promise.allSettled([
+        projectsApi.getAll(true),
+        certificatesApi.getAll(),
+        profileApi.get(),
+        skillsApi.getAll(),
+        educationApi.getAll(),
+        experienceApi.getAll(),
+      ]);
+
+      const val = (i) => results[i].status === 'fulfilled' ? results[i].value.data.data : null;
+      const failed = results.filter((r) => r.status === 'rejected');
+
+      if (val(0) !== null) setProjects(val(0) ?? []);
+      if (val(1) !== null) setCerts(val(1) ?? []);
+      if (val(2) !== null) setProfile(val(2));
+      if (val(3) !== null) setSkills(val(3) ?? []);
+      if (val(4) !== null) setEducation(val(4) ?? []);
+      if (val(5) !== null) setExperience(val(5) ?? []);
+
+      if (failed.length === results.length) {
+        toast.error('Failed to load portfolio data. Please refresh.');
+      } else if (failed.length > 0) {
+        toast.error('Some data failed to load.');
       }
+
+      setLoading(false);
     };
     load();
   }, []);
@@ -220,7 +226,7 @@ export default function Home() {
             </div>
           )}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map(p => <ProjectCard key={p._id} project={p} />)}
+            {filteredProjects.map(p => <ProjectCard key={p.id} project={p} />)}
           </div>
         </div>
       </section>
@@ -299,7 +305,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificates.map(cert => <CertificateCard key={cert._id} certificate={cert} />)}
+            {certificates.map(cert => <CertificateCard key={cert.id} certificate={cert} />)}
           </div>
         </div>
       </section>
