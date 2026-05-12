@@ -115,10 +115,9 @@ export default function Home() {
     e.preventDefault();
     setSending(true);
     try {
-      await contactApi.send(contactForm);
+      await contactApi.send({ ...contactForm, visitorId: getVisitorId() });
       toast.success("Message sent! I'll reply soon.");
       setContactForm({ name: '', email: '', message: '', honeypot: '' });
-      analyticsApi.track({ page: '/contact', visitorId: getVisitorId(), event: 'contact_form' }).catch(() => {});
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to send');
     } finally {

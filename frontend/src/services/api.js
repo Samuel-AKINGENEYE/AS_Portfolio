@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'https://samuel-ak-portfolio-api.onrender.com/api',
-  timeout: 15000,
+  timeout: 30000,
 });
 
 api.interceptors.request.use((config) => {
@@ -67,24 +67,34 @@ export const experienceApi = {
   remove: (id) => api.delete(`/experience/${id}`),
 };
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+function buildFormData(fieldName, file) {
+  const fd = new FormData();
+  fd.append(fieldName, file);
+  return fd;
 }
 
 export const uploadApi = {
-  uploadAvatar: async (file) => {
-    const data = await fileToBase64(file);
-    return api.post('/upload/avatar', { data, mimeType: file.type });
-  },
-  uploadResume: async (file) => {
-    const data = await fileToBase64(file);
-    return api.post('/upload/resume', { data });
-  },
+  uploadAvatar: (file) =>
+    api.post('/upload/avatar', buildFormData('avatar', file), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  uploadResume: (file) =>
+    api.post('/upload/resume', buildFormData('resume', file), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+
+  uploadImage: (file, folder) =>
+    api.post('/upload/image', buildFormData('image', file), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      params: folder ? { folder } : {},
+    }),
+
+  uploadFile: (file, folder) =>
+    api.post('/upload/file', buildFormData('file', file), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      params: folder ? { folder } : {},
+    }),
 };
 
 export const analyticsApi = {

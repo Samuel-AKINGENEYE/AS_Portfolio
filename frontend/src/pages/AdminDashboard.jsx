@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code,
-  BookOpen, Briefcase, Upload, BarChart2, TrendingUp, Eye, Download,
-  MessageSquare, Calendar, RefreshCw,
+  BookOpen, Briefcase, Upload, BarChart2, Eye, Download,
+  MessageSquare, RefreshCw, Image, FileText,
 } from 'lucide-react';
 import {
   projectsApi, certificatesApi, profileApi, skillsApi,
-  educationApi, experienceApi, analyticsApi,
+  educationApi, experienceApi, analyticsApi, uploadApi,
 } from '../services/api.js';
 import DarkModeToggle from '../components/DarkModeToggle.jsx';
 
@@ -62,6 +62,108 @@ function ItemRow({ children, onEdit, onDelete }) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// Reusable image upload field (file picker + URL fallback)
+// ──────────────────────────────────────────────────────────────────────────
+function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await uploadApi.uploadImage(file, folder);
+      onChange(res.data.data.url);
+      toast.success('Image uploaded!');
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div>
+      <label className={LABEL}>{label}</label>
+      <div className="space-y-2">
+        {value && (
+          <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
+            <img src={value} alt="preview" className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="flex gap-2">
+          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
+            <Image size={13} />
+            {uploading ? 'Uploading…' : 'Upload Image'}
+            <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
+          </label>
+        </div>
+        <input
+          type="url"
+          placeholder="…or paste image URL"
+          value={value || ''}
+          onChange={e => onChange(e.target.value)}
+          className={INPUT}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Reusable file upload field (PDF / any file + URL fallback)
+function FileUploadField({ label, value, onChange, folder, accept, fieldName = 'file', icon: Icon = FileText }) {
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = fieldName === 'resume'
+        ? await uploadApi.uploadResume(file)
+        : await uploadApi.uploadFile(file, folder);
+      onChange(res.data.data.url);
+      toast.success('File uploaded!');
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div>
+      <label className={LABEL}>{label}</label>
+      <div className="space-y-2">
+        {value && (
+          <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-green-500 hover:text-green-600">
+            <Icon size={13} /> View current file
+          </a>
+        )}
+        <div className="flex gap-2">
+          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
+            <Upload size={13} />
+            {uploading ? 'Uploading…' : `Upload ${label}`}
+            <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
+          </label>
+        </div>
+        <input
+          type="url"
+          placeholder="…or paste file URL"
+          value={value || ''}
+          onChange={e => onChange(e.target.value)}
+          className={INPUT}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // PROJECTS TAB
 // ──────────────────────────────────────────────────────────────────────────
 function ProjectsTab() {
@@ -83,7 +185,7 @@ function ProjectsTab() {
       else await projectsApi.update(modal._id, data);
       toast.success('Saved!');
       setModal(null); load();
-    } catch (err) { toast.error('Save failed'); }
+    } catch { toast.error('Save failed'); }
   };
 
   const handleDelete = async (id) => {
@@ -102,8 +204,13 @@ function ProjectsTab() {
         <div className="space-y-3">
           {projects.map(p => (
             <ItemRow key={p._id} onEdit={() => setModal(p)} onDelete={() => handleDelete(p._id)}>
-              <p className="font-medium text-sm">{p.title}</p>
-              <p className="text-xs text-slate-500">{p.description}</p>
+              <div className="flex items-center gap-3">
+                {p.imageUrl && <img src={p.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />}
+                <div>
+                  <p className="font-medium text-sm">{p.title}</p>
+                  <p className="text-xs text-slate-500 truncate">{p.description}</p>
+                </div>
+              </div>
             </ItemRow>
           ))}
         </div>
@@ -135,13 +242,13 @@ function ProjectForm({ initial, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><label className={LABEL}>Title *</label><input required value={form.title} onChange={e => set('title', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Description *</label><textarea required rows={2} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Tech Stack</label><input value={form.techStack} onChange={e => set('techStack', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Image URL</label><input type="url" value={form.imageUrl} onChange={e => set('imageUrl', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>Tech Stack (comma-separated)</label><input value={form.techStack} onChange={e => set('techStack', e.target.value)} className={INPUT} /></div>
+      <ImageUploadField label="Project Image" value={form.imageUrl} onChange={v => set('imageUrl', v)} folder="portfolio/projects" />
       <div className="grid grid-cols-2 gap-3">
         <div><label className={LABEL}>Live URL</label><input type="url" value={form.liveUrl} onChange={e => set('liveUrl', e.target.value)} className={INPUT} /></div>
         <div><label className={LABEL}>GitHub URL</label><input type="url" value={form.githubUrl} onChange={e => set('githubUrl', e.target.value)} className={INPUT} /></div>
       </div>
-      <label className="flex items-center gap-2"><input type="checkbox" checked={form.featured} onChange={e => set('featured', e.target.checked)} /><span>Featured</span></label>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.featured} onChange={e => set('featured', e.target.checked)} /><span>Featured</span></label>
       <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
     </form>
   );
@@ -168,7 +275,7 @@ function CertificatesTab() {
       if (modal === 'add') await certificatesApi.create(data);
       else await certificatesApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
-    } catch (err) { toast.error('Save failed'); }
+    } catch { toast.error('Save failed'); }
   };
 
   const handleDelete = async (id) => {
@@ -187,8 +294,13 @@ function CertificatesTab() {
         <div className="space-y-3">
           {certs.map(c => (
             <ItemRow key={c._id} onEdit={() => setModal(c)} onDelete={() => handleDelete(c._id)}>
-              <p className="font-medium text-sm">{c.name}</p>
-              <p className="text-xs text-slate-500">{c.issuer}</p>
+              <div className="flex items-center gap-3">
+                {c.imageUrl && <img src={c.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />}
+                <div>
+                  <p className="font-medium text-sm">{c.name}</p>
+                  <p className="text-xs text-slate-500">{c.issuer} · {c.category}</p>
+                </div>
+              </div>
             </ItemRow>
           ))}
         </div>
@@ -201,6 +313,8 @@ function CertificatesTab() {
     </div>
   );
 }
+
+const CERT_CATEGORIES = ['AI/ML', 'Web Dev', 'Cybersecurity', 'Other'];
 
 function CertificateForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial || { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Other' });
@@ -216,7 +330,14 @@ function CertificateForm({ initial, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><label className={LABEL}>Name *</label><input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Issuer *</label><input required value={form.issuer} onChange={e => set('issuer', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Image URL</label><input type="url" value={form.imageUrl} onChange={e => set('imageUrl', e.target.value)} className={INPUT} /></div>
+      <div>
+        <label className={LABEL}>Category</label>
+        <select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}>
+          {CERT_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+        </select>
+      </div>
+      <div><label className={LABEL}>Issue Date</label><input type="date" value={form.issueDate ? form.issueDate.split('T')[0] : ''} onChange={e => set('issueDate', e.target.value)} className={INPUT} /></div>
+      <ImageUploadField label="Certificate Image" value={form.imageUrl} onChange={v => set('imageUrl', v)} folder="portfolio/certificates" />
       <div><label className={LABEL}>Credential URL</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} /></div>
       <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
     </form>
@@ -246,7 +367,7 @@ function SkillsTab() {
       if (modal === 'add') await skillsApi.create(data);
       else await skillsApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
-    } catch (err) { toast.error('Save failed'); }
+    } catch { toast.error('Save failed'); }
   };
 
   const handleDelete = async (id) => {
@@ -312,7 +433,7 @@ function EducationTab() {
       if (modal === 'add') await educationApi.create(data);
       else await educationApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
-    } catch (err) { toast.error('Save failed'); }
+    } catch { toast.error('Save failed'); }
   };
 
   const handleDelete = async (id) => {
@@ -344,9 +465,9 @@ function EducationForm({ initial, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><label className={LABEL}>Institution *</label><input required value={form.institution} onChange={e => set('institution', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Degree *</label><input required value={form.degree} onChange={e => set('degree', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Start Date</label><input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>End Date</label><input type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
-      <label className="flex items-center gap-2"><input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} /><span>Current</span></label>
+      <div><label className={LABEL}>Start Date</label><input type="date" value={form.startDate ? form.startDate.split('T')[0] : ''} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>End Date</label><input type="date" value={form.endDate ? form.endDate.split('T')[0] : ''} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} /><span>Current</span></label>
       <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
     </form>
   );
@@ -373,7 +494,7 @@ function ExperienceTab() {
       if (modal === 'add') await experienceApi.create(data);
       else await experienceApi.update(modal._id, data);
       toast.success('Saved!'); setModal(null); load();
-    } catch (err) { toast.error('Save failed'); }
+    } catch { toast.error('Save failed'); }
   };
 
   const handleDelete = async (id) => {
@@ -405,9 +526,9 @@ function ExperienceForm({ initial, onSave, onCancel }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><label className={LABEL}>Company *</label><input required value={form.company} onChange={e => set('company', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Position *</label><input required value={form.position} onChange={e => set('position', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Start Date</label><input type="date" value={form.startDate} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>End Date</label><input type="date" value={form.endDate} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
-      <label className="flex items-center gap-2"><input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} /><span>Current</span></label>
+      <div><label className={LABEL}>Start Date</label><input type="date" value={form.startDate ? form.startDate.split('T')[0] : ''} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>End Date</label><input type="date" value={form.endDate ? form.endDate.split('T')[0] : ''} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} /><span>Current</span></label>
       <div><label className={LABEL}>Description</label><textarea rows={3} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT} /></div>
       <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
     </form>
@@ -421,60 +542,43 @@ function ProfileTab() {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const avatarRef = useRef(null);
+  const resumeRef = useRef(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
 
   useEffect(() => {
-    profileApi.get().then(r => setForm(r.data.data)).catch(() => toast.error('Failed to load profile')).finally(() => setLoading(false));
+    profileApi.get()
+      .then(r => setForm(r.data.data))
+      .catch(() => toast.error('Failed to load profile'))
+      .finally(() => setLoading(false));
   }, []);
 
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSocial = (k, v) => setForm(f => ({ ...f, socialLinks: { ...f.socialLinks, [k]: v } }));
 
-  const handleImageUpload = async (e) => {
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { toast.error('Please select an image'); return; }
-    setUploading(true);
+    setUploadingAvatar(true);
     try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/avatar`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        setField('avatar', data.data.url);
-        toast.success('Avatar uploaded!');
-      }
-    } catch { toast.error('Upload failed'); }
-    finally { setUploading(false); }
+      const res = await uploadApi.uploadAvatar(file);
+      setField('avatar', res.data.data.url);
+      toast.success('Avatar uploaded!');
+    } catch { toast.error('Avatar upload failed'); }
+    finally { setUploadingAvatar(false); if (avatarRef.current) avatarRef.current.value = ''; }
   };
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.type !== 'application/pdf') { toast.error('Please select a PDF'); return; }
     setUploadingResume(true);
     try {
-      const formData = new FormData();
-      formData.append('resume', file);
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/resume`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        setField('resumeUrl', data.data.url);
-        toast.success('Resume uploaded!');
-      }
-    } catch { toast.error('Upload failed'); }
-    finally { setUploadingResume(false); }
+      const res = await uploadApi.uploadResume(file);
+      setField('resumeUrl', res.data.data.url);
+      toast.success('Resume uploaded!');
+    } catch { toast.error('Resume upload failed'); }
+    finally { setUploadingResume(false); if (resumeRef.current) resumeRef.current.value = ''; }
   };
 
   const handleSubmit = async (e) => {
@@ -484,39 +588,49 @@ function ProfileTab() {
     finally { setSaving(false); }
   };
 
-  if (loading) return <div className="space-y-4">Loading...</div>;
+  if (loading) return <div className="text-sm text-slate-500 py-8 text-center">Loading profile…</div>;
   if (!form) return null;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
       <h2 className="text-lg font-semibold">Profile Settings</h2>
-      
+
+      {/* Avatar */}
       <div>
         <label className={LABEL}>Avatar</label>
-        <div className="flex gap-4">
-          {form.avatar && <img src={form.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />}
-          <div className="flex-1">
-            <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg text-sm inline-block">
-              {uploading ? 'Uploading...' : 'Upload Avatar'}
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+        <div className="flex items-start gap-4">
+          {form.avatar
+            ? <img src={form.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0 border-2 border-slate-200 dark:border-slate-600" />
+            : <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0"><User size={24} className="text-slate-400" /></div>
+          }
+          <div className="flex-1 space-y-2">
+            <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingAvatar ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
+              <Image size={13} />
+              {uploadingAvatar ? 'Uploading…' : 'Upload Avatar'}
+              <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploadingAvatar} />
             </label>
-            <input type="url" placeholder="Image URL" value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT + ' mt-2'} />
+            <input type="url" placeholder="…or paste image URL" value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} />
           </div>
         </div>
       </div>
 
+      {/* Resume */}
       <div>
-        <label className={LABEL}>Resume</label>
-        <div className="flex gap-4">
-          {form.resumeUrl && <a href={form.resumeUrl} target="_blank" className="text-green-500 text-sm">View Resume</a>}
-          <div className="flex-1">
-            <label className="cursor-pointer bg-green-500 text-white px-4 py-2 rounded-lg text-sm inline-block">
-              {uploadingResume ? 'Uploading...' : 'Upload Resume (PDF)'}
-              <input type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden" />
-            </label>
-            <input type="url" placeholder="Resume URL" value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT + ' mt-2'} />
-          </div>
+        <label className={LABEL}>Resume (PDF)</label>
+        <div className="space-y-2">
+          {form.resumeUrl && (
+            <a href={form.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-green-500 hover:text-green-600">
+              <Download size={13} /> View current resume
+            </a>
+          )}
+          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingResume ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
+            <Upload size={13} />
+            {uploadingResume ? 'Uploading…' : 'Upload Resume (PDF)'}
+            <input ref={resumeRef} type="file" accept=".pdf,application/pdf" onChange={handleResumeUpload} className="hidden" disabled={uploadingResume} />
+          </label>
+          <input type="url" placeholder="…or paste resume URL" value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT} />
         </div>
+        <p className="text-xs text-slate-400 mt-1">Uploaded resume will appear in the "Download Resume" button on the contact section.</p>
       </div>
 
       <div><label className={LABEL}>Name</label><input value={form.name || ''} onChange={e => setField('name', e.target.value)} className={INPUT} /></div>
@@ -525,13 +639,13 @@ function ProfileTab() {
       <div><label className={LABEL}>Location</label><input value={form.location || ''} onChange={e => setField('location', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Email</label><input type="email" value={form.email || ''} onChange={e => setField('email', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Availability</label><input value={form.availability || ''} onChange={e => setField('availability', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Years Experience</label><input type="number" value={form.yearsOfExperience || 0} onChange={e => setField('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div>
-      
+      <div><label className={LABEL}>Years of Experience</label><input type="number" min="0" value={form.yearsOfExperience || 0} onChange={e => setField('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div>
+
       <div>
-        <h3 className="font-medium mb-2">Social Links</h3>
+        <h3 className="font-medium text-sm mb-3">Social Links</h3>
         {['github', 'linkedin', 'twitter'].map(key => (
-          <div key={key} className="mb-2">
-            <label className={LABEL}>{key}</label>
+          <div key={key} className="mb-3">
+            <label className={LABEL}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
             <input type="url" value={form.socialLinks?.[key] || ''} onChange={e => setSocial(key, e.target.value)} className={INPUT} />
           </div>
         ))}
@@ -545,6 +659,24 @@ function ProfileTab() {
 // ──────────────────────────────────────────────────────────────────────────
 // ANALYTICS TAB
 // ──────────────────────────────────────────────────────────────────────────
+function StatCard({ icon: Icon, label, value, color = 'blue' }) {
+  const colors = {
+    blue: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    green: 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400',
+    purple: 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400',
+    orange: 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400',
+  };
+  return (
+    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
+      <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${colors[color]}`}>
+        <Icon size={18} />
+      </div>
+      <p className="text-2xl font-bold text-slate-900 dark:text-white">{value ?? '—'}</p>
+      <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+    </div>
+  );
+}
+
 function AnalyticsTab() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -560,22 +692,26 @@ function AnalyticsTab() {
 
   return (
     <div>
-      <div className="flex justify-between mb-6">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold">Analytics</h2>
-        <select value={days} onChange={e => setDays(Number(e.target.value))} className={INPUT + ' w-32'}>
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <select value={days} onChange={e => setDays(Number(e.target.value))} className={INPUT + ' w-36'}>
+            <option value={7}>Last 7 days</option>
+            <option value={30}>Last 30 days</option>
+            <option value={90}>Last 90 days</option>
+          </select>
+          <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={14} /></button>
+        </div>
       </div>
-      {loading ? <SkeletonRows /> : (
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl"><p className="text-2xl font-bold">{stats?.totalViews || 0}</p><p className="text-xs text-slate-500">Page Views</p></div>
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl"><p className="text-2xl font-bold">{stats?.uniqueVisitors || 0}</p><p className="text-xs text-slate-500">Unique Visitors</p></div>
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl"><p className="text-2xl font-bold">{stats?.resumeDownloads || 0}</p><p className="text-xs text-slate-500">Resume Downloads</p></div>
-          <div className="bg-white dark:bg-slate-800 p-4 rounded-xl"><p className="text-2xl font-bold">{stats?.contactForms || 0}</p><p className="text-xs text-slate-500">Contact Forms</p></div>
+      {loading ? <SkeletonRows count={1} /> : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <StatCard icon={Eye} label="Page Views" value={stats?.totalViews?.toLocaleString()} color="blue" />
+          <StatCard icon={BarChart2} label="Unique Visitors" value={stats?.uniqueVisitors?.toLocaleString()} color="purple" />
+          <StatCard icon={Download} label="Resume Downloads" value={stats?.resumeDownloads?.toLocaleString()} color="green" />
+          <StatCard icon={MessageSquare} label="Contact Forms" value={stats?.contactForms?.toLocaleString()} color="orange" />
         </div>
       )}
+      <p className="text-xs text-slate-400 mt-4">Stats are counted from MongoDB — tracking fires on each page load and tracked user actions.</p>
     </div>
   );
 }
@@ -605,21 +741,21 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="sticky top-0 bg-white dark:bg-slate-800 border-b p-4">
+      <header className="sticky top-0 z-10 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <span className="font-bold text-xl">SA Dashboard</span>
-          <div className="flex gap-3">
-            <Link to="/" className="text-sm text-blue-500">View Site</Link>
+          <div className="flex gap-3 items-center">
+            <Link to="/" className="text-sm text-blue-500 hover:text-blue-600">View Site</Link>
             <DarkModeToggle />
-            <button onClick={handleLogout} className="text-sm text-red-500">Logout</button>
+            <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1"><LogOut size={13} /> Logout</button>
           </div>
         </div>
       </header>
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex flex-wrap gap-2 mb-6">
-          {TABS.map(({ id, label }) => (
-            <button key={id} onClick={() => setTab(id)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white' : 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300'}`}>
-              {label}
+          {TABS.map(({ id, label, Icon }) => (
+            <button key={id} onClick={() => setTab(id)} className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500'}`}>
+              <Icon size={13} />{label}
             </button>
           ))}
         </div>
