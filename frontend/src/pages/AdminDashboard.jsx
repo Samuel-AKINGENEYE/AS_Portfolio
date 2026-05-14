@@ -62,10 +62,11 @@ function ItemRow({ children, onEdit, onDelete }) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
-// Reusable image upload field (file picker + URL fallback)
+// Reusable image upload field (file picker; URL input hidden by default)
 // ──────────────────────────────────────────────────────────────────────────
 function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }) {
   const [uploading, setUploading] = useState(false);
+  const [showUrl, setShowUrl] = useState(false);
   const inputRef = useRef(null);
 
   const handleFile = async (e) => {
@@ -91,30 +92,47 @@ function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }
         {value && (
           <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
             <img src={value} alt="preview" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-red-500/80 transition-colors"
+            >
+              <X size={10} />
+            </button>
           </div>
         )}
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
           <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
             <Image size={13} />
-            {uploading ? 'Uploading…' : 'Upload Image'}
+            {uploading ? 'Uploading…' : value ? 'Replace Image' : 'Upload Image'}
             <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
           </label>
+          <button
+            type="button"
+            onClick={() => setShowUrl(v => !v)}
+            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2"
+          >
+            {showUrl ? 'hide URL field' : 'or paste URL'}
+          </button>
         </div>
-        <input
-          type="url"
-          placeholder="…or paste image URL"
-          value={value || ''}
-          onChange={e => onChange(e.target.value)}
-          className={INPUT}
-        />
+        {showUrl && (
+          <input
+            type="url"
+            placeholder="Paste image URL here"
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
+            className={INPUT}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-// Reusable file upload field (PDF / any file + URL fallback)
+// Reusable file upload field (PDF / any file; URL input hidden by default)
 function FileUploadField({ label, value, onChange, folder, accept, fieldName = 'file', icon: Icon = FileText }) {
   const [uploading, setUploading] = useState(false);
+  const [showUrl, setShowUrl] = useState(false);
   const inputRef = useRef(null);
 
   const handleFile = async (e) => {
@@ -144,20 +162,29 @@ function FileUploadField({ label, value, onChange, folder, accept, fieldName = '
             <Icon size={13} /> View current file
           </a>
         )}
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3 flex-wrap">
           <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
             <Upload size={13} />
-            {uploading ? 'Uploading…' : `Upload ${label}`}
+            {uploading ? 'Uploading…' : value ? `Replace ${label}` : `Upload ${label}`}
             <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
           </label>
+          <button
+            type="button"
+            onClick={() => setShowUrl(v => !v)}
+            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2"
+          >
+            {showUrl ? 'hide URL field' : 'or paste URL'}
+          </button>
         </div>
-        <input
-          type="url"
-          placeholder="…or paste file URL"
-          value={value || ''}
-          onChange={e => onChange(e.target.value)}
-          className={INPUT}
-        />
+        {showUrl && (
+          <input
+            type="url"
+            placeholder="Paste file URL here"
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
+            className={INPUT}
+          />
+        )}
       </div>
     </div>
   );
@@ -546,6 +573,8 @@ function ProfileTab() {
   const resumeRef = useRef(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
+  const [showAvatarUrl, setShowAvatarUrl] = useState(false);
+  const [showResumeUrl, setShowResumeUrl] = useState(false);
 
   useEffect(() => {
     profileApi.get()
@@ -604,12 +633,19 @@ function ProfileTab() {
             : <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0"><User size={24} className="text-slate-400" /></div>
           }
           <div className="flex-1 space-y-2">
-            <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingAvatar ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-              <Image size={13} />
-              {uploadingAvatar ? 'Uploading…' : 'Upload Avatar'}
-              <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploadingAvatar} />
-            </label>
-            <input type="url" placeholder="…or paste image URL" value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} />
+            <div className="flex items-center gap-3 flex-wrap">
+              <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingAvatar ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
+                <Image size={13} />
+                {uploadingAvatar ? 'Uploading…' : form.avatar ? 'Replace Avatar' : 'Upload Avatar'}
+                <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploadingAvatar} />
+              </label>
+              <button type="button" onClick={() => setShowAvatarUrl(v => !v)} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2">
+                {showAvatarUrl ? 'hide URL field' : 'or paste URL'}
+              </button>
+            </div>
+            {showAvatarUrl && (
+              <input type="url" placeholder="Paste image URL here" value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} />
+            )}
           </div>
         </div>
       </div>
@@ -623,12 +659,19 @@ function ProfileTab() {
               <Download size={13} /> View current resume
             </a>
           )}
-          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingResume ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-            <Upload size={13} />
-            {uploadingResume ? 'Uploading…' : 'Upload Resume (PDF)'}
-            <input ref={resumeRef} type="file" accept=".pdf,application/pdf" onChange={handleResumeUpload} className="hidden" disabled={uploadingResume} />
-          </label>
-          <input type="url" placeholder="…or paste resume URL" value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT} />
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingResume ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
+              <Upload size={13} />
+              {uploadingResume ? 'Uploading…' : form.resumeUrl ? 'Replace Resume (PDF)' : 'Upload Resume (PDF)'}
+              <input ref={resumeRef} type="file" accept=".pdf,application/pdf" onChange={handleResumeUpload} className="hidden" disabled={uploadingResume} />
+            </label>
+            <button type="button" onClick={() => setShowResumeUrl(v => !v)} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2">
+              {showResumeUrl ? 'hide URL field' : 'or paste URL'}
+            </button>
+          </div>
+          {showResumeUrl && (
+            <input type="url" placeholder="Paste resume URL here" value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT} />
+          )}
         </div>
         <p className="text-xs text-slate-400 mt-1">Uploaded resume will appear in the "Download Resume" button on the contact section.</p>
       </div>

@@ -46,9 +46,9 @@ function StarRating({ rating }) {
   );
 }
 
-function SectionHeader({ title, subtitle }) {
+function SectionHeader({ title, subtitle, className = '' }) {
   return (
-    <div className="text-center mb-12">
+    <div className={`text-center mb-12 reveal ${className}`}>
       <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{title}</h2>
       {subtitle && <p className="text-slate-500 dark:text-slate-400 mt-3">{subtitle}</p>}
     </div>
@@ -103,6 +103,25 @@ export default function Home() {
     load();
   }, []);
 
+  // Don't block on cold-start API delays beyond 3 s
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Scroll-reveal: observe all .reveal* elements once loading clears
+  useEffect(() => {
+    if (loading) return;
+    const io = new IntersectionObserver(
+      entries => entries.forEach(el => {
+        if (el.isIntersecting) { el.target.classList.add('visible'); io.unobserve(el.target); }
+      }),
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-scale').forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, [loading]);
+
   const skillsByCategory = skills.reduce((acc, s) => {
     (acc[s.category] = acc[s.category] || []).push(s);
     return acc;
@@ -136,7 +155,28 @@ export default function Home() {
   const experienceCount = experience.length;
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Loading...</div>;
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-white dark:bg-slate-900">
+        {/* Brand logo */}
+        <div className="relative animate-fade-in">
+          <span className="text-6xl font-black tracking-tight text-slate-900 dark:text-white select-none">
+            <span className="text-blue-500">{'{'}</span>SA<span className="text-blue-500">{'}'}</span>
+          </span>
+          <span className="absolute inset-x-0 -bottom-2 h-0.5 rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 opacity-80" />
+        </div>
+        {/* Animated dots */}
+        <div className="flex gap-2.5">
+          {[0, 1, 2, 3].map(i => (
+            <div
+              key={i}
+              className="w-2.5 h-2.5 rounded-full bg-blue-500"
+              style={{ animation: `dotBounce 1.2s ease-in-out ${i * 0.18}s infinite` }}
+            />
+          ))}
+        </div>
+        <p className="text-sm text-slate-400 animate-pulse tracking-wide">Loading portfolio…</p>
+      </div>
+    );
   }
 
   return (
@@ -152,25 +192,35 @@ export default function Home() {
         <div className="relative z-10 max-w-6xl mx-auto w-full py-20">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-medium mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-medium mb-6 animate-slide-up">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                 {profile?.availability || 'Available for Work'}
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-3 text-slate-900 dark:text-white">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-3 text-slate-900 dark:text-white animate-slide-up-d1">
                 Hi, I'm <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">{profile?.name?.split(' ')[0] || 'Samuel'}</span>
               </h1>
-              <div className="text-xl md:text-2xl lg:text-3xl font-semibold text-slate-600 dark:text-slate-300 mb-4">
+              <div className="text-xl md:text-2xl lg:text-3xl font-semibold text-slate-600 dark:text-slate-300 mb-4 animate-slide-up-d2">
                 <TypingText texts={HERO_TEXTS} />
               </div>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6 max-w-lg">
+              <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6 max-w-lg animate-slide-up-d3">
                 {profile?.bio || 'Building tools used by 500+ users across Africa. I write code that creates real impact.'}
               </p>
-              <div className="flex flex-wrap gap-3 mb-10">
+              <div className="flex flex-wrap gap-3 mb-10 animate-slide-up-d4">
                 <a href="#projects" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">View My Work <ChevronRight size={16} /></a>
+                {profile?.resumeUrl && (
+                  <a
+                    href={profile.resumeUrl}
+                    download
+                    onClick={trackResume}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all font-medium"
+                  >
+                    <Download size={16} /> Download CV
+                  </a>
+                )}
                 <a href="#contact" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all">Contact Me</a>
               </div>
             </div>
-            <div className="hidden lg:flex justify-center">
+            <div className="hidden lg:flex justify-center animate-slide-right">
               <div className="relative animate-float">
                 <div className="relative w-80 h-80 rounded-[2rem] overflow-hidden border border-blue-500/20 shadow-2xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
                   {profile?.avatar ? <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><span className="text-8xl font-black text-blue-500/30 dark:text-blue-500/20">SA</span></div>}
@@ -191,19 +241,19 @@ export default function Home() {
       <section className="py-16 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 reveal reveal-d1">
               <p className="text-4xl font-bold text-blue-500"><CountUp end={projectCount} />+</p>
               <p className="text-sm text-slate-500 mt-1">Projects Built</p>
             </div>
-            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 reveal reveal-d2">
               <p className="text-4xl font-bold text-green-500"><CountUp end={certificateCount} /></p>
               <p className="text-sm text-slate-500 mt-1">Certifications</p>
             </div>
-            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 reveal reveal-d3">
               <p className="text-4xl font-bold text-purple-500"><CountUp end={skillCount} /></p>
               <p className="text-sm text-slate-500 mt-1">Skills</p>
             </div>
-            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="text-center p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 reveal reveal-d4">
               <p className="text-4xl font-bold text-orange-500"><CountUp end={experienceCount} /></p>
               <p className="text-sm text-slate-500 mt-1">Years Active</p>
             </div>
@@ -225,7 +275,11 @@ export default function Home() {
             </div>
           )}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map(p => <ProjectCard key={p.id} project={p} />)}
+            {filteredProjects.map((p, i) => (
+              <div key={p._id || p.id} className={`reveal reveal-d${(i % 3) + 1}`}>
+                <ProjectCard project={p} />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -235,7 +289,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Frontend</h3>
               <ul className="space-y-3">
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="React" size={18} /> React</li>
@@ -247,7 +301,7 @@ export default function Home() {
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="Figma" size={18} /> Figma</li>
               </ul>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d2">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Backend</h3>
               <ul className="space-y-3">
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="Node.js" size={18} /> Node.js</li>
@@ -257,7 +311,7 @@ export default function Home() {
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="PHP" size={18} /> PHP</li>
               </ul>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d3">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Database</h3>
               <ul className="space-y-3">
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="PostgreSQL" size={18} /> PostgreSQL</li>
@@ -266,7 +320,7 @@ export default function Home() {
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="MySQL" size={18} /> MySQL</li>
               </ul>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d4">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">Tools</h3>
               <ul className="space-y-3">
                 <li className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3"><SkillIcon name="Git" size={18} /> Git</li>
@@ -304,7 +358,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificates.map(cert => <CertificateCard key={cert.id} certificate={cert} />)}
+            {certificates.map((cert, i) => (
+              <div key={cert._id || cert.id} className={`reveal reveal-d${(i % 3) + 1}`}>
+                <CertificateCard certificate={cert} />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -315,7 +373,7 @@ export default function Home() {
           <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
           <div className="grid md:grid-cols-3 gap-8">
             {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+              <div key={i} className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm reveal reveal-d${i + 1}`}>
                 <StarRating rating={t.rating} />
                 <p className="text-sm italic mt-3 mb-4 text-slate-600 dark:text-slate-400">"{t.feedback}"</p>
                 <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
@@ -333,14 +391,14 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
           <div className="grid lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            <form onSubmit={handleContact} className="space-y-4">
+            <form onSubmit={handleContact} className="space-y-4 reveal reveal-d1">
               <input type="text" tabIndex={-1} autoComplete="off" className="hidden" value={contactForm.honeypot} onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))} />
               <div><input required placeholder="Your name" value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
               <div><input required type="email" placeholder="Your email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" /></div>
               <div><textarea required rows={5} placeholder="Your message" value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white resize-none" /></div>
               <button type="submit" disabled={sending} className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">{sending ? 'Sending...' : 'Send Message'}</button>
             </form>
-            <div className="space-y-6">
+            <div className="space-y-6 reveal reveal-d2">
               <div><h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3><div className="flex flex-wrap gap-3">{social.github && <a href={social.github} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}{social.linkedin && <a href={social.linkedin} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}{social.twitter && <a href={social.twitter} target="_blank" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}{profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white"><Mail size={20} /></a>}</div></div>
               {profile?.location && (<div className="flex items-center gap-3 text-slate-600 dark:text-slate-400"><MapPin size={16} className="text-blue-500" /><span>{profile.location}</span></div>)}
               {profile?.email && (<div className="flex items-center gap-3 text-slate-600 dark:text-slate-400"><Mail size={16} className="text-blue-500" /><a href={`mailto:${profile.email}`} className="hover:text-blue-500">{profile.email}</a></div>)}

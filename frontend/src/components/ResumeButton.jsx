@@ -6,10 +6,11 @@ const ResumeButton = () => {
   const [trackResume, setTrackResume] = useState(() => () => {});
 
   useEffect(() => {
-    // Fetch profile to get resume URL
-    fetch('/api/profile')
+    const base = import.meta.env.VITE_API_URL || 'https://samuel-ak-portfolio-api.onrender.com/api';
+    fetch(`${base}/profile`)
       .then(res => res.json())
-      .then(data => setProfile(data.data));
+      .then(data => setProfile(data.data))
+      .catch(() => {});
   }, []);
 
   const handleDownload = () => {
