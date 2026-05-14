@@ -207,16 +207,6 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-3 mb-10 animate-slide-up-d4">
                 <a href="#projects" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">View My Work <ChevronRight size={16} /></a>
-                {profile?.resumeUrl && (
-                  <a
-                    href={profile.resumeUrl}
-                    download
-                    onClick={trackResume}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all font-medium"
-                  >
-                    <Download size={16} /> Download CV
-                  </a>
-                )}
                 <a href="#contact" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all">Contact Me</a>
               </div>
             </div>
