@@ -85,4 +85,53 @@
   .reveal-d4 { transition-delay: 0.28s; }
   .reveal-d5 { transition-delay: 0.35s; }
   .reveal-d6 { transition-delay: 0.42s; }
+
+  /* ── Hero / entry animations ─────────────────────────── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideRight {
+    from { opacity: 0; transform: translateX(32px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-12px); }
+  }
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40%           { transform: translateY(-10px); opacity: 1; }
+  }
+
+  .animate-slide-up    { animation: slideUp  0.6s cubic-bezier(0.16,1,0.3,1) both; }
+  .animate-slide-up-d1 { animation: slideUp  0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+  .animate-slide-up-d2 { animation: slideUp  0.6s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+  .animate-slide-up-d3 { animation: slideUp  0.6s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
+  .animate-slide-up-d4 { animation: slideUp  0.6s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
+  .animate-slide-right { animation: slideRight 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+  .animate-fade-in     { animation: fadeIn   0.5s ease both; }
+  .animate-float       { animation: float    4s ease-in-out infinite; }
+
+  /* ── Image loading placeholder ───────────────────────── */
+  img {
+    content-visibility: auto;
+  }
+
+  /* ── Reduce motion preference ─────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-left, .reveal-scale,
+    .animate-slide-up, .animate-slide-up-d1, .animate-slide-up-d2,
+    .animate-slide-up-d3, .animate-slide-up-d4, .animate-slide-right,
+    .animate-fade-in, .animate-float {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
 }

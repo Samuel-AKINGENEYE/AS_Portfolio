@@ -4,11 +4,11 @@ import toast from 'react-hot-toast';
 import {
   LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code,
   BookOpen, Briefcase, Upload, BarChart2, Eye, Download,
-  MessageSquare, RefreshCw, Image, FileText,
+  MessageSquare, RefreshCw, Image, FileText, Inbox, Mail, MailOpen, ZoomIn,
 } from 'lucide-react';
 import {
   projectsApi, certificatesApi, profileApi, skillsApi,
-  educationApi, experienceApi, analyticsApi, uploadApi,
+  educationApi, experienceApi, analyticsApi, uploadApi, contactApi,
 } from '../services/api.js';
 import DarkModeToggle from '../components/DarkModeToggle.jsx';
 
@@ -288,6 +288,7 @@ function CertificatesTab() {
   const [certs, setCerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -322,7 +323,21 @@ function CertificatesTab() {
           {certs.map(c => (
             <ItemRow key={c._id} onEdit={() => setModal(c)} onDelete={() => handleDelete(c._id)}>
               <div className="flex items-center gap-3">
-                {c.imageUrl && <img src={c.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />}
+                {c.imageUrl
+                  ? (
+                    <button
+                      onClick={() => setPreview(c)}
+                      title="Preview certificate"
+                      className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 ring-1 ring-slate-200 dark:ring-slate-600 hover:ring-blue-400 transition-all group"
+                    >
+                      <img src={c.imageUrl} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-all">
+                        <ZoomIn size={12} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </button>
+                  )
+                  : <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0"><Award size={14} className="text-slate-400" /></div>
+                }
                 <div>
                   <p className="font-medium text-sm">{c.name}</p>
                   <p className="text-xs text-slate-500">{c.issuer} · {c.category}</p>
@@ -336,6 +351,26 @@ function CertificatesTab() {
         <Modal title={modal === 'add' ? 'Add Certificate' : 'Edit Certificate'} onClose={() => setModal(null)}>
           <CertificateForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
         </Modal>
+      )}
+      {preview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPreview(null)}>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+          <div className="relative max-w-2xl w-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+              <div>
+                <p className="font-semibold text-sm">{preview.name}</p>
+                <p className="text-xs text-slate-500">{preview.issuer} · {preview.category}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {preview.credentialUrl && (
+                  <a href={preview.credentialUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1"><Eye size={12} /> View Credential</a>
+                )}
+                <button onClick={() => setPreview(null)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"><X size={16} /></button>
+              </div>
+            </div>
+            <img src={preview.imageUrl} alt={preview.name} className="w-full max-h-[70vh] object-contain bg-slate-50 dark:bg-slate-900 p-4" />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -760,11 +795,112 @@ function AnalyticsTab() {
 }
 
 // ──────────────────────────────────────────────────────────────────────────
+// MESSAGES TAB
+// ──────────────────────────────────────────────────────────────────────────
+function MessagesTab({ onUnreadChange }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await contactApi.getMessages();
+      const data = r.data.data ?? [];
+      setMessages(data);
+      onUnreadChange?.(data.filter(m => !m.read).length);
+    } catch { toast.error('Failed to load messages'); }
+    finally { setLoading(false); }
+  }, [onUnreadChange]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleMarkRead = async (msg) => {
+    if (msg.read) return;
+    try {
+      await contactApi.markRead(msg._id);
+      setMessages(prev => prev.map(m => m._id === msg._id ? { ...m, read: true } : m));
+      onUnreadChange?.(messages.filter(m => !m.read && m._id !== msg._id).length);
+    } catch { toast.error('Failed to mark read'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this message?')) return;
+    try {
+      await contactApi.deleteMessage(id);
+      const next = messages.filter(m => m._id !== id);
+      setMessages(next);
+      onUnreadChange?.(next.filter(m => !m.read).length);
+      toast.success('Deleted');
+    } catch { toast.error('Delete failed'); }
+  };
+
+  const unread = messages.filter(m => !m.read).length;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold">Messages</h2>
+          {unread > 0 && <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-blue-500 text-white">{unread} new</span>}
+        </div>
+        <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={14} /></button>
+      </div>
+      {loading ? <SkeletonRows count={3} /> : messages.length === 0 ? (
+        <div className="text-center py-16 text-slate-400">
+          <Inbox size={36} className="mx-auto mb-3 opacity-40" />
+          <p className="text-sm">No messages yet</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {messages.map(msg => (
+            <div
+              key={msg._id}
+              className={`rounded-xl border transition-all overflow-hidden ${msg.read ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'bg-blue-50/60 dark:bg-blue-900/10 border-blue-200 dark:border-blue-700/40'}`}
+            >
+              <div
+                className="flex items-start gap-4 p-4 cursor-pointer"
+                onClick={() => { setExpanded(expanded === msg._id ? null : msg._id); handleMarkRead(msg); }}
+              >
+                <div className={`mt-0.5 shrink-0 ${msg.read ? 'text-slate-400' : 'text-blue-500'}`}>
+                  {msg.read ? <MailOpen size={16} /> : <Mail size={16} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className={`text-sm font-medium truncate ${msg.read ? 'text-slate-700 dark:text-slate-300' : 'text-slate-900 dark:text-white'}`}>{msg.name}</p>
+                    <p className="text-xs text-slate-400 shrink-0">{new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  </div>
+                  <p className="text-xs text-slate-500 truncate">{msg.email}</p>
+                  {expanded !== msg._id && (
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-1">{msg.message}</p>
+                  )}
+                </div>
+                <button onClick={e => { e.stopPropagation(); handleDelete(msg._id); }} className="p-1.5 shrink-0 rounded-lg text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
+              </div>
+              {expanded === msg._id && (
+                <div className="px-4 pb-4 pt-0 border-t border-slate-200/60 dark:border-slate-700/60 ml-8">
+                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <a href={`mailto:${msg.email}?subject=Re: Your message&body=Hi ${msg.name},%0A%0A`} className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors"><Mail size={12} /> Reply via Email</a>
+                    {!msg.read && <button onClick={() => handleMarkRead(msg)} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Mark as read</button>}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
 // MAIN DASHBOARD
 // ──────────────────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'projects', label: 'Projects', Icon: Layers },
   { id: 'certificates', label: 'Certificates', Icon: Award },
+  { id: 'messages', label: 'Messages', Icon: Inbox },
   { id: 'skills', label: 'Skills', Icon: Code },
   { id: 'education', label: 'Education', Icon: BookOpen },
   { id: 'experience', label: 'Experience', Icon: Briefcase },
@@ -774,6 +910,7 @@ const TABS = [
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState('projects');
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -797,14 +934,18 @@ export default function AdminDashboard() {
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex flex-wrap gap-2 mb-6">
           {TABS.map(({ id, label, Icon }) => (
-            <button key={id} onClick={() => setTab(id)} className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500'}`}>
+            <button key={id} onClick={() => setTab(id)} className={`relative inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500'}`}>
               <Icon size={13} />{label}
+              {id === 'messages' && unreadCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 text-[10px] font-bold rounded-full bg-red-500 text-white flex items-center justify-center">{unreadCount}</span>
+              )}
             </button>
           ))}
         </div>
         <div>
           {tab === 'projects' && <ProjectsTab />}
           {tab === 'certificates' && <CertificatesTab />}
+          {tab === 'messages' && <MessagesTab onUnreadChange={setUnreadCount} />}
           {tab === 'skills' && <SkillsTab />}
           {tab === 'education' && <EducationTab />}
           {tab === 'experience' && <ExperienceTab />}

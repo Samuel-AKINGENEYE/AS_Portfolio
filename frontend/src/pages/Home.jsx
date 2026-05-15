@@ -64,6 +64,7 @@ export default function Home() {
   const [experience, setExperience] = useState([]);
   const [loading, setLoading] = useState(true);
   const [techFilter, setTechFilter] = useState('All');
+  const [certFilter, setCertFilter] = useState('All');
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
   const [sending, setSending] = useState(false);
 
@@ -129,6 +130,9 @@ export default function Home() {
 
   const allTechs = ['All', ...new Set(projects.flatMap(p => p.techStack || []))].slice(0, 9);
   const filteredProjects = techFilter === 'All' ? projects : projects.filter(p => p.techStack?.includes(techFilter));
+
+  const allCertCategories = ['All', ...new Set(certificates.map(c => c.category).filter(Boolean))];
+  const filteredCerts = certFilter === 'All' ? certificates : certificates.filter(c => c.category === certFilter);
 
   const handleContact = async (e) => {
     e.preventDefault();
@@ -347,13 +351,25 @@ export default function Home() {
       <section id="certificates" className="py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
+          {allCertCategories.length > 1 && (
+            <div className="flex flex-wrap gap-2 justify-center mb-10">
+              {allCertCategories.map(cat => (
+                <button key={cat} onClick={() => setCertFilter(cat)} className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${certFilter === cat ? 'bg-blue-500 text-white border-blue-500' : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500'}`}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {certificates.map((cert, i) => (
+            {filteredCerts.map((cert, i) => (
               <div key={cert._id || cert.id} className={`reveal reveal-d${(i % 3) + 1}`}>
                 <CertificateCard certificate={cert} />
               </div>
             ))}
           </div>
+          {filteredCerts.length === 0 && (
+            <p className="text-center text-slate-500 dark:text-slate-400 py-8">No certificates in this category.</p>
+          )}
         </div>
       </section>
 
