@@ -1,34 +1,50 @@
 import { ExternalLink, Github } from 'lucide-react';
+import { useState } from 'react';
 
 export default function ProjectCard({ project }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const cardLink = project.liveUrl || project.githubUrl || null;
+
   return (
     <div
-      className="group flex flex-col bg-white dark:bg-slate-800
+      className="group relative flex flex-col bg-white dark:bg-slate-800
                  border border-slate-200 dark:border-slate-700
                  rounded-2xl overflow-hidden shadow-sm
                  hover:shadow-xl hover:scale-[1.02] hover:border-blue-500/50
                  transition-all duration-300 glow-hover"
+      style={cardLink ? { cursor: 'pointer' } : undefined}
     >
+      {cardLink && (
+        <a
+          href={cardLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 z-[1] rounded-2xl"
+          aria-label={`Open ${project.title}`}
+          tabIndex={-1}
+        />
+      )}
+
       {/* Thumbnail */}
-      <div className="h-48 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden">
-        {project.imageUrl ? (
+      <div className="relative z-[2] h-48 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
+        {project.imageUrl && !imgFailed ? (
           <img
             src={project.imageUrl}
             alt={project.title}
             loading="lazy"
+            decoding="async"
+            onError={() => setImgFailed(true)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-5xl font-black text-blue-500/20 select-none">
-              {project.title?.charAt(0) ?? '?'}
-            </span>
-          </div>
+          <span className="text-5xl font-black text-blue-500/20 select-none">
+            {project.title?.charAt(0) ?? '?'}
+          </span>
         )}
       </div>
 
       {/* Body */}
-      <div className="flex flex-col flex-1 p-6">
+      <div className="relative z-[2] flex flex-col flex-1 p-6">
         <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">
           {project.title}
         </h3>
@@ -36,7 +52,6 @@ export default function ProjectCard({ project }) {
           {project.description}
         </p>
 
-        {/* Tech stack */}
         {project.techStack?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-5">
             {project.techStack.map((tech) => (
@@ -53,14 +68,14 @@ export default function ProjectCard({ project }) {
           </div>
         )}
 
-        {/* Links */}
         <div className="flex items-center gap-4 pt-1 border-t border-slate-100 dark:border-slate-700/50">
           {project.liveUrl && (
             <a
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-medium
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-[3] inline-flex items-center gap-1.5 text-sm font-medium
                          text-blue-600 dark:text-blue-400
                          hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
             >
@@ -73,7 +88,8 @@ export default function ProjectCard({ project }) {
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-medium
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-[3] inline-flex items-center gap-1.5 text-sm font-medium
                          text-slate-500 dark:text-slate-400
                          hover:text-slate-900 dark:hover:text-white transition-colors"
             >

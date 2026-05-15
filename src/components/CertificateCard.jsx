@@ -1,4 +1,4 @@
-import { Award, ExternalLink } from 'lucide-react';
+import { Award, ExternalLink, FileText } from 'lucide-react';
 
 const CATEGORY_COLORS = {
   'AI/ML': 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
@@ -7,33 +7,66 @@ const CATEGORY_COLORS = {
   'Other': 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600',
 };
 
+const isPdf = (url) => url && /\.pdf(\?|$)/i.test(url);
+
 export default function CertificateCard({ certificate }) {
   const badgeClass = CATEGORY_COLORS[certificate.category] ?? CATEGORY_COLORS['Other'];
+  const cardLink = certificate.credentialUrl
+    || (isPdf(certificate.imageUrl) ? certificate.imageUrl : null)
+    || certificate.imageUrl
+    || null;
 
   return (
     <div
-      className="group flex flex-col bg-white dark:bg-slate-800
+      className="group relative flex flex-col bg-white dark:bg-slate-800
                  border border-slate-200 dark:border-slate-700
                  rounded-2xl overflow-hidden shadow-sm
                  hover:shadow-xl hover:scale-[1.02] hover:border-blue-500/50
                  transition-all duration-300 glow-hover"
+      style={cardLink ? { cursor: 'pointer' } : undefined}
     >
+      {cardLink && (
+        <a
+          href={cardLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute inset-0 z-[1] rounded-2xl"
+          aria-label={`View ${certificate.name}`}
+          tabIndex={-1}
+        />
+      )}
+
       {/* Image / icon area */}
-      <div className="h-36 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700/50 overflow-hidden flex items-center justify-center">
-        {certificate.imageUrl ? (
+      <div className="relative z-[2] h-36 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700/50 overflow-hidden flex items-center justify-center">
+        {isPdf(certificate.imageUrl) ? (
+          <div className="flex flex-col items-center gap-2 text-blue-500/60 dark:text-blue-400/50 select-none">
+            <FileText size={40} strokeWidth={1.5} />
+            <span className="text-xs font-medium tracking-wide uppercase">PDF Certificate</span>
+          </div>
+        ) : certificate.imageUrl ? (
           <img
             src={certificate.imageUrl}
             alt={certificate.name}
             loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.removeAttribute('style');
+            }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-        ) : (
-          <Award size={44} className="text-blue-500/30 dark:text-blue-500/20" />
+        ) : null}
+        {!isPdf(certificate.imageUrl) && (
+          <Award
+            size={44}
+            className="text-blue-500/30 dark:text-blue-500/20 absolute"
+            style={certificate.imageUrl ? { display: 'none' } : undefined}
+          />
         )}
       </div>
 
       {/* Body */}
-      <div className="flex flex-col flex-1 p-5">
+      <div className="relative z-[2] flex flex-col flex-1 p-5">
         <span className={`self-start text-xs font-medium px-2.5 py-1 rounded-full border ${badgeClass} mb-3`}>
           {certificate.category ?? 'Certificate'}
         </span>
@@ -51,12 +84,13 @@ export default function CertificateCard({ certificate }) {
           </p>
         )}
 
-        {certificate.credentialUrl && certificate.credentialUrl !== '' && (
+        {certificate.credentialUrl && (
           <a
             href={certificate.credentialUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-[3] mt-4 inline-flex items-center gap-1.5 text-xs font-medium
                        text-blue-600 dark:text-blue-400
                        hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
           >
