@@ -4,7 +4,7 @@ import {
   Github, Linkedin, Twitter, Mail, MapPin, Calendar,
   Briefcase, Code2, Database, Wrench, Globe,
   Star, StarHalf, MessageSquare, ChevronRight,
-  ArrowDown, Send, Award,
+  ArrowDown, Send, Award, Download,
 } from 'lucide-react';
 
 import Navbar from '../components/Navbar.jsx';
@@ -547,6 +547,24 @@ export default function Home() {
                   <div>
                     <p className="font-medium text-slate-900 dark:text-white text-sm">Email</p>
                     <p className="text-xs text-slate-500 mt-0.5">{profile.email}</p>
+                  </div>
+                </a>
+              )}
+
+              {profile?.resumeUrl && (
+                <a
+                  href={profile.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  className="flex items-center gap-4 p-4 rounded-xl card glow-hover group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    <Download size={20} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-white text-sm">Download Resume</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Get my CV as a PDF</p>
                   </div>
                 </a>
               )}

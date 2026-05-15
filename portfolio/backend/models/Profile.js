@@ -13,6 +13,7 @@ const profileSchema = new mongoose.Schema({
     linkedin: { type: String, default: '' },
     twitter: { type: String, default: '' },
   },
+  resumeUrl: { type: String, default: '' },
   updatedAt: { type: Date, default: Date.now },
 });
 

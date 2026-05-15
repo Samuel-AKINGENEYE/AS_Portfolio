@@ -48,6 +48,12 @@ export const certificatesApi = {
 export const profileApi = {
   get: () => api.get('/profile'),
   update: (data) => api.put('/profile', data),
+  uploadResume: (file) => {
+    const fd = new FormData();
+    fd.append('resume', file);
+    return api.post('/profile/resume', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  deleteResume: () => api.delete('/profile/resume'),
 };
 
 // Skills

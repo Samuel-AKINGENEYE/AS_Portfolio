@@ -12,7 +12,6 @@ build/
 
 # Backend (keep for reference but not needed for frontend deploy)
 backend/uploads/
-portfolio/
 
 # IDE
 .vscode/

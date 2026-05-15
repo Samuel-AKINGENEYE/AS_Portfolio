@@ -5,7 +5,7 @@ import {
   LogOut, Plus, Edit2, Trash2, X, Save,
   Layers, Award, User, Code, BookOpen, Briefcase,
   ExternalLink, Github, Linkedin, Twitter, Mail,
-  ChevronUp, ChevronDown
+  ChevronUp, ChevronDown, Upload, FileText, Download
 } from 'lucide-react';
 import { projectsApi, certificatesApi, profileApi, skillsApi, educationApi, experienceApi } from '../services/api.js';
 import DarkModeToggle from '../components/DarkModeToggle.jsx';
@@ -577,10 +577,13 @@ function ProfileTab() {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [deletingResume, setDeletingResume] = useState(false);
 
-  useEffect(() => {
+  const loadProfile = () =>
     profileApi.get().then(res => setForm(res.data.data)).catch(() => toast.error('Failed to load profile')).finally(() => setLoading(false));
-  }, []);
+
+  useEffect(() => { loadProfile(); }, []);
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
   const setSocial = (key, val) => setForm(f => ({ ...f, socialLinks: { ...f.socialLinks, [key]: val } }));
@@ -589,6 +592,36 @@ function ProfileTab() {
     e.preventDefault();
     setSaving(true);
     try { await profileApi.update(form); toast.success('Profile saved!'); } catch { toast.error('Failed to save'); } finally { setSaving(false); }
+  };
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') { toast.error('Please select a PDF file.'); return; }
+    setUploadingResume(true);
+    try {
+      const res = await profileApi.uploadResume(file);
+      setForm(f => ({ ...f, resumeUrl: res.data.data.resumeUrl }));
+      toast.success('Resume uploaded!');
+    } catch {
+      toast.error('Failed to upload resume.');
+    } finally {
+      setUploadingResume(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleResumeDelete = async () => {
+    setDeletingResume(true);
+    try {
+      await profileApi.deleteResume();
+      setForm(f => ({ ...f, resumeUrl: '' }));
+      toast.success('Resume removed.');
+    } catch {
+      toast.error('Failed to remove resume.');
+    } finally {
+      setDeletingResume(false);
+    }
   };
 
   if (loading) return <div className="space-y-4">{Array.from({ length: 5 }, (_, i) => <div key={i} className="h-12 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse" />)}</div>;
@@ -602,6 +635,28 @@ function ProfileTab() {
       <div className="grid grid-cols-2 gap-4"><div><label className={LABEL}>Location</label><input value={form.location ?? ''} onChange={e => set('location', e.target.value)} className={INPUT} /></div><div><label className={LABEL}>Email</label><input type="email" value={form.email ?? ''} onChange={e => set('email', e.target.value)} className={INPUT} /></div></div>
       <div className="grid grid-cols-2 gap-4"><div><label className={LABEL}>Availability</label><input value={form.availability ?? ''} onChange={e => set('availability', e.target.value)} className={INPUT} /></div><div><label className={LABEL}>Years of Experience</label><input type="number" value={form.yearsOfExperience ?? 0} onChange={e => set('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div></div>
       <div><h3 className="text-sm font-medium mb-3">Social Links</h3><div className="space-y-3">{['github', 'linkedin', 'twitter'].map(key => (<div key={key} className="flex items-center gap-3"><input type="url" value={form.socialLinks?.[key] ?? ''} onChange={e => setSocial(key, e.target.value)} className={INPUT} placeholder={`https://${key}.com/...`} /></div>))}</div></div>
+
+      {/* Resume upload */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Resume (PDF)</h3>
+        {form.resumeUrl ? (
+          <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/40">
+            <FileText size={18} className="text-blue-500 shrink-0" />
+            <a href={form.resumeUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:underline truncate flex-1">View current resume</a>
+            <button type="button" onClick={handleResumeDelete} disabled={deletingResume} className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50">
+              {deletingResume ? <Spinner /> : <Trash2 size={12} />} Remove
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-slate-400 mb-2">No resume uploaded yet.</p>
+        )}
+        <label className={`mt-2 inline-flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg text-sm border border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${uploadingResume ? 'opacity-50 pointer-events-none' : ''}`}>
+          {uploadingResume ? <Spinner /> : <Upload size={14} />}
+          {uploadingResume ? 'Uploading…' : form.resumeUrl ? 'Replace resume' : 'Upload resume PDF'}
+          <input type="file" accept="application/pdf" className="hidden" onChange={handleResumeUpload} disabled={uploadingResume} />
+        </label>
+      </div>
+
       <button type="submit" disabled={saving} className={BTN_PRIMARY}>{saving ? <Spinner /> : <Save size={14} />}{saving ? 'Saving…' : 'Save Profile'}</button>
     </form>
   );
