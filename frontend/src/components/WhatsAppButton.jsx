@@ -17,7 +17,7 @@ export default function WhatsAppButton() {
       aria-label="Chat with me on WhatsApp"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 group"
+      className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-50 flex items-center gap-3 group"
     >
       <span className={`text-sm font-medium text-white bg-slate-800 dark:bg-slate-700 px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap transition-all duration-300 pointer-events-none ${hovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
         Chat with me

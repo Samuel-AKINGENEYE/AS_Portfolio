@@ -1059,6 +1059,16 @@ export default function AdminDashboard() {
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
+  // Fetch unread count immediately on mount so the badge is visible before opening Messages
+  useEffect(() => {
+    contactApi.getMessages()
+      .then(r => {
+        const data = r.data.data ?? [];
+        setUnreadCount(data.filter(m => !m.read).length);
+      })
+      .catch(() => {});
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     toast.success('Logged out');
