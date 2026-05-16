@@ -357,7 +357,7 @@ export default function Home() {
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-center sm:text-left">{category}</h3>
                     <ul className="space-y-3">
                       {[...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(s => (
-                        <li key={s._id} className="text-slate-600 dark:text-slate-400 text-sm flex items-center justify-center sm:justify-start gap-3">
+                        <li key={s._id} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3">
                           <SkillIcon name={s.name} size={18} />
                           {s.name}
                         </li>
@@ -370,7 +370,7 @@ export default function Home() {
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-center sm:text-left">{category}</h3>
                     <ul className="space-y-3">
                       {items.map(name => (
-                        <li key={name} className="text-slate-600 dark:text-slate-400 text-sm flex items-center justify-center sm:justify-start gap-3">
+                        <li key={name} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3">
                           <SkillIcon name={name} size={18} />
                           {name}
                         </li>
