@@ -159,11 +159,31 @@ export default function Home() {
   };
 
   const social = profile?.socialLinks ?? {};
-  const resumeHref = profile?.resumeUrl || '/resume.pdf';
 
-  const trackResume = useCallback(() => {
+  const [resumeDownloading, setResumeDownloading] = useState(false);
+
+  const handleResumeDownload = useCallback(async (e) => {
+    e?.preventDefault();
+    if (resumeDownloading || !profile?.resumeUrl) return;
+    setResumeDownloading(true);
+    try {
+      const response = await fetch(profile.resumeUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'Samuel_AKINGENEYE_Resume.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(profile.resumeUrl, '_blank', 'noopener,noreferrer');
+    } finally {
+      setResumeDownloading(false);
+    }
     analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
-  }, []);
+  }, [profile?.resumeUrl, resumeDownloading]);
 
   const projectCount = projects.length;
   const certificateCount = certificates.length;
@@ -513,19 +533,18 @@ export default function Home() {
               )}
 
               {/* Resume button — uses admin-uploaded PDF when available */}
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                <a
-                  href={resumeHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={trackResume}
-                  className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border-2 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 font-medium"
-                >
-                  <Download size={16} />
-                  Download CV
-                </a>
-                <p className="text-xs text-slate-400 text-center mt-2">Opens as PDF — save from your browser</p>
-              </div>
+              {profile?.resumeUrl && (
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <button
+                    onClick={handleResumeDownload}
+                    disabled={resumeDownloading}
+                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border-2 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    <Download size={16} />
+                    {resumeDownloading ? 'Downloading…' : 'Download Resume'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -539,20 +558,28 @@ export default function Home() {
           {[
             { href: '#hero',         Icon: HomeIcon, label: 'Home'    },
             { href: '#projects',     Icon: Layers,   label: 'Work'    },
-            { href: resumeHref,      Icon: Download, label: 'CV',     external: true },
             { href: '#certificates', Icon: Award,    label: 'Certs'   },
             { href: '#contact',      Icon: Mail,     label: 'Contact' },
-          ].map(({ href, Icon, label, external }) => (
+          ].map(({ href, Icon, label }) => (
             <a
               key={label}
               href={href}
-              {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 active:scale-95 transition-all"
             >
               <Icon size={20} />
               <span className="text-[10px] font-medium">{label}</span>
             </a>
           ))}
+          {profile?.resumeUrl && (
+            <button
+              onClick={handleResumeDownload}
+              disabled={resumeDownloading}
+              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 active:scale-95 transition-all disabled:opacity-60"
+            >
+              <Download size={20} />
+              <span className="text-[10px] font-medium">Resume</span>
+            </button>
+          )}
         </div>
       </nav>
     </div>
