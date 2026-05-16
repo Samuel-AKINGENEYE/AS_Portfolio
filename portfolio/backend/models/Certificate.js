@@ -7,6 +7,7 @@ const certificateSchema = new mongoose.Schema(
     issueDate: { type: Date },
     credentialUrl: { type: String, trim: true, default: '' },
     imageUrl: { type: String, default: '' },
+    pdfUrl: { type: String, default: '' },
     category: {
       type: String,
       enum: ['AI/ML', 'Web Dev', 'Cybersecurity', 'Other'],

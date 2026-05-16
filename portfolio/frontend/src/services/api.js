@@ -42,6 +42,12 @@ export const certificatesApi = {
   create: (data) => api.post('/certificates', data),
   update: (id, data) => api.put(`/certificates/${id}`, data),
   remove: (id) => api.delete(`/certificates/${id}`),
+  uploadPdf: (id, file) => {
+    const fd = new FormData();
+    fd.append('pdf', file);
+    return api.post(`/certificates/${id}/pdf`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  deletePdf: (id) => api.delete(`/certificates/${id}/pdf`),
 };
 
 // Profile

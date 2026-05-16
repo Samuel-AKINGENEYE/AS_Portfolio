@@ -549,9 +549,10 @@ function CertificatesTab() {
 }
 
 function CertificateForm({ initial, onSave, onCancel }) {
-  const blank = { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Web Dev' };
+  const blank = { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Web Dev', pdfUrl: '' };
   const [form, setForm] = useState(initial ? { ...initial, issueDate: initial.issueDate?.split('T')[0] || '' } : blank);
   const [saving, setSaving] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
   const handleSubmit = async (e) => {
@@ -560,12 +561,58 @@ function CertificateForm({ initial, onSave, onCancel }) {
     try { await onSave(form); } finally { setSaving(false); }
   };
 
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') { toast.error('Please select a PDF file.'); return; }
+    setUploadingPdf(true);
+    try {
+      const res = await certificatesApi.uploadPdf(initial._id, file);
+      set('pdfUrl', res.data.data.pdfUrl);
+      toast.success('PDF uploaded!');
+    } catch { toast.error('Failed to upload PDF.'); }
+    finally { setUploadingPdf(false); e.target.value = ''; }
+  };
+
+  const handlePdfRemove = async () => {
+    try {
+      await certificatesApi.deletePdf(initial._id);
+      set('pdfUrl', '');
+      toast.success('PDF removed.');
+    } catch { toast.error('Failed to remove PDF.'); }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><label className={LABEL}>Name *</label><input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} /></div>
       <div><label className={LABEL}>Issuer *</label><input required value={form.issuer} onChange={e => set('issuer', e.target.value)} className={INPUT} /></div>
       <div className="grid grid-cols-2 gap-3"><div><label className={LABEL}>Issue Date</label><input type="date" value={form.issueDate} onChange={e => set('issueDate', e.target.value)} className={INPUT} /></div><div><label className={LABEL}>Category</label><select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}><option>AI/ML</option><option>Web Dev</option><option>Cybersecurity</option><option>Other</option></select></div></div>
       <div><label className={LABEL}>Credential URL</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} /></div>
+
+      {/* PDF Certificate Upload — only available when editing an existing cert */}
+      <div>
+        <label className={LABEL}>PDF Certificate</label>
+        {initial?._id ? (
+          form.pdfUrl ? (
+            <div className="flex items-center gap-2 mt-1">
+              <a href={form.pdfUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:underline"><FileText size={13} />View current PDF</a>
+              <label className={`inline-flex items-center gap-1.5 cursor-pointer px-2.5 py-1.5 rounded-lg text-xs border border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${uploadingPdf ? 'opacity-50 pointer-events-none' : ''}`}>
+                {uploadingPdf ? <Spinner /> : <Upload size={12} />}{uploadingPdf ? 'Uploading…' : 'Replace PDF'}
+                <input type="file" accept="application/pdf" className="hidden" onChange={handlePdfUpload} disabled={uploadingPdf} />
+              </label>
+              <button type="button" onClick={handlePdfRemove} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 transition-colors" title="Remove PDF"><Trash2 size={12} /></button>
+            </div>
+          ) : (
+            <label className={`mt-1 inline-flex items-center gap-1.5 cursor-pointer px-2.5 py-1.5 rounded-lg text-xs border border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${uploadingPdf ? 'opacity-50 pointer-events-none' : ''}`}>
+              {uploadingPdf ? <Spinner /> : <Upload size={12} />}{uploadingPdf ? 'Uploading…' : 'Upload PDF'}
+              <input type="file" accept="application/pdf" className="hidden" onChange={handlePdfUpload} disabled={uploadingPdf} />
+            </label>
+          )
+        ) : (
+          <p className="text-xs text-slate-400 mt-1">Save the certificate first, then edit it to upload a PDF.</p>
+        )}
+      </div>
+
       <div className="flex gap-3 pt-2"><button type="submit" disabled={saving} className={BTN_PRIMARY + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}{saving ? 'Saving…' : 'Save'}</button><button type="button" onClick={onCancel} className={BTN_GHOST}>Cancel</button></div>
     </form>
   );
