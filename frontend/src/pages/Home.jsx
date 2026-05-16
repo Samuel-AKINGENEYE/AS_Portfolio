@@ -160,30 +160,22 @@ export default function Home() {
 
   const social = profile?.socialLinks ?? {};
 
-  const [resumeDownloading, setResumeDownloading] = useState(false);
-
-  const handleResumeDownload = useCallback(async (e) => {
+  const handleResumeDownload = useCallback((e) => {
     e?.preventDefault();
-    if (resumeDownloading || !profile?.resumeUrl) return;
-    setResumeDownloading(true);
-    try {
-      const response = await fetch(profile.resumeUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = 'Samuel_AKINGENEYE_Resume.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(profile.resumeUrl, '_blank', 'noopener,noreferrer');
-    } finally {
-      setResumeDownloading(false);
-    }
+    if (!profile?.resumeUrl) return;
+    // Add fl_attachment so Cloudinary sends Content-Disposition: attachment,
+    // triggering a real browser download without any fetch/CORS complications.
+    const url = profile.resumeUrl.includes('res.cloudinary.com')
+      ? profile.resumeUrl.replace(/\/upload\/(?!fl_attachment)/, '/upload/fl_attachment/')
+      : profile.resumeUrl;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Samuel_AKINGENEYE_Resume.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
-  }, [profile?.resumeUrl, resumeDownloading]);
+  }, [profile?.resumeUrl]);
 
   const projectCount = projects.length;
   const certificateCount = certificates.length;
@@ -362,10 +354,10 @@ export default function Home() {
             {hasApiSkills
               ? Object.entries(skillsByCategory).map(([category, items], idx) => (
                   <div key={category} className={`bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d${Math.min(idx + 1, 6)}`}>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">{category}</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-center sm:text-left">{category}</h3>
                     <ul className="space-y-3">
                       {[...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(s => (
-                        <li key={s._id} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3">
+                        <li key={s._id} className="text-slate-600 dark:text-slate-400 text-sm flex items-center justify-center sm:justify-start gap-3">
                           <SkillIcon name={s.name} size={18} />
                           {s.name}
                         </li>
@@ -375,10 +367,10 @@ export default function Home() {
                 ))
               : STATIC_SKILLS.map(({ category, items }, idx) => (
                   <div key={category} className={`bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d${idx + 1}`}>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700">{category}</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-center sm:text-left">{category}</h3>
                     <ul className="space-y-3">
                       {items.map(name => (
-                        <li key={name} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3">
+                        <li key={name} className="text-slate-600 dark:text-slate-400 text-sm flex items-center justify-center sm:justify-start gap-3">
                           <SkillIcon name={name} size={18} />
                           {name}
                         </li>
@@ -537,11 +529,10 @@ export default function Home() {
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                   <button
                     onClick={handleResumeDownload}
-                    disabled={resumeDownloading}
-                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border-2 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 font-medium disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border-2 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 font-medium"
                   >
                     <Download size={16} />
-                    {resumeDownloading ? 'Downloading…' : 'Download Resume'}
+                    Download Resume
                   </button>
                 </div>
               )}
@@ -573,8 +564,7 @@ export default function Home() {
           {profile?.resumeUrl && (
             <button
               onClick={handleResumeDownload}
-              disabled={resumeDownloading}
-              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 active:scale-95 transition-all disabled:opacity-60"
+              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 active:scale-95 transition-all"
             >
               <Download size={20} />
               <span className="text-[10px] font-medium">Resume</span>
