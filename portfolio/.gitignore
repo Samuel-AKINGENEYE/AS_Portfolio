@@ -1,0 +1,10 @@
+# Backend
+backend/node_modules/
+backend/uploads/
+backend/.env
+backend/portfolio.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
