@@ -4,7 +4,7 @@ import {
   Github, Linkedin, Twitter, Mail, MapPin, Calendar,
   Briefcase, Code2, Database, Wrench, Globe,
   Star, StarHalf, MessageSquare, ChevronRight,
-  ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp,
+  ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp, Download,
 } from 'lucide-react';
 
 import Navbar           from '../components/Navbar.jsx';
@@ -13,7 +13,7 @@ import ProjectCard      from '../components/ProjectCard.jsx';
 import CertificateCard  from '../components/CertificateCard.jsx';
 import GitHubCalendar   from '../components/GitHubCalendar.jsx';
 import { SkillIcon }    from '../components/SkillIcon.jsx';
-import { projectsApi, certificatesApi, profileApi } from '../services/api.js';
+import { projectsApi, certificatesApi, profileApi, contactApi } from '../services/api.js';
 
 // ─── Static skill data (used as display source; SVG icons come from SkillIcon) ─
 
@@ -146,10 +146,15 @@ function ContactForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
-    await new Promise((r) => setTimeout(r, 900));
-    toast.success("Message sent! I'll get back to you soon.");
-    setForm({ name: '', email: '', message: '' });
-    setSending(false);
+    try {
+      const res = await contactApi.send(form);
+      toast.success(res.data?.message || "Message sent! I'll get back to you soon.");
+      setForm({ name: '', email: '', message: '' });
+    } catch {
+      toast.error('Failed to send message. Please try again or email me directly.');
+    } finally {
+      setSending(false);
+    }
   };
 
   const inputClass =
@@ -310,6 +315,13 @@ export default function Home() {
                 </a>
                 <a href="#contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-400 dark:hover:text-blue-400 font-medium transition-colors">
                   Contact Me <Mail size={16} />
+                </a>
+                <a
+                  href="/resume.pdf"
+                  download="Samuel_AKINGENEYE_Resume.pdf"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-green-500 hover:text-green-500 dark:hover:border-green-400 dark:hover:text-green-400 font-medium transition-colors"
+                >
+                  Download CV <Download size={16} />
                 </a>
               </div>
 

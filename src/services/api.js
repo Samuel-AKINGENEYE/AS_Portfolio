@@ -74,4 +74,12 @@ export const experienceApi = {
   remove: (id) => api.delete(`/experience/${id}`),
 };
 
+// Contact
+export const contactApi = {
+  send: (data) => api.post('/contact/send', data),
+  getMessages: () => api.get('/contact/messages'),
+  markRead: (id) => api.patch(`/contact/messages/${id}/read`),
+  remove: (id) => api.delete(`/contact/messages/${id}`),
+};
+
 export default api;
