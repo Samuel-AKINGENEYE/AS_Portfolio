@@ -56,7 +56,7 @@ const seed = async () => {
         title: 'Portfolio Dashboard',
         description: 'Full-stack portfolio site with custom admin CMS.',
         techStack: ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'JWT', 'Express'],
-        liveUrl: 'https://samuelak.netlify.app',
+        liveUrl: 'https://as-portfolio-livid-one.vercel.app',
         githubUrl: 'https://github.com/samuel-akingeneye/portfolio',
         featured: true,
       },

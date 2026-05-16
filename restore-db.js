@@ -84,7 +84,7 @@ const restore = async () => {
       description: 'Full-stack portfolio site with custom admin CMS for managing all content.',
       longDescription: 'A self-built portfolio and admin dashboard using React, Node.js, MongoDB, and JWT authentication.',
       techStack: ['React', 'Node.js', 'MongoDB', 'Tailwind CSS', 'JWT', 'Express'],
-      liveUrl: 'https://samuelak.netlify.app',
+      liveUrl: 'https://as-portfolio-livid-one.vercel.app',
       githubUrl: 'https://github.com/samuel-akingeneye/portfolio',
       imageUrl: '',
       featured: true,
