@@ -53,7 +53,7 @@ function Modal({ title, onClose, children }) {
 
 function ItemRow({ children, onEdit, onDelete }) {
   return (
-    <div className="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+    <div className="flex flex-col sm:flex-row items-start gap-4 p-4 min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
       <div className="flex-1 min-w-0">{children}</div>
       <div className="flex items-center gap-1 shrink-0">
         {onEdit && <button onClick={onEdit} className="p-2 rounded-lg text-slate-400 hover:text-blue-500 transition-colors"><Edit2 size={14} /></button>}
@@ -315,11 +315,11 @@ function ProjectsTab() {
         <div className="space-y-3">
           {projects.map(p => (
             <ItemRow key={p._id} onEdit={() => setModal(p)} onDelete={() => handleDelete(p._id)}>
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex flex-col sm:flex-row items-start gap-3 min-w-0 w-full">
                 {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="w-10 h-10 rounded-lg object-cover shrink-0" />}
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="font-medium text-sm truncate">{p.title}</p>
-                  <p className="text-xs text-slate-500 truncate max-w-full">{p.description}</p>
+                  <p className="text-xs text-slate-500 break-words whitespace-pre-wrap max-w-full">{p.description}</p>
                 </div>
               </div>
             </ItemRow>
