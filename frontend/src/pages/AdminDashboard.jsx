@@ -1114,8 +1114,14 @@ export default function AdminDashboard() {
           </div>
           <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-3">
             <Link to="/" className="block text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">View site</Link>
-            <div className="pt-2">
-              <DarkModeToggle />
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-2">
+                <DarkModeToggle />
+                <span className="text-sm text-slate-600 dark:text-slate-300">Theme</span>
+              </div>
+              <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 flex items-center gap-1">
+                <LogOut size={14} /> Logout
+              </button>
             </div>
           </div>
         </aside>
@@ -1155,11 +1161,14 @@ export default function AdminDashboard() {
               </div>
               <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-3">
                 <Link to="/" className="block text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">View site</Link>
-                <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 flex items-center gap-2">
-                  <LogOut size={14} /> Logout
-                </button>
-                <div className="pt-2">
-                  <DarkModeToggle />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <DarkModeToggle />
+                    <span className="text-sm text-slate-600 dark:text-slate-300">Theme</span>
+                  </div>
+                  <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 flex items-center gap-2">
+                    <LogOut size={14} /> Logout
+                  </button>
                 </div>
               </div>
             </div>
