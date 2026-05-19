@@ -12,6 +12,11 @@
     @apply bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
+
+  p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
 }
 
 @layer utilities {
