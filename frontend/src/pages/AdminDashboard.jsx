@@ -5,6 +5,7 @@ import {
   LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code,
   BookOpen, Briefcase, Upload, BarChart2, Eye, Download,
   MessageSquare, RefreshCw, Image, FileText, Inbox, Mail, MailOpen, ZoomIn,
+  Menu,
 } from 'lucide-react';
 import {
   projectsApi, certificatesApi, profileApi, skillsApi,
@@ -1057,6 +1058,7 @@ const TABS = [
 export default function AdminDashboard() {
   const [tab, setTab] = useState('projects');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   // Fetch unread count immediately on mount so the badge is visible before opening Messages
@@ -1080,7 +1082,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto lg:flex lg:items-start gap-6 p-4 sm:p-6">
-        <aside className="w-full lg:w-72 xl:w-80 shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-sm">
+        <aside className="hidden lg:block w-full lg:w-72 xl:w-80 shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-sm">
           <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-700">
             <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400 mb-2">Admin Dashboard</p>
             <div className="flex items-center justify-between gap-4">
@@ -1118,7 +1120,68 @@ export default function AdminDashboard() {
           </div>
         </aside>
 
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+            <div className="relative h-full w-full max-w-xs bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 shadow-2xl overflow-y-auto">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400 mb-1">Menu</p>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Admin</h2>
+                </div>
+                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" aria-label="Close menu">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="space-y-2 p-4">
+                {TABS.map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setTab(id);
+                      setSidebarOpen(false);
+                    }}
+                    className={`group w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/20' : 'text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                  >
+                    <Icon size={16} className={tab === id ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-500'} />
+                    <span>{label}</span>
+                    {id === 'messages' && (
+                      <span className={`ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] rounded-full text-[11px] font-semibold ${unreadCount > 0 ? 'bg-green-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300'}`}>
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-3">
+                <Link to="/" className="block text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">View site</Link>
+                <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 flex items-center gap-2">
+                  <LogOut size={14} /> Logout
+                </button>
+                <div className="pt-2">
+                  <DarkModeToggle />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <main className="flex-1">
+          <div className="lg:hidden mb-4">
+            <div className="flex items-center justify-between gap-3 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <Menu size={16} /> Menu
+              </button>
+              <div className="text-right">
+                <p className="text-xs text-slate-500 dark:text-slate-400">Current section</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{activeTab}</p>
+              </div>
+            </div>
+          </div>
+
           <div className="mb-6">
             <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
