@@ -1189,10 +1189,6 @@ export default function AdminDashboard() {
                   <p className="text-sm text-slate-500 dark:text-slate-400">Current section</p>
                   <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">{activeTab}</h2>
                 </div>
-                <div className="flex gap-3 items-center">
-                  <Link to="/" className="text-sm text-blue-500 hover:text-blue-600">View Site</Link>
-                  <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600 flex items-center gap-1"><LogOut size={13} /> Logout</button>
-                </div>
               </div>
             </div>
           </div>
