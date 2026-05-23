@@ -2,6 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import Project from './backend/models/Project.js';
+import Certificate from './backend/models/Certificate.js';
+import Profile from './backend/models/Profile.js';
+import Skill from './backend/models/Skill.js';
+import Education from './backend/models/Education.js';
+import Experience from './backend/models/Experience.js';
 import authRoutes from './backend/routes/auth.js';
 import projectRoutes from './backend/routes/projects.js';
 import certificateRoutes from './backend/routes/certificates.js';
@@ -56,6 +62,28 @@ app.use('/api/contact', contactRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'API is running', timestamp: new Date().toISOString() });
+});
+
+// Aggregate endpoint: returns all public portfolio data in one round-trip
+app.get('/api/portfolio', async (_req, res) => {
+  try {
+    const [projects, certificates, profile, skills, education, experience] = await Promise.all([
+      Project.find({ featured: true }).sort({ createdAt: -1 }).lean(),
+      Certificate.find().sort({ createdAt: -1 }).lean(),
+      Profile.findOne().lean(),
+      Skill.find().sort({ order: 1 }).lean(),
+      Education.find().sort({ startDate: -1 }).lean(),
+      Experience.find().sort({ startDate: -1 }).lean(),
+    ]);
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.json({
+      success: true,
+      data: { projects, certificates, profile: profile ?? null, skills, education, experience },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: 'Failed to fetch portfolio data.' });
+  }
 });
 
 app.use((_req, res) => {

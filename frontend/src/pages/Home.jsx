@@ -16,8 +16,7 @@ import CountUp from '../components/CountUp.jsx';
 import Timeline from '../components/Timeline.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
 import {
-  projectsApi, certificatesApi, profileApi, skillsApi,
-  educationApi, experienceApi, analyticsApi, contactApi,
+  portfolioApi, analyticsApi, contactApi,
 } from '../services/api.js';
 
 const HERO_TEXTS = ['Full Stack Developer', 'React & Node.js Expert', 'API Builder', 'Problem Solver'];
@@ -71,6 +70,7 @@ export default function Home() {
   const [education, setEducation] = useState([]);
   const [experience, setExperience] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [slow, setSlow] = useState(false);
   const [techFilter, setTechFilter] = useState('All');
   const [certFilter, setCertFilter] = useState('All');
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
@@ -81,41 +81,39 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const load = async () => {
-      const results = await Promise.allSettled([
-        projectsApi.getAll(true),
-        certificatesApi.getAll(),
-        profileApi.get(),
-        skillsApi.getAll(),
-        educationApi.getAll(),
-        experienceApi.getAll(),
-      ]);
-
-      const val = (i) => results[i].status === 'fulfilled' ? results[i].value.data.data : null;
-      const failed = results.filter((r) => r.status === 'rejected');
-
-      if (val(0) !== null) setProjects(val(0) ?? []);
-      if (val(1) !== null) setCerts(val(1) ?? []);
-      if (val(2) !== null) setProfile(val(2));
-      if (val(3) !== null) setSkills(val(3) ?? []);
-      if (val(4) !== null) setEducation(val(4) ?? []);
-      if (val(5) !== null) setExperience(val(5) ?? []);
-
-      if (failed.length === results.length) {
-        toast.error('Failed to load portfolio data. Please refresh.');
-      } else if (failed.length > 0) {
-        toast.error('Some data failed to load.');
-      }
-
+    const cached = portfolioApi.getCached();
+    if (cached) {
+      setProjects(cached.projects ?? []);
+      setCerts(cached.certificates ?? []);
+      setProfile(cached.profile);
+      setSkills(cached.skills ?? []);
+      setEducation(cached.education ?? []);
+      setExperience(cached.experience ?? []);
       setLoading(false);
-    };
-    load();
-  }, []);
+    }
 
-  // Don't block on cold-start API delays beyond 3 s
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(t);
+    let slowTimer;
+    if (!cached) slowTimer = setTimeout(() => setSlow(true), 5000);
+
+    portfolioApi.getAll()
+      .then((res) => {
+        const data = res.data.data;
+        portfolioApi.setCache(data);
+        setProjects(data.projects ?? []);
+        setCerts(data.certificates ?? []);
+        setProfile(data.profile);
+        setSkills(data.skills ?? []);
+        setEducation(data.education ?? []);
+        setExperience(data.experience ?? []);
+      })
+      .catch(() => {
+        if (!cached) toast.error('Failed to load portfolio. Please refresh.');
+      })
+      .finally(() => {
+        clearTimeout(slowTimer);
+        setSlow(false);
+        if (!cached) setLoading(false);
+      });
   }, []);
 
   // Scroll-reveal: observe all .reveal* elements once loading clears
@@ -200,7 +198,9 @@ export default function Home() {
             />
           ))}
         </div>
-        <p className="text-sm text-slate-400 animate-pulse tracking-wide">Loading portfolio…</p>
+        <p className="text-sm text-slate-400 animate-pulse tracking-wide">
+          {slow ? 'Server is waking up, hang tight…' : 'Loading portfolio…'}
+        </p>
       </div>
     );
   }

@@ -109,4 +109,24 @@ export const contactApi = {
   deleteMessage: (id) => api.delete(`/contact/messages/${id}`),
 };
 
+const CACHE_KEY = 'portfolio_v2';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export const portfolioApi = {
+  getAll: () => api.get('/portfolio', { timeout: 60000 }),
+  getCached() {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const { ts, data } = JSON.parse(raw);
+      return Date.now() - ts < CACHE_TTL ? data : null;
+    } catch { return null; }
+  },
+  setCache(data) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+    } catch {}
+  },
+};
+
 export default api;
