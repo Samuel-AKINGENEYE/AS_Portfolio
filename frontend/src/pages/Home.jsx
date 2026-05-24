@@ -289,7 +289,7 @@ export default function Home() {
       <WhatsAppButton />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 bg-white dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+      <section id="hero" className="relative min-h-screen flex items-center pt-16 px-4 sm:px-6 bg-white dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
         {/* Dot-grid background */}
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.35] dark:opacity-[0.12]"
@@ -448,7 +448,7 @@ export default function Home() {
       </section>
 
       {/* ── Projects ─────────────────────────────────────────────────── */}
-      <section id="projects" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
+      <section id="projects" className="py-16 md:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Work" />
           {allTechs.length > 1 && (
@@ -479,7 +479,7 @@ export default function Home() {
       </section>
 
       {/* ── Stack ────────────────────────────────────────────────────── */}
-      <section id="skills" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-900/50">
+      <section id="skills" className="py-16 md:py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-900/50">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Stack" />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -498,18 +498,18 @@ export default function Home() {
                   className={`reveal reveal-d${Math.min(idx + 1, 4)} rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 transition-all duration-300`}
                 >
                   {/* macOS title bar */}
-                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-                    <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56] shrink-0" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e] shrink-0" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f] shrink-0" />
+                    <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400 min-w-0">
                       <span
-                        className="inline-flex items-center justify-center px-1 h-[15px] rounded-sm text-[8px] font-black text-white tracking-tight select-none"
+                        className="inline-flex items-center justify-center px-1 h-[15px] rounded-sm text-[8px] font-black text-white tracking-tight select-none shrink-0"
                         style={{ background: 'linear-gradient(135deg, #3178c6 55%, #61dafb 100%)' }}
                       >
                         TS
                       </span>
-                      {fileSlug}.ts
+                      <span className="truncate">{fileSlug}.ts</span>
                     </div>
                   </div>
 
@@ -527,12 +527,12 @@ export default function Home() {
 
                     {/* L2+: each skill */}
                     {skills.map((name, si) => (
-                      <div key={name} className="flex gap-3">
+                      <div key={name} className="flex gap-3 min-w-0">
                         <span className="text-slate-600 w-5 text-right shrink-0 select-none">{si + 2}</span>
                         <span className="pl-4 flex items-center gap-2 min-w-0">
                           <SkillIcon name={name} size={13} className="shrink-0" />
-                          <span className="text-[#c3e88d]">"{name}"</span>
-                          <span className="text-slate-500">,</span>
+                          <span className="text-[#c3e88d] truncate">"{name}"</span>
+                          <span className="text-slate-500 shrink-0">,</span>
                         </span>
                       </div>
                     ))}
@@ -551,7 +551,7 @@ export default function Home() {
       </section>
 
       {/* ── Experience ───────────────────────────────────────────────── */}
-      <section id="experience" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
+      <section id="experience" className="py-16 md:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Experience" />
           <div className="max-w-3xl mx-auto">
@@ -564,7 +564,7 @@ export default function Home() {
       </section>
 
       {/* ── Education ────────────────────────────────────────────────── */}
-      <section id="education" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
+      <section id="education" className="py-16 md:py-24 px-4 sm:px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Education" />
           <div className="max-w-3xl mx-auto">
@@ -577,7 +577,7 @@ export default function Home() {
       </section>
 
       {/* ── Certificates ─────────────────────────────────────────────── */}
-      <section id="certificates" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
+      <section id="certificates" className="py-16 md:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Certificates" />
           {allCertCategories.length > 1 && (
@@ -611,7 +611,7 @@ export default function Home() {
       </section>
 
       {/* ── Contact ──────────────────────────────────────────────────── */}
-      <section id="contact" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
+      <section id="contact" className="py-16 md:py-24 px-4 sm:px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Contact" />
           <div className="grid lg:grid-cols-2 gap-10 md:gap-12 max-w-5xl mx-auto">
