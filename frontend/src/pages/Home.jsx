@@ -140,7 +140,7 @@ export default function Home() {
   const [slow, setSlow] = useState(false);
   const [techFilter, setTechFilter] = useState('All');
   const [certFilter, setCertFilter] = useState('All');
-  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
+  const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '', honeypot: '' });
   const [sending, setSending] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
@@ -224,7 +224,7 @@ export default function Home() {
     try {
       await contactApi.send({ ...contactForm, visitorId: getVisitorId() });
       toast.success("Message sent! I'll reply soon.");
-      setContactForm({ name: '', email: '', message: '', honeypot: '' });
+      setContactForm({ name: '', email: '', subject: '', message: '', honeypot: '' });
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to send');
     } finally {
@@ -557,38 +557,105 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Contact" />
           <div className="grid lg:grid-cols-2 gap-10 md:gap-12 max-w-4xl mx-auto">
-            {/* Contact form */}
-            <form onSubmit={handleContact} className="space-y-4 reveal reveal-d1">
-              <input
-                type="text" tabIndex={-1} autoComplete="off" className="hidden"
-                value={contactForm.honeypot}
-                onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))}
-              />
-              <input
-                required placeholder="Your name"
-                value={contactForm.name}
-                onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-              />
-              <input
-                required type="email" placeholder="Your email"
-                value={contactForm.email}
-                onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
-                className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-              />
-              <textarea
-                required rows={5} placeholder="Your message"
-                value={contactForm.message}
-                onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
-                className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
-              />
-              <button
-                type="submit" disabled={sending}
-                className="w-full py-3 rounded-md bg-accent hover:bg-accent-hover text-white font-medium transition-colors disabled:opacity-60"
-              >
-                {sending ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
+            {/* Contact form — terminal mail-compose style */}
+            <div className="reveal reveal-d1 rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl shadow-black/40">
+
+              {/* Tab bar */}
+              <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                <div className="ml-3 flex items-center gap-2 font-mono text-[11px]">
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white">TS</span>
+                  <span className="text-slate-400">sendMessage.ts</span>
+                  <span className="text-slate-600 ml-1">×</span>
+                </div>
+              </div>
+
+              {/* Mail header */}
+              <div className="px-5 pt-4 pb-3 border-b border-slate-800 font-mono">
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="flex items-center gap-2 text-slate-300">
+                    <Mail size={12} className="text-accent" />
+                    mail.compose
+                  </span>
+                  <span className="text-slate-600">secure channel</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-500">
+                    to: <span className="text-accent">{profile?.email || 'freshtalent491@gmail.com'}</span>
+                  </span>
+                  <span className="text-slate-600">response: <span className="text-[#c3e88d]">within 24h</span></span>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleContact} className="p-5 space-y-4">
+                <input type="text" tabIndex={-1} autoComplete="off" className="hidden"
+                  value={contactForm.honeypot}
+                  onChange={e => setContactForm(f => ({ ...f, honeypot: e.target.value }))} />
+
+                {/* Name + Email row */}
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-mono text-[10px] text-slate-500 tracking-widest mb-1.5">NAME</label>
+                    <input
+                      required placeholder="Your Name"
+                      value={contactForm.name}
+                      onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-md bg-[#161b22] border border-slate-700/60 text-slate-300 font-mono text-xs placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-mono text-[10px] text-slate-500 tracking-widest mb-1.5">EMAIL</label>
+                    <input
+                      required type="email" placeholder="your@email.com"
+                      value={contactForm.email}
+                      onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-md bg-[#161b22] border border-slate-700/60 text-slate-300 font-mono text-xs placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Subject */}
+                <div>
+                  <label className="block font-mono text-[10px] text-slate-500 tracking-widest mb-1.5">SUBJECT</label>
+                  <input
+                    placeholder="Project inquiry / Collaboration"
+                    value={contactForm.subject}
+                    onChange={e => setContactForm(f => ({ ...f, subject: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-md bg-[#161b22] border border-slate-700/60 text-slate-300 font-mono text-xs placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 transition-colors"
+                  />
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block font-mono text-[10px] text-slate-500 tracking-widest mb-1.5">MESSAGE</label>
+                  <textarea
+                    required rows={5} placeholder="Tell me about your project, timeline, and goals..."
+                    value={contactForm.message}
+                    onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-md bg-[#161b22] border border-slate-700/60 text-slate-300 font-mono text-xs placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 transition-colors resize-none"
+                  />
+                </div>
+
+                {/* Footer comment */}
+                <p className="font-mono text-[11px] text-slate-600">
+                  {'// Protected by spam filters and rate limits'}
+                </p>
+
+                {/* Submit */}
+                <button
+                  type="submit" disabled={sending}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-md bg-accent hover:bg-accent-hover text-white font-mono font-semibold text-sm tracking-wider transition-colors disabled:opacity-60 shadow-lg shadow-accent/20"
+                >
+                  {sending
+                    ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> SENDING...</>
+                    : <><Play size={13} className="fill-white" /> SEND MESSAGE</>
+                  }
+                </button>
+              </form>
+            </div>
 
             {/* Connect + resume */}
             <div className="space-y-5 reveal reveal-d2">
