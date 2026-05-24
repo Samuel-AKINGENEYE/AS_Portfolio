@@ -19,6 +19,7 @@ export default {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         float: 'float 3s ease-in-out infinite',
         shimmer: 'shimmer 1.6s ease-in-out infinite',
+        'spin-slow': 'spin 8s linear infinite',
       },
       keyframes: {
         fadeIn: {

@@ -5,6 +5,7 @@ import {
   Briefcase, Code2, Database, Wrench, Globe,
   Star, StarHalf, MessageSquare, ChevronRight,
   ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp, Download, X, FileText,
+  Play, FolderOpen,
 } from 'lucide-react';
 
 import Navbar           from '../components/Navbar.jsx';
@@ -376,80 +377,143 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right — terminal card */}
+            {/* Right — VS Code editor card */}
             <div className="flex justify-center animate-fade-in">
-              <div className="w-full max-w-sm animate-float">
-                <div className="rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950 shadow-2xl shadow-blue-500/10 font-mono text-xs">
+              <div className="relative w-full max-w-sm animate-float">
+
+                {/* Floating avatar circle */}
+                <div className="absolute -top-4 -right-4 z-10 w-12 h-12 rounded-full border-2 border-dashed border-orange-500/70 bg-[#0d1117] flex items-center justify-center shadow-xl shadow-orange-500/10 animate-spin-slow">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-blue-500/40 flex items-center justify-center">
+                    <span className="text-[10px] font-black text-blue-400 select-none font-mono">SA</span>
+                  </div>
+                </div>
+
+                {/* Editor window */}
+                <div className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl shadow-black/50">
 
                   {/* Title bar */}
-                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 border-b border-slate-700/80">
-                    <span className="w-3 h-3 rounded-full bg-red-500" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <span className="w-3 h-3 rounded-full bg-green-500" />
-                    <span className="ml-2 text-slate-500 text-[11px]">~/samuel-akingeneye</span>
+                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+                    <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                    <div className="ml-3 flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                      portfolio.tsx
+                    </div>
                   </div>
 
-                  {/* Body */}
-                  <div className="p-5 space-y-3">
+                  {/* Code body */}
+                  <div className="px-4 py-4 font-mono text-[11px] sm:text-xs leading-[1.75] select-none">
 
-                    {/* Avatar — small & centred */}
-                    <div className="flex justify-center pb-1">
-                      <div className="relative">
-                        <div className="w-16 h-16 rounded-full border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                          <span className="text-lg font-black text-blue-400 select-none">SA</span>
-                        </div>
-                        <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-slate-950" />
+                    {/* L1 comment */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">1</span>
+                      <span className="text-slate-500">{'// Welcome to my workspace'}</span>
+                    </div>
+
+                    {/* L2 import */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">2</span>
+                      <span>
+                        <span className="text-[#c792ea]">import </span>
+                        <span className="text-slate-300">{'{ '}</span>
+                        <span className="text-[#82aaff]">Developer</span>
+                        <span className="text-slate-300">{' } '}</span>
+                        <span className="text-[#c792ea]">from </span>
+                        <span className="text-[#c3e88d]">'./universe'</span>
+                        <span className="text-slate-300">;</span>
+                      </span>
+                    </div>
+
+                    {/* L3 blank */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">3</span>
+                      <span>&nbsp;</span>
+                    </div>
+
+                    {/* L4 const */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">4</span>
+                      <span>
+                        <span className="text-[#c792ea]">const </span>
+                        <span className="text-[#82aaff]">Portfolio </span>
+                        <span className="text-slate-300">= () </span>
+                        <span className="text-[#89ddff]">{'=> '}</span>
+                        <span className="text-slate-300">{'{'}</span>
+                      </span>
+                    </div>
+
+                    {/* L5 return */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">5</span>
+                      <span className="pl-4">
+                        <span className="text-[#c792ea]">return </span>
+                        <span className="text-slate-300">(</span>
+                      </span>
+                    </div>
+
+                    {/* L6 <Developer */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">6</span>
+                      <span className="pl-8">
+                        <span className="text-[#89ddff]">{'<'}</span>
+                        <span className="text-[#f07178]">Developer</span>
+                      </span>
+                    </div>
+
+                    {/* L7–9 props */}
+                    {[
+                      { n: 7,  attr: 'name',    val: '"Samuel AKINGENEYE"' },
+                      { n: 8,  attr: 'role',    val: '"Junior Software Engineer"' },
+                      { n: 9,  attr: 'passion', val: '"Building Real Impact"' },
+                    ].map(({ n, attr, val }) => (
+                      <div key={attr} className="flex gap-3">
+                        <span className="text-slate-600 w-4 text-right shrink-0">{n}</span>
+                        <span className="pl-12">
+                          <span className="text-[#ffcb6b]">{attr}</span>
+                          <span className="text-slate-300">=</span>
+                          <span className="text-[#c3e88d]">{val}</span>
+                        </span>
                       </div>
+                    ))}
+
+                    {/* L10 /> */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">10</span>
+                      <span className="pl-8">
+                        <span className="text-[#89ddff]">{'/>'}</span>
+                      </span>
                     </div>
 
-                    {/* whoami */}
-                    <div>
-                      <p className="text-slate-500">$ whoami</p>
-                      <p className="text-green-400 mt-0.5">samuel_akingeneye</p>
+                    {/* L11 ); */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">11</span>
+                      <span className="pl-4 text-slate-300">);</span>
                     </div>
 
-                    {/* cat info */}
-                    <div>
-                      <p className="text-slate-500">$ cat profile.json</p>
-                      <div className="mt-1 space-y-1 pl-1">
-                        <p>
-                          <span className="text-blue-400">NAME</span>
-                          <span className="text-slate-600 mx-1">::</span>
-                          <span className="text-slate-300">Samuel AKINGENEYE</span>
-                        </p>
-                        <p>
-                          <span className="text-blue-400">ROLE</span>
-                          <span className="text-slate-600 mx-1">::</span>
-                          <span className="text-slate-300">Junior Software Engineer</span>
-                        </p>
-                        <p>
-                          <span className="text-blue-400">LOC </span>
-                          <span className="text-slate-600 mx-1">::</span>
-                          <span className="text-slate-300">Kigali, Rwanda</span>
-                        </p>
-                        <p>
-                          <span className="text-blue-400">STACK</span>
-                          <span className="text-slate-600 mx-1">::</span>
-                          <span className="text-slate-300">MERN · React · Node.js</span>
-                        </p>
-                        <p>
-                          <span className="text-blue-400">STATUS</span>
-                          <span className="text-slate-600 mx-1">::</span>
-                          <span className="text-green-400">Available ✓</span>
-                        </p>
-                      </div>
+                    {/* L12 }; */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">12</span>
+                      <span className="text-slate-300">{'};'}</span>
                     </div>
-
-                    {/* running line */}
-                    <div className="pt-1 border-t border-slate-800">
-                      <p className="text-slate-500">$ while(alive) {'{ code() }'}</p>
-                      <p className="text-green-400 mt-0.5 flex items-center gap-1">
-                        Running
-                        <span className="inline-block w-1.5 h-3.5 bg-green-400 animate-pulse rounded-sm" />
-                      </p>
-                    </div>
-
                   </div>
+
+                  {/* Bottom buttons */}
+                  <div className="flex gap-3 px-4 pb-4 pt-1">
+                    <a
+                      href="#projects"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 text-white text-xs font-semibold transition-colors shadow-lg shadow-orange-500/25"
+                    >
+                      <Play size={11} className="fill-white" /> Run Profile
+                    </a>
+                    <a
+                      href="#projects"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white text-xs font-semibold transition-colors"
+                    >
+                      <FolderOpen size={11} /> View Projects
+                    </a>
+                  </div>
+
                 </div>
               </div>
             </div>
