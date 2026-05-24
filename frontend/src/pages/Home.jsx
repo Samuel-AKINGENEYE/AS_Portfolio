@@ -32,6 +32,94 @@ function getVisitorId() {
   return id;
 }
 
+function RunProfileModal({ profile, onClose }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl animate-fade-in"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Title bar */}
+        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+          <button onClick={onClose} className="w-3 h-3 rounded-full bg-[#ff5f56] hover:opacity-80 transition-opacity" />
+          <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+          <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+          <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+            <span className="text-accent">{'> _'}</span>
+            <span>user_profile.log</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 font-mono text-sm space-y-6 max-h-[70vh] overflow-y-auto">
+
+          {/* whoami */}
+          <div>
+            <p className="flex items-center gap-2 text-slate-300 mb-3">
+              <span className="text-accent font-bold">→</span>
+              <span className="text-[#82aaff]">whoami</span>
+            </p>
+            <p className="text-slate-400 leading-relaxed pl-4 border-l-2 border-slate-700 text-[13px]">
+              {profile?.bio ||
+                'A self-taught software engineer from Rwanda who turned curiosity into code. ' +
+                'After completing freeCodeCamp\'s full-stack programme and the ALX Africa Pathway, ' +
+                'I built real solutions — an AI-powered language tutor used by 300+ learners and ' +
+                'a civic engagement platform that reduced local service request time by 40%.'}
+            </p>
+          </div>
+
+          {/* cat mission.txt */}
+          <div>
+            <p className="flex items-center gap-2 text-slate-300 mb-3">
+              <span className="text-accent font-bold">→</span>
+              <span className="text-[#82aaff]">cat </span>
+              <span className="text-slate-300">mission.txt</span>
+            </p>
+            <p className="text-slate-400 leading-relaxed pl-4 border-l-2 border-slate-700 text-[13px]">
+              Building real-world solutions that create impact across Africa.
+              Currently focused on{' '}
+              <span className="text-accent font-semibold">Clean Architecture</span>,{' '}
+              <span className="text-accent font-semibold">Real-time Systems</span>, and{' '}
+              <span className="text-accent font-semibold">AI Integration</span>.
+            </p>
+          </div>
+
+          {/* Quick stats */}
+          <div>
+            <p className="flex items-center gap-2 text-slate-300 mb-3">
+              <span className="text-accent font-bold">→</span>
+              <span className="text-[#82aaff]">cat </span>
+              <span className="text-slate-300">stats.json</span>
+            </p>
+            <div className="pl-4 border-l-2 border-slate-700 space-y-1 text-[13px]">
+              {[
+                { k: 'location',  v: profile?.location  || 'Kigali, Rwanda' },
+                { k: 'stack',     v: 'MERN · React · Node.js' },
+                { k: 'status',    v: profile?.availability || 'Available for work' },
+                { k: 'email',     v: profile?.email || 'freshtalent491@gmail.com' },
+              ].map(({ k, v }) => (
+                <p key={k}>
+                  <span className="text-[#ffcb6b]">{k}</span>
+                  <span className="text-slate-600 mx-2">:</span>
+                  <span className="text-[#c3e88d]">"{v}"</span>
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-slate-600 text-xs flex items-center gap-2">
+            <span className="text-accent">{'>'}</span>
+            <span className="animate-blink">█</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SectionHeader({ title, subtitle, className = '' }) {
   return (
     <div className={`mb-12 reveal ${className}`}>
@@ -54,6 +142,15 @@ export default function Home() {
   const [certFilter, setCertFilter] = useState('All');
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', honeypot: '' });
   const [sending, setSending] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [visibleLines, setVisibleLines] = useState(0);
+
+  // Typing animation — reveal one line every 110ms
+  useEffect(() => {
+    if (visibleLines >= 12) return;
+    const t = setTimeout(() => setVisibleLines(v => v + 1), 110);
+    return () => clearTimeout(t);
+  }, [visibleLines]);
 
   useEffect(() => {
     analyticsApi.track({ page: '/', visitorId: getVisitorId() }).catch(() => {});
@@ -181,13 +278,16 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300 pb-16 md:pb-0">
+      {showProfileModal && (
+        <RunProfileModal profile={profile} onClose={() => setShowProfileModal(false)} />
+      )}
       <Navbar />
       <WhatsAppButton />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
         <div className="relative z-10 max-w-6xl mx-auto w-full py-24 lg:py-32">
-          <div className="grid lg:grid-cols-[1fr_280px] gap-16 items-start">
+          <div className="grid lg:grid-cols-[1fr_380px] gap-12 items-start">
             {/* Left — text */}
             <div>
               <p className="font-mono text-xs text-green-600 dark:text-green-400 mb-10 tracking-widest uppercase animate-slide-up">
@@ -234,10 +334,10 @@ export default function Home() {
 
             {/* Right — VS Code editor card */}
             <div className="flex justify-center lg:justify-end animate-slide-right">
-              <div className="relative w-full max-w-[320px] animate-float">
+              <div className="relative w-full max-w-[380px] animate-float">
 
-                {/* Floating avatar circle — spins slowly, shows real photo */}
-                <div className="absolute -top-5 -right-5 z-10 w-14 h-14 rounded-full border-2 border-dashed border-accent/70 animate-spin-slow flex items-center justify-center">
+                {/* Floating avatar — static, no spin */}
+                <div className="absolute -top-5 -right-5 z-10 w-14 h-14 rounded-full border-2 border-dashed border-accent/70 flex items-center justify-center">
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-accent/40 bg-slate-900 flex items-center justify-center shadow-lg">
                     {profile?.avatar
                       ? <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
@@ -260,97 +360,61 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Code */}
+                  {/* Code — lines reveal one-by-one like live typing */}
                   <div className="px-4 py-4 font-mono text-[11px] leading-[1.8] select-none overflow-x-auto">
-
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">1</span>
-                      <span className="text-slate-500">{'// Welcome to my workspace'}</span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">2</span>
-                      <span>
-                        <span className="text-[#c792ea]">import </span>
-                        <span className="text-slate-300">{'{ '}</span>
-                        <span className="text-[#82aaff]">Developer</span>
-                        <span className="text-slate-300">{' } '}</span>
-                        <span className="text-[#c792ea]">from </span>
-                        <span className="text-[#c3e88d]">'./universe'</span>
-                        <span className="text-slate-300">;</span>
-                      </span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">3</span>
-                      <span>&nbsp;</span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">4</span>
-                      <span>
-                        <span className="text-[#c792ea]">const </span>
-                        <span className="text-[#82aaff]">Portfolio </span>
-                        <span className="text-slate-300">= () </span>
-                        <span className="text-[#89ddff]">{'=> '}</span>
-                        <span className="text-slate-300">{'{'}</span>
-                      </span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">5</span>
-                      <span className="pl-4">
-                        <span className="text-[#c792ea]">return </span>
-                        <span className="text-slate-300">(</span>
-                      </span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">6</span>
-                      <span className="pl-8">
-                        <span className="text-[#89ddff]">{'<'}</span>
-                        <span className="text-[#f07178]">Developer</span>
-                      </span>
-                    </div>
-
                     {[
-                      { n: 7,  k: 'name',    v: `"${profile?.name ?? 'Samuel AKINGENEYE'}"` },
-                      { n: 8,  k: 'role',    v: '"Junior Software Engineer"' },
-                      { n: 9,  k: 'passion', v: '"Building Real Impact"' },
-                    ].map(({ n, k, v }) => (
-                      <div key={k} className="flex gap-3">
-                        <span className="text-slate-600 w-4 text-right shrink-0">{n}</span>
-                        <span className="pl-12">
-                          <span className="text-[#ffcb6b]">{k}</span>
-                          <span className="text-slate-300">=</span>
-                          <span className="text-[#c3e88d]">{v}</span>
-                        </span>
-                      </div>
+                      /* 1  */ <span className="text-slate-500">{'// Welcome to my workspace'}</span>,
+                      /* 2  */ <span>
+                                 <span className="text-[#c792ea]">import </span>
+                                 <span className="text-slate-300">{'{ '}</span>
+                                 <span className="text-[#82aaff]">Developer</span>
+                                 <span className="text-slate-300">{' } '}</span>
+                                 <span className="text-[#c792ea]">from </span>
+                                 <span className="text-[#c3e88d]">'./universe'</span>
+                                 <span className="text-slate-300">;</span>
+                               </span>,
+                      /* 3  */ <span>&nbsp;</span>,
+                      /* 4  */ <span>
+                                 <span className="text-[#c792ea]">const </span>
+                                 <span className="text-[#82aaff]">Portfolio </span>
+                                 <span className="text-slate-300">{'= () '}</span>
+                                 <span className="text-[#89ddff]">{'=> '}</span>
+                                 <span className="text-slate-300">{'{'}</span>
+                               </span>,
+                      /* 5  */ <span className="pl-4"><span className="text-[#c792ea]">return </span><span className="text-slate-300">(</span></span>,
+                      /* 6  */ <span className="pl-8"><span className="text-[#89ddff]">{'<'}</span><span className="text-[#f07178]">Developer</span></span>,
+                      /* 7  */ <span className="pl-12"><span className="text-[#ffcb6b]">name</span><span className="text-slate-300">=</span><span className="text-[#c3e88d]">{`"${profile?.name ?? 'Samuel AKINGENEYE'}"`}</span></span>,
+                      /* 8  */ <span className="pl-12"><span className="text-[#ffcb6b]">role</span><span className="text-slate-300">=</span><span className="text-[#c3e88d]">"Junior Software Engineer"</span></span>,
+                      /* 9  */ <span className="pl-12"><span className="text-[#ffcb6b]">passion</span><span className="text-slate-300">=</span><span className="text-[#c3e88d]">"Building Real Impact"</span></span>,
+                      /* 10 */ <span className="pl-8 text-[#89ddff]">{'/>'}</span>,
+                      /* 11 */ <span className="pl-4 text-slate-300">);</span>,
+                      /* 12 */ <span className="text-slate-300">{'};'}</span>,
+                    ].map((content, i) => (
+                      visibleLines > i && (
+                        <div key={i} className="flex gap-3 animate-fade-in">
+                          <span className="text-slate-600 w-5 text-right shrink-0">{i + 1}</span>
+                          {content}
+                        </div>
+                      )
                     ))}
 
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">10</span>
-                      <span className="pl-8 text-[#89ddff]">{'/>'}</span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">11</span>
-                      <span className="pl-4 text-slate-300">);</span>
-                    </div>
-                    <div className="flex gap-3">
-                      <span className="text-slate-600 w-4 text-right shrink-0">12</span>
-                      <span className="text-slate-300">{'};'}</span>
-                    </div>
+                    {/* Blinking cursor after last visible line */}
+                    {visibleLines < 12 && (
+                      <div className="flex gap-3">
+                        <span className="text-slate-600 w-5 text-right shrink-0">{visibleLines + 1}</span>
+                        <span className="inline-block w-2 h-[14px] bg-accent animate-blink rounded-sm" />
+                      </div>
+                    )}
                   </div>
 
-                  {/* Buttons */}
-                  <div className="flex gap-3 px-4 pb-4 pt-1">
-                    <a
-                      href="#projects"
+                  {/* Single button */}
+                  <div className="px-4 pb-4 pt-1">
+                    <button
+                      onClick={() => setShowProfileModal(true)}
                       className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition-colors shadow-lg shadow-accent/25"
                     >
                       <Play size={11} className="fill-white" /> Run Profile
-                    </a>
-                    <a
-                      href="#projects"
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white text-xs font-semibold transition-colors"
-                    >
-                      <FolderOpen size={11} /> View Projects
-                    </a>
+                    </button>
                   </div>
 
                 </div>
