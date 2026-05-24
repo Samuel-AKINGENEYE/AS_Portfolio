@@ -1,38 +1,70 @@
 import { Award, ExternalLink, FileText } from 'lucide-react';
 
-const CATEGORY_COLORS = {
-  'AI/ML': 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
-  'Web Dev': 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
-  'Cybersecurity': 'bg-red-50 text-red-600 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20',
-  'Other': 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600',
+const CATEGORY_BADGE = {
+  'AI/ML':         'border-purple-500/30 text-purple-400 bg-purple-500/10',
+  'Web Dev':       'border-blue-500/30   text-blue-400   bg-blue-500/10',
+  'Cybersecurity': 'border-red-500/30    text-red-400    bg-red-500/10',
+  'Other':         'border-slate-600     text-slate-400  bg-slate-700/40',
 };
+
+function toSlug(str = '') {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 const isPdf = (url) => url && /\.pdf(\?|$)/i.test(url);
 
 export default function CertificateCard({ certificate }) {
-  const badgeClass = CATEGORY_COLORS[certificate.category] ?? CATEGORY_COLORS['Other'];
-  const uploadedFile = certificate.imageUrl || null;
-  const isClickable = !!uploadedFile || !!certificate.credentialUrl;
+  const badgeClass = CATEGORY_BADGE[certificate.category] ?? CATEGORY_BADGE['Other'];
+  const s = toSlug(certificate.name);
+  const isClickable = !!(certificate.imageUrl || certificate.credentialUrl);
 
   const handleClick = () => {
-    if (uploadedFile) {
-      window.open(uploadedFile, '_blank', 'noopener,noreferrer');
+    if (certificate.imageUrl) {
+      window.open(certificate.imageUrl, '_blank', 'noopener,noreferrer');
     } else if (certificate.credentialUrl) {
       window.open(certificate.credentialUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
+  const issueDate = certificate.issueDate
+    ? new Date(certificate.issueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+    : null;
+
   return (
     <div
-      onClick={handleClick}
-      className={`group flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:scale-[1.02] hover:border-blue-500/50 transition-all duration-300 glow-hover${isClickable ? ' cursor-pointer' : ''}`}
+      onClick={isClickable ? handleClick : undefined}
+      className={`group flex flex-col rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300${isClickable ? ' cursor-pointer' : ''}`}
     >
-      {/* Image / icon area */}
-      <div className="relative h-36 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700/50 overflow-hidden flex items-center justify-center">
+      {/* ── macOS title bar ───────────────────────────────────── */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50 shrink-0">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+          <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+            <span
+              className="inline-flex items-center justify-center px-1 h-[15px] rounded-sm text-[8px] font-black text-white tracking-tight select-none"
+              style={{ background: 'linear-gradient(135deg, #E8703A 0%, #C45520 100%)' }}
+            >
+              AWD
+            </span>
+            {s}.pdf
+          </div>
+        </div>
+
+        {certificate.category && (
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] font-mono ${badgeClass}`}>
+            {certificate.category}
+          </span>
+        )}
+      </div>
+
+      {/* ── Certificate image / placeholder ──────────────────── */}
+      <div className="relative h-36 border-b border-slate-700/50 bg-[#161b22] overflow-hidden flex items-center justify-center">
         {isPdf(certificate.imageUrl) ? (
-          <div className="flex flex-col items-center gap-2 text-blue-500/60 dark:text-blue-400/50 select-none">
-            <FileText size={40} strokeWidth={1.5} />
-            <span className="text-xs font-medium tracking-wide uppercase">PDF Certificate</span>
+          <div className="flex flex-col items-center gap-2 text-accent/50 select-none">
+            <FileText size={38} strokeWidth={1.5} />
+            <span className="font-mono text-[10px] text-slate-500 uppercase tracking-widest">PDF Certificate</span>
           </div>
         ) : certificate.imageUrl ? (
           <>
@@ -42,43 +74,42 @@ export default function CertificateCard({ certificate }) {
               loading="lazy"
               decoding="async"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-slate-900/90 rounded-full p-2.5 shadow-lg">
-                <ExternalLink size={18} className="text-blue-500" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-[#0d1117]/90 rounded-full p-2.5 shadow-lg border border-slate-700">
+                <ExternalLink size={16} className="text-accent" />
               </div>
             </div>
           </>
         ) : (
-          <Award size={44} className="text-blue-500/30 dark:text-blue-500/20" />
+          <Award size={42} className="text-accent/25" strokeWidth={1.5} />
         )}
       </div>
 
-      {/* Body */}
-      <div className="flex flex-col flex-1 p-5">
-        <span className={`self-start text-xs font-medium px-2.5 py-1 rounded-full border ${badgeClass} mb-3`}>
-          {certificate.category ?? 'Certificate'}
-        </span>
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white leading-snug line-clamp-2 mb-1 flex-1">
+      {/* ── Plain-text content ────────────────────────────────── */}
+      <div className="flex-1 flex flex-col p-5 gap-1.5">
+        <h3 className="font-display font-semibold text-white text-sm leading-snug group-hover:text-accent transition-colors line-clamp-2">
           {certificate.name}
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">{certificate.issuer}</p>
-        {certificate.issueDate && (
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            {new Date(certificate.issueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-          </p>
+
+        {certificate.issuer && (
+          <p className="text-xs text-slate-400">{certificate.issuer}</p>
         )}
+
+        {issueDate && (
+          <p className="text-xs text-slate-500">{issueDate}</p>
+        )}
+
         {certificate.credentialUrl && (
           <a
             href={certificate.credentialUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+            className="mt-auto pt-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-accent hover:text-accent-hover transition-colors"
           >
-            <ExternalLink size={12} />
-            View Credential
+            <ExternalLink size={11} /> View Credential
           </a>
         )}
       </div>

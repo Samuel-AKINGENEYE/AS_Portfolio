@@ -5,74 +5,14 @@ function toSlug(str = '') {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function toCamel(s = '') {
-  return s.replace(/-([a-z])/g, (_, c) => c.toUpperCase()) || 'project';
-}
-
 export default function ProjectCard({ project }) {
   const [imgFailed, setImgFailed] = useState(false);
-
-  const s   = toSlug(project.title);
-  const v   = toCamel(s);
-  const hasDesc  = !!project.description;
-  const hasLong  = !!project.longDescription;
-  const hasStack = (project.techStack?.length ?? 0) > 0;
-
-  // Build sequential lines so numbers are always contiguous
-  const lines = [
-    // L1  // title
-    <span key="l1" className="text-slate-500">{'// '}{project.title}</span>,
-
-    // L2  const varName = {
-    <span key="l2">
-      <span className="text-[#c792ea]">const </span>
-      <span className="text-[#82aaff]">{v} </span>
-      <span className="text-slate-400">= {'{'}</span>
-    </span>,
-
-    // L3  desc: "..."  (only if description exists)
-    ...(hasDesc ? [
-      <span key="l3" className="pl-4 break-words">
-        <span className="text-[#ffcb6b]">desc</span>
-        <span className="text-slate-400">: </span>
-        <span className="text-[#c3e88d]">"{project.description}"</span>
-        <span className="text-slate-500">,</span>
-      </span>,
-    ] : []),
-
-    // long description as block comment
-    ...(hasLong ? [
-      <span key="llong" className="text-slate-500 break-words">
-        {'/* '}{project.longDescription}{' */'}
-      </span>,
-    ] : []),
-
-    // stack: ["React", ...]
-    ...(hasStack ? [
-      <span key="lstack" className="pl-4 break-words">
-        <span className="text-[#ffcb6b]">stack</span>
-        <span className="text-slate-400">: [</span>
-        {project.techStack.map((t, i) => (
-          <span key={t}>
-            <span className="text-[#c3e88d]">"{t}"</span>
-            {i < project.techStack.length - 1 && (
-              <span className="text-slate-500">, </span>
-            )}
-          </span>
-        ))}
-        <span className="text-slate-400">]</span>
-        <span className="text-slate-500">,</span>
-      </span>,
-    ] : []),
-
-    // closing };
-    <span key="lclose" className="text-slate-400">{'};'}</span>,
-  ];
+  const s = toSlug(project.title);
 
   return (
     <div className="group flex flex-col rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300">
 
-      {/* ── VS Code title bar ─────────────────────────────────── */}
+      {/* ── macOS title bar ───────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50 shrink-0">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
@@ -100,7 +40,6 @@ export default function ProjectCard({ project }) {
       {/* ── Browser-chrome image preview ─────────────────────── */}
       {project.imageUrl && !imgFailed && (
         <div className="border-b border-slate-700/50">
-          {/* Fake browser bar */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#0d1117]">
             <div className="flex gap-1 shrink-0">
               <span className="w-2 h-2 rounded-full bg-slate-700" />
@@ -124,14 +63,36 @@ export default function ProjectCard({ project }) {
         </div>
       )}
 
-      {/* ── Code body ────────────────────────────────────────── */}
-      <div className="flex-1 px-5 py-4 font-mono text-[12px] leading-[1.85]">
-        {lines.map((content, i) => (
-          <div key={i} className="flex gap-3">
-            <span className="text-slate-600 w-5 text-right shrink-0 select-none">{i + 1}</span>
-            <span className="flex-1 min-w-0">{content}</span>
+      {/* ── Plain-text content ────────────────────────────────── */}
+      <div className="flex-1 flex flex-col p-5 gap-3">
+        <h3 className="font-display font-semibold text-white text-base leading-snug group-hover:text-accent transition-colors">
+          {project.title}
+        </h3>
+
+        {project.description && (
+          <p className="text-sm text-slate-400 leading-relaxed">
+            {project.description}
+          </p>
+        )}
+
+        {project.longDescription && (
+          <p className="text-xs text-slate-500 italic leading-relaxed pl-3 border-l-2 border-slate-700">
+            {project.longDescription}
+          </p>
+        )}
+
+        {project.techStack?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
+            {project.techStack.map((t) => (
+              <span
+                key={t}
+                className="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400"
+              >
+                {t}
+              </span>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {/* ── Footer terminal bar ───────────────────────────────── */}
