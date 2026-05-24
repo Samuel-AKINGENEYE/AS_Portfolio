@@ -144,13 +144,14 @@ export default function Home() {
   const [sending, setSending] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
+  const [isEditorHovered, setIsEditorHovered] = useState(false);
 
-  // Typing animation — reveal one line every 110ms
+  // Typing animation — slow by default (400 ms/line), fast when hovered (40 ms/line)
   useEffect(() => {
     if (visibleLines >= 12) return;
-    const t = setTimeout(() => setVisibleLines(v => v + 1), 110);
+    const t = setTimeout(() => setVisibleLines(v => v + 1), isEditorHovered ? 40 : 400);
     return () => clearTimeout(t);
-  }, [visibleLines]);
+  }, [visibleLines, isEditorHovered]);
 
   useEffect(() => {
     analyticsApi.track({ page: '/', visitorId: getVisitorId() }).catch(() => {});
@@ -287,7 +288,7 @@ export default function Home() {
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
         <div className="relative z-10 max-w-6xl mx-auto w-full py-24 lg:py-32">
-          <div className="grid lg:grid-cols-[1fr_380px] gap-12 items-start">
+          <div className="grid lg:grid-cols-[1fr_460px] gap-12 items-start">
             {/* Left — text */}
             <div>
               <p className="font-mono text-xs text-green-600 dark:text-green-400 mb-10 tracking-widest uppercase animate-slide-up">
@@ -334,7 +335,7 @@ export default function Home() {
 
             {/* Right — VS Code editor card */}
             <div className="flex justify-center lg:justify-end animate-slide-right">
-              <div className="relative w-full max-w-[380px] animate-float">
+              <div className="relative w-full max-w-[460px] animate-float">
 
                 {/* Floating avatar — static, no spin */}
                 <div className="absolute -top-5 -right-5 z-10 w-14 h-14 rounded-full border-2 border-dashed border-accent/70 flex items-center justify-center">
@@ -347,16 +348,27 @@ export default function Home() {
                 </div>
 
                 {/* Editor window */}
-                <div className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl shadow-black/60">
+                <div
+                  className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl shadow-black/60"
+                  onMouseEnter={() => setIsEditorHovered(true)}
+                  onMouseLeave={() => setIsEditorHovered(false)}
+                >
 
                   {/* Title bar */}
                   <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
                     <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                     <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
                     <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                    <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                      portfolio.tsx
+                    <div className="ml-3 flex items-center gap-2 font-mono text-[11px]">
+                      {/* TypeScript + React file-type icon */}
+                      <span
+                        className="inline-flex items-center justify-center px-1 h-[15px] rounded-sm text-[8px] font-black text-white tracking-tight select-none"
+                        style={{ background: 'linear-gradient(135deg, #3178c6 55%, #61dafb 100%)' }}
+                      >
+                        TSX
+                      </span>
+                      <span className="text-slate-400">portfolio.tsx</span>
+                      <span className="text-slate-600 ml-0.5">×</span>
                     </div>
                   </div>
 
@@ -556,7 +568,7 @@ export default function Home() {
       <section id="contact" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Contact" />
-          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 max-w-4xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 md:gap-12 max-w-5xl mx-auto">
             {/* Contact form — terminal mail-compose style */}
             <div className="reveal reveal-d1 rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl shadow-black/40">
 
@@ -681,18 +693,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Resume button — uses admin-uploaded PDF when available */}
-              {profile?.resumeUrl && (
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <button
-                    onClick={handleResumeDownload}
-                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-md border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-accent hover:text-accent transition-colors font-medium"
-                  >
-                    <Download size={16} />
-                    Download Resume
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>
