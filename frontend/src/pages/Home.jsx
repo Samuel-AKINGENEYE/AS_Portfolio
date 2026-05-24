@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
   Code2, Database, Wrench, Globe, ChevronRight, Loader2,
-  Home as HomeIcon, Layers, Award,
+  Home as HomeIcon, Layers, Award, Play, FolderOpen,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -232,25 +232,129 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right — avatar, desktop only */}
-            <div className="hidden lg:block animate-slide-right">
-              {profile?.avatar ? (
-                <img
-                  src={profile.avatar}
-                  alt={profile?.name || 'Samuel AKINGENEYE'}
-                  className="w-full aspect-square rounded-xl object-cover border border-slate-200 dark:border-slate-800"
-                />
-              ) : (
-                <div className="w-full aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center justify-center">
-                  <span className="font-display text-6xl font-bold text-slate-300 dark:text-slate-600 select-none">SA</span>
+            {/* Right — VS Code editor card */}
+            <div className="flex justify-center lg:justify-end animate-slide-right">
+              <div className="relative w-full max-w-[320px] animate-float">
+
+                {/* Floating avatar circle — spins slowly, shows real photo */}
+                <div className="absolute -top-5 -right-5 z-10 w-14 h-14 rounded-full border-2 border-dashed border-accent/70 animate-spin-slow flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-accent/40 bg-slate-900 flex items-center justify-center shadow-lg">
+                    {profile?.avatar
+                      ? <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
+                      : <span className="font-mono text-[10px] font-bold text-accent select-none">SA</span>
+                    }
+                  </div>
                 </div>
-              )}
-              {profile?.location && (
-                <p className="font-mono text-xs text-slate-500 dark:text-slate-500 mt-3 flex items-center gap-1.5">
-                  <MapPin size={11} className="text-accent" />
-                  {profile.location}
-                </p>
-              )}
+
+                {/* Editor window */}
+                <div className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-2xl shadow-black/60">
+
+                  {/* Title bar */}
+                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+                    <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                    <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                      portfolio.tsx
+                    </div>
+                  </div>
+
+                  {/* Code */}
+                  <div className="px-4 py-4 font-mono text-[11px] leading-[1.8] select-none overflow-x-auto">
+
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">1</span>
+                      <span className="text-slate-500">{'// Welcome to my workspace'}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">2</span>
+                      <span>
+                        <span className="text-[#c792ea]">import </span>
+                        <span className="text-slate-300">{'{ '}</span>
+                        <span className="text-[#82aaff]">Developer</span>
+                        <span className="text-slate-300">{' } '}</span>
+                        <span className="text-[#c792ea]">from </span>
+                        <span className="text-[#c3e88d]">'./universe'</span>
+                        <span className="text-slate-300">;</span>
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">3</span>
+                      <span>&nbsp;</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">4</span>
+                      <span>
+                        <span className="text-[#c792ea]">const </span>
+                        <span className="text-[#82aaff]">Portfolio </span>
+                        <span className="text-slate-300">= () </span>
+                        <span className="text-[#89ddff]">{'=> '}</span>
+                        <span className="text-slate-300">{'{'}</span>
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">5</span>
+                      <span className="pl-4">
+                        <span className="text-[#c792ea]">return </span>
+                        <span className="text-slate-300">(</span>
+                      </span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">6</span>
+                      <span className="pl-8">
+                        <span className="text-[#89ddff]">{'<'}</span>
+                        <span className="text-[#f07178]">Developer</span>
+                      </span>
+                    </div>
+
+                    {[
+                      { n: 7,  k: 'name',    v: `"${profile?.name ?? 'Samuel AKINGENEYE'}"` },
+                      { n: 8,  k: 'role',    v: '"Junior Software Engineer"' },
+                      { n: 9,  k: 'passion', v: '"Building Real Impact"' },
+                    ].map(({ n, k, v }) => (
+                      <div key={k} className="flex gap-3">
+                        <span className="text-slate-600 w-4 text-right shrink-0">{n}</span>
+                        <span className="pl-12">
+                          <span className="text-[#ffcb6b]">{k}</span>
+                          <span className="text-slate-300">=</span>
+                          <span className="text-[#c3e88d]">{v}</span>
+                        </span>
+                      </div>
+                    ))}
+
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">10</span>
+                      <span className="pl-8 text-[#89ddff]">{'/>'}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">11</span>
+                      <span className="pl-4 text-slate-300">);</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-4 text-right shrink-0">12</span>
+                      <span className="text-slate-300">{'};'}</span>
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 px-4 pb-4 pt-1">
+                    <a
+                      href="#projects"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition-colors shadow-lg shadow-accent/25"
+                    >
+                      <Play size={11} className="fill-white" /> Run Profile
+                    </a>
+                    <a
+                      href="#projects"
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white text-xs font-semibold transition-colors"
+                    >
+                      <FolderOpen size={11} /> View Projects
+                    </a>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
         </div>
