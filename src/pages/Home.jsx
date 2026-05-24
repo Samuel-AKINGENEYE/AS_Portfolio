@@ -376,15 +376,80 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right — floating avatar card */}
-            <div className="hidden lg:flex justify-center">
-              <div className="relative animate-float">
-                <div className="w-80 h-80 rounded-3xl overflow-hidden border border-blue-500/20 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-2xl">
-                  <span className="text-8xl font-black text-blue-500/15 select-none">SA</span>
-                </div>
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full px-5 py-2 shadow-lg text-sm font-medium">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-slate-700 dark:text-slate-300">Open to Work</span>
+            {/* Right — terminal card */}
+            <div className="flex justify-center animate-fade-in">
+              <div className="w-full max-w-sm animate-float">
+                <div className="rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950 shadow-2xl shadow-blue-500/10 font-mono text-xs">
+
+                  {/* Title bar */}
+                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 border-b border-slate-700/80">
+                    <span className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-400" />
+                    <span className="w-3 h-3 rounded-full bg-green-500" />
+                    <span className="ml-2 text-slate-500 text-[11px]">~/samuel-akingeneye</span>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-5 space-y-3">
+
+                    {/* Avatar — small & centred */}
+                    <div className="flex justify-center pb-1">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full border-2 border-blue-500/50 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                          <span className="text-lg font-black text-blue-400 select-none">SA</span>
+                        </div>
+                        <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green-500 border-2 border-slate-950" />
+                      </div>
+                    </div>
+
+                    {/* whoami */}
+                    <div>
+                      <p className="text-slate-500">$ whoami</p>
+                      <p className="text-green-400 mt-0.5">samuel_akingeneye</p>
+                    </div>
+
+                    {/* cat info */}
+                    <div>
+                      <p className="text-slate-500">$ cat profile.json</p>
+                      <div className="mt-1 space-y-1 pl-1">
+                        <p>
+                          <span className="text-blue-400">NAME</span>
+                          <span className="text-slate-600 mx-1">::</span>
+                          <span className="text-slate-300">Samuel AKINGENEYE</span>
+                        </p>
+                        <p>
+                          <span className="text-blue-400">ROLE</span>
+                          <span className="text-slate-600 mx-1">::</span>
+                          <span className="text-slate-300">Junior Software Engineer</span>
+                        </p>
+                        <p>
+                          <span className="text-blue-400">LOC </span>
+                          <span className="text-slate-600 mx-1">::</span>
+                          <span className="text-slate-300">Kigali, Rwanda</span>
+                        </p>
+                        <p>
+                          <span className="text-blue-400">STACK</span>
+                          <span className="text-slate-600 mx-1">::</span>
+                          <span className="text-slate-300">MERN · React · Node.js</span>
+                        </p>
+                        <p>
+                          <span className="text-blue-400">STATUS</span>
+                          <span className="text-slate-600 mx-1">::</span>
+                          <span className="text-green-400">Available ✓</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* running line */}
+                    <div className="pt-1 border-t border-slate-800">
+                      <p className="text-slate-500">$ while(alive) {'{ code() }'}</p>
+                      <p className="text-green-400 mt-0.5 flex items-center gap-1">
+                        Running
+                        <span className="inline-block w-1.5 h-3.5 bg-green-400 animate-pulse rounded-sm" />
+                      </p>
+                    </div>
+
+                  </div>
                 </div>
               </div>
             </div>
