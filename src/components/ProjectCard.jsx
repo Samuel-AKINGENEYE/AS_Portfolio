@@ -1,9 +1,21 @@
 import { ExternalLink, Github } from 'lucide-react';
 import { useState } from 'react';
 
+function screenshotUrl(url) {
+  return `https://image.thum.io/get/width/600/crop/400/${encodeURIComponent(url)}`;
+}
+
 export default function ProjectCard({ project }) {
   const [imgFailed, setImgFailed] = useState(false);
   const cardLink = project.liveUrl || project.githubUrl || null;
+
+  // Use stored image, fall back to live-URL screenshot, then placeholder
+  const thumbSrc =
+    (project.imageUrl && !imgFailed)
+      ? project.imageUrl
+      : (!imgFailed && project.liveUrl)
+        ? screenshotUrl(project.liveUrl)
+        : null;
 
   return (
     <div
@@ -27,14 +39,14 @@ export default function ProjectCard({ project }) {
 
       {/* Thumbnail */}
       <div className="relative z-[2] h-48 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
-        {project.imageUrl && !imgFailed ? (
+        {thumbSrc ? (
           <img
-            src={project.imageUrl}
+            src={thumbSrc}
             alt={project.title}
             loading="lazy"
             decoding="async"
             onError={() => setImgFailed(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <span className="text-5xl font-black text-blue-500/20 select-none">
