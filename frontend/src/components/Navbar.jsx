@@ -27,8 +27,11 @@ export default function Navbar() {
         : 'bg-transparent'
     }`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#hero" className="font-mono font-bold text-xl text-slate-900 dark:text-white tracking-tight hover:text-accent transition-colors">
-          SA
+        <a href="#hero" className="inline-flex items-center font-mono font-black text-xl select-none group" title="Samuel AKINGENEYE">
+          <span className="text-accent opacity-80 group-hover:opacity-100 transition-opacity">{'{'}</span>
+          <span className="text-slate-900 dark:text-white px-1 group-hover:text-accent transition-colors duration-200">SA</span>
+          <span className="text-accent opacity-80 group-hover:opacity-100 transition-opacity">{'}'}</span>
+          <span className="inline-block w-[2px] h-[18px] ml-1 bg-accent rounded-sm animate-blink" />
         </a>
 
         <div className="hidden md:flex items-center gap-8">
