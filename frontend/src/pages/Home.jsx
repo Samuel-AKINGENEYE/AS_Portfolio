@@ -421,13 +421,13 @@ export default function Home() {
                       )
                     ))}
 
-                    {/* Blinking cursor after last visible line */}
-                    {visibleLines < 12 && (
-                      <div className="flex gap-3">
-                        <span className="text-slate-600 w-5 text-right shrink-0">{visibleLines + 1}</span>
-                        <span className="inline-block w-2 h-[14px] bg-accent animate-blink rounded-sm" />
-                      </div>
-                    )}
+                    {/* Blinking cursor — thin vertical line, always visible like a real editor */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">
+                        {visibleLines < 12 ? visibleLines + 1 : 13}
+                      </span>
+                      <span className="inline-block w-[2px] h-[14px] bg-accent animate-blink rounded-full" />
+                    </div>
                   </div>
 
                   {/* Single button */}
