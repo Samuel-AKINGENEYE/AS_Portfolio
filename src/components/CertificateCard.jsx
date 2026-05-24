@@ -1,4 +1,5 @@
-import { Award, ExternalLink, FileText } from 'lucide-react';
+import { Award, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 
 const CATEGORY_COLORS = {
   'AI/ML': 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
@@ -8,13 +9,23 @@ const CATEGORY_COLORS = {
 };
 
 const isPdf = (url) => url && /\.pdf(\?|$)/i.test(url);
+const thumbOf = (url) => `https://image.thum.io/get/width/600/crop/400/${url}`;
 
 export default function CertificateCard({ certificate }) {
+  const [imgFailed, setImgFailed] = useState(false);
   const badgeClass = CATEGORY_COLORS[certificate.category] ?? CATEGORY_COLORS['Other'];
-  const cardLink = certificate.credentialUrl
-    || (isPdf(certificate.imageUrl) ? certificate.imageUrl : null)
-    || certificate.imageUrl
-    || null;
+  const cardLink = certificate.credentialUrl || certificate.imageUrl || null;
+
+  // Resolve which image to show:
+  // 1. imageUrl if it's a real image and hasn't failed
+  // 2. thum.io screenshot of credentialUrl when imageUrl is missing, a PDF, or failed
+  // 3. nothing (shows Award icon placeholder)
+  const imageIsUsable = certificate.imageUrl && !isPdf(certificate.imageUrl) && !imgFailed;
+  const thumbSrc = imageIsUsable
+    ? certificate.imageUrl
+    : (!imgFailed && certificate.credentialUrl)
+      ? thumbOf(certificate.credentialUrl)
+      : null;
 
   return (
     <div
@@ -36,32 +47,19 @@ export default function CertificateCard({ certificate }) {
         />
       )}
 
-      {/* Image / icon area */}
-      <div className="relative z-[2] h-36 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700/50 overflow-hidden flex items-center justify-center">
-        {isPdf(certificate.imageUrl) ? (
-          <div className="flex flex-col items-center gap-2 text-blue-500/60 dark:text-blue-400/50 select-none">
-            <FileText size={40} strokeWidth={1.5} />
-            <span className="text-xs font-medium tracking-wide uppercase">PDF Certificate</span>
-          </div>
-        ) : certificate.imageUrl ? (
+      {/* Image / preview area */}
+      <div className="relative z-[2] h-40 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700/50 overflow-hidden flex items-center justify-center">
+        {thumbSrc ? (
           <img
-            src={certificate.imageUrl}
+            src={thumbSrc}
             alt={certificate.name}
             loading="lazy"
             decoding="async"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextElementSibling?.removeAttribute('style');
-            }}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={() => setImgFailed(true)}
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
           />
-        ) : null}
-        {!isPdf(certificate.imageUrl) && (
-          <Award
-            size={44}
-            className="text-blue-500/30 dark:text-blue-500/20 absolute"
-            style={certificate.imageUrl ? { display: 'none' } : undefined}
-          />
+        ) : (
+          <Award size={44} className="text-blue-500/30 dark:text-blue-500/20" />
         )}
       </div>
 

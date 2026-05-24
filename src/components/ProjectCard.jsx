@@ -2,7 +2,7 @@ import { ExternalLink, Github } from 'lucide-react';
 import { useState } from 'react';
 
 function screenshotUrl(url) {
-  return `https://image.thum.io/get/width/600/crop/400/${encodeURIComponent(url)}`;
+  return `https://image.thum.io/get/width/600/crop/400/${url}`;
 }
 
 export default function ProjectCard({ project }) {
