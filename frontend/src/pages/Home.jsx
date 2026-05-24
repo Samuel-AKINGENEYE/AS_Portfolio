@@ -482,35 +482,70 @@ export default function Home() {
       <section id="skills" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-900/50">
         <div className="max-w-6xl mx-auto">
           <SectionHeader title="Stack" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-            {hasApiSkills
-              ? Object.entries(skillsByCategory).map(([category, items], idx) => (
-                  <div key={category} className={`reveal reveal-d${Math.min(idx + 1, 6)}`}>
-                    <p className="font-mono text-[11px] text-accent uppercase tracking-widest mb-4">{category}</p>
-                    <ul className="space-y-2.5">
-                      {[...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(s => (
-                        <li key={s._id} className="flex items-center gap-3">
-                          <SkillIcon name={s.name} size={16} className="shrink-0 text-slate-400" />
-                          <span className="font-mono text-sm text-slate-700 dark:text-slate-300">{s.name}</span>
-                        </li>
-                      ))}
-                    </ul>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {(hasApiSkills
+              ? Object.entries(skillsByCategory).map(([cat, items]) => ({
+                  category: cat,
+                  skills: [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(s => s.name),
+                }))
+              : STATIC_SKILLS.map(({ category, items }) => ({ category, skills: items }))
+            ).map(({ category, skills }, idx) => {
+              const fileSlug = category.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const varName  = category.replace(/\s+/g, '');
+              return (
+                <div
+                  key={category}
+                  className={`reveal reveal-d${Math.min(idx + 1, 4)} rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 transition-all duration-300`}
+                >
+                  {/* macOS title bar */}
+                  <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                    <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+                      <span
+                        className="inline-flex items-center justify-center px-1 h-[15px] rounded-sm text-[8px] font-black text-white tracking-tight select-none"
+                        style={{ background: 'linear-gradient(135deg, #3178c6 55%, #61dafb 100%)' }}
+                      >
+                        TS
+                      </span>
+                      {fileSlug}.ts
+                    </div>
                   </div>
-                ))
-              : STATIC_SKILLS.map(({ category, items }, idx) => (
-                  <div key={category} className={`reveal reveal-d${idx + 1}`}>
-                    <p className="font-mono text-[11px] text-accent uppercase tracking-widest mb-4">{category}</p>
-                    <ul className="space-y-2.5">
-                      {items.map(name => (
-                        <li key={name} className="flex items-center gap-3">
-                          <SkillIcon name={name} size={16} className="shrink-0 text-slate-400" />
-                          <span className="font-mono text-sm text-slate-700 dark:text-slate-300">{name}</span>
-                        </li>
-                      ))}
-                    </ul>
+
+                  {/* Code body */}
+                  <div className="px-4 py-4 font-mono text-[12px] leading-[1.85]">
+                    {/* L1: const Category = [ */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">1</span>
+                      <span>
+                        <span className="text-[#c792ea]">const </span>
+                        <span className="text-[#82aaff]">{varName} </span>
+                        <span className="text-slate-400">= [</span>
+                      </span>
+                    </div>
+
+                    {/* L2+: each skill */}
+                    {skills.map((name, si) => (
+                      <div key={name} className="flex gap-3">
+                        <span className="text-slate-600 w-5 text-right shrink-0 select-none">{si + 2}</span>
+                        <span className="pl-4 flex items-center gap-2 min-w-0">
+                          <SkillIcon name={name} size={13} className="shrink-0" />
+                          <span className="text-[#c3e88d]">"{name}"</span>
+                          <span className="text-slate-500">,</span>
+                        </span>
+                      </div>
+                    ))}
+
+                    {/* Last line: ] */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">{skills.length + 2}</span>
+                      <span className="text-slate-400">];</span>
+                    </div>
                   </div>
-                ))
-            }
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
