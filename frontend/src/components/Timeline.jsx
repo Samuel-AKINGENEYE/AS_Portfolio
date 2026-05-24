@@ -1,66 +1,51 @@
-import { GraduationCap } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 
 function fmt(date) {
   if (!date) return '';
   return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 }
 
-function slug(str = '') {
+function toSlug(str = '') {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-function classname(str = '') {
-  return str.replace(/[^a-zA-Z0-9]/g, '');
-}
-
-// ── Shared VS Code–style editor card ─────────────────────────────────────────
-function EditorCard({ filename, badge, badgeVariant = 'green', fileIcon, children }) {
-  const badge_styles = {
+// ── Shared macOS title bar ────────────────────────────────────────────────────
+function TitleBar({ filename, fileBadge, fileBadgeStyle, badge, badgeVariant = 'green' }) {
+  const badgeStyles = {
     green: { pill: 'bg-green-500/15 border-green-500/30 text-green-400', dot: 'bg-green-500' },
     blue:  { pill: 'bg-blue-500/15  border-blue-500/30  text-blue-400',  dot: 'bg-blue-400'  },
   };
-  const { pill, dot } = badge_styles[badgeVariant];
+  const { pill, dot } = badgeStyles[badgeVariant];
 
   return (
-    <div className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl glow-hover transition-all duration-300">
-      {/* Title bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
-          <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
-            {fileIcon}
-            {filename}
-          </div>
+    <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50 shrink-0">
+      <div className="flex items-center gap-1.5">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+        <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+          {fileBadge && (
+            <span
+              className="inline-flex items-center justify-center px-1 h-[15px] rounded-sm text-[8px] font-black text-white tracking-tight select-none"
+              style={{ background: fileBadgeStyle }}
+            >
+              {fileBadge}
+            </span>
+          )}
+          {filename}
         </div>
-        {badge && (
-          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-mono ${pill}`}>
-            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${dot}`} />
-            {badge}
-          </span>
-        )}
       </div>
-
-      {/* Code body */}
-      <div className="px-5 py-4 font-mono text-[12px] leading-[1.85]">
-        {children}
-      </div>
+      {badge && (
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-mono ${pill}`}>
+          <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${dot}`} />
+          {badge}
+        </span>
+      )}
     </div>
   );
 }
 
-// ── Line with number ──────────────────────────────────────────────────────────
-function L({ n, children }) {
-  return (
-    <div className="flex gap-3">
-      <span className="text-slate-600 w-5 text-right shrink-0 select-none">{n}</span>
-      <span className="flex-1 min-w-0">{children}</span>
-    </div>
-  );
-}
-
-// ── Experience card (VS Code file = git-flavoured const declarations) ─────────
+// ── Experience card ───────────────────────────────────────────────────────────
 function ExperienceCard({ item, index }) {
   const achievements = (item.achievements ?? []).filter(Boolean);
 
@@ -78,131 +63,110 @@ function ExperienceCard({ item, index }) {
         }
       </div>
 
-      <EditorCard
-        filename={`${slug(item.company)}.ts`}
-        badge={item.current ? 'active' : null}
-        badgeVariant="green"
-      >
-        {/* company · location */}
-        <L n={1}>
-          <span className="text-slate-500">
-            {'// '}{item.company}{item.location ? ` · ${item.location}` : ''}
-          </span>
-        </L>
-        {/* role */}
-        <L n={2}>
-          <span className="text-[#c792ea]">const </span>
-          <span className="text-[#82aaff]">role </span>
-          <span className="text-slate-400">= </span>
-          <span className="text-[#c3e88d]">"{item.position}"</span>
-          <span className="text-slate-500">;</span>
-        </L>
-        {/* date range */}
-        <L n={3}>
-          <span className="text-slate-500">
-            {'// '}
-            {fmt(item.startDate) || '?'}
-            {' → '}
-            {item.current ? 'Present' : (fmt(item.endDate) || '?')}
-          </span>
-        </L>
-        {/* blank */}
-        <L n={4}><span>&nbsp;</span></L>
+      <div className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 transition-all duration-300">
+        <TitleBar
+          filename={`${toSlug(item.company)}.ts`}
+          badge={item.current ? 'active' : null}
+          badgeVariant="green"
+        />
 
-        {achievements.length > 0 ? (
-          <>
-            <L n={5}>
-              <span className="text-[#c792ea]">const </span>
-              <span className="text-[#82aaff]">highlights </span>
-              <span className="text-slate-400">= [</span>
-            </L>
-            {achievements.map((ach, ai) => (
-              <L key={ai} n={6 + ai}>
-                <span className="pl-4 break-words">
-                  <span className="text-[#c3e88d]">"{ach}"</span>
-                  {ai < achievements.length - 1 && <span className="text-slate-500">,</span>}
-                </span>
-              </L>
-            ))}
-            <L n={6 + achievements.length}>
-              <span className="text-slate-400">];</span>
-            </L>
-          </>
-        ) : item.description ? (
-          <L n={5}>
-            <span className="text-slate-500 break-words whitespace-pre-wrap">
-              {'/* '}{item.description}{' */'}
-            </span>
-          </L>
-        ) : null}
-      </EditorCard>
+        <div className="p-5 flex flex-col gap-2">
+          {/* Role */}
+          <h3 className="font-display font-semibold text-white text-base leading-snug">
+            {item.position}
+          </h3>
+
+          {/* Company + location */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-accent font-medium">{item.company}</span>
+            {item.location && (
+              <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                <MapPin size={11} /> {item.location}
+              </span>
+            )}
+          </div>
+
+          {/* Date range */}
+          <div className="inline-flex items-center gap-1.5 font-mono text-xs text-slate-500">
+            <Calendar size={11} />
+            {fmt(item.startDate) || '?'}
+            {' — '}
+            {item.current
+              ? <span className="text-green-400 font-semibold">Present</span>
+              : fmt(item.endDate) || '?'
+            }
+          </div>
+
+          {/* Description */}
+          {item.description && (
+            <p className="text-sm text-slate-400 leading-relaxed mt-1">
+              {item.description}
+            </p>
+          )}
+
+          {/* Achievements */}
+          {achievements.length > 0 && (
+            <ul className="mt-1 space-y-1.5">
+              {achievements.map((ach, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-slate-400">
+                  <span className="text-accent mt-0.5 shrink-0">›</span>
+                  {ach}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
-// ── Education card (VS Code file = class definition) ─────────────────────────
+// ── Education card ────────────────────────────────────────────────────────────
 function EducationCard({ item, index }) {
-  const lo = item.field ? 1 : 0;
-
   return (
     <div className={`reveal reveal-d${Math.min(index + 1, 4)}`}>
-      <EditorCard
-        filename={`${slug(item.institution)}.ts`}
-        badge={item.current ? 'enrolled' : null}
-        badgeVariant="blue"
-        fileIcon={<GraduationCap size={12} className="text-purple-400" />}
-      >
-        {/* class Institution { */}
-        <L n={1}>
-          <span className="text-[#c792ea]">class </span>
-          <span className="text-[#f07178]">{classname(item.institution)}</span>
-          <span className="text-slate-300"> {'{'}</span>
-        </L>
-        {/* degree = "..." */}
-        <L n={2}>
-          <span className="pl-4">
-            <span className="text-[#ffcb6b]">degree</span>
-            <span className="text-slate-400"> = </span>
-            <span className="text-[#c3e88d]">"{item.degree}"</span>
-            <span className="text-slate-500">;</span>
-          </span>
-        </L>
-        {/* field = "..." (optional) */}
-        {item.field && (
-          <L n={3}>
-            <span className="pl-4">
-              <span className="text-[#ffcb6b]">field</span>
-              <span className="text-slate-400"> = </span>
-              <span className="text-[#c3e88d]">"{item.field}"</span>
-              <span className="text-slate-500">;</span>
-            </span>
-          </L>
-        )}
-        {/* // dates */}
-        <L n={3 + lo}>
-          <span className="pl-4 text-slate-500">
-            {'// '}
+      <div className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 transition-all duration-300">
+        <TitleBar
+          filename={`${toSlug(item.institution)}.tsx`}
+          fileBadge="TSX"
+          fileBadgeStyle="linear-gradient(135deg, #3178c6 55%, #61dafb 100%)"
+          badge={item.current ? 'enrolled' : null}
+          badgeVariant="blue"
+        />
+
+        <div className="p-5 flex flex-col gap-2">
+          {/* Degree */}
+          <h3 className="font-display font-semibold text-white text-base leading-snug">
+            {item.degree}
+          </h3>
+
+          {/* Institution */}
+          <span className="text-sm text-accent font-medium">{item.institution}</span>
+
+          {/* Field */}
+          {item.field && (
+            <span className="text-xs text-slate-400">{item.field}</span>
+          )}
+
+          {/* Date range */}
+          <div className="inline-flex items-center gap-1.5 font-mono text-xs text-slate-500">
+            <Calendar size={11} />
             {fmt(item.startDate)}
-            {(item.startDate && (item.endDate || item.current)) ? ' → ' : ''}
-            {item.current ? 'Present' : fmt(item.endDate)}
-          </span>
-        </L>
-        {/* } */}
-        <L n={4 + lo}>
-          <span className="text-slate-300">{'}'}</span>
-        </L>
-        {/* description block comment */}
-        {item.description && (
-          <>
-            <L n={5 + lo}><span>&nbsp;</span></L>
-            <L n={6 + lo}>
-              <span className="text-slate-500 break-words whitespace-pre-wrap">
-                {'/* '}{item.description}{' */'}
-              </span>
-            </L>
-          </>
-        )}
-      </EditorCard>
+            {(item.startDate && (item.endDate || item.current)) && ' — '}
+            {item.current
+              ? <span className="text-blue-400 font-semibold">Present</span>
+              : fmt(item.endDate)
+            }
+          </div>
+
+          {/* Description */}
+          {item.description && (
+            <p className="text-sm text-slate-400 leading-relaxed mt-1">
+              {item.description}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -223,7 +187,6 @@ export default function Timeline({ items = [], type = 'education' }) {
 
   return (
     <div className="relative">
-      {/* Vertical timeline connector */}
       <div className="absolute left-4 top-5 bottom-5 w-px bg-gradient-to-b from-accent/60 via-slate-700/40 to-transparent" />
       <div className="space-y-8">
         {items.map((item, i) => (
