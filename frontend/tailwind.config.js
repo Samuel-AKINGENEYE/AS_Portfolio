@@ -5,6 +5,11 @@ export default {
   theme: {
     extend: {
       colors: {
+        accent: {
+          DEFAULT: '#E8703A',
+          hover: '#D4612C',
+          muted: 'rgba(232, 112, 58, 0.12)',
+        },
         brand: {
           blue: '#3B82F6',
           cyan: '#22D3EE',
@@ -77,7 +82,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       backgroundSize: {
         '300%': '300%',

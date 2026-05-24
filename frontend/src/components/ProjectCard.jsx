@@ -7,61 +7,69 @@ export default function ProjectCard({ project }) {
 
   return (
     <div
-      className="group relative flex flex-col bg-white dark:bg-slate-800
-                 border border-slate-200 dark:border-slate-700
-                 rounded-2xl overflow-hidden shadow-sm
-                 hover:shadow-2xl hover:scale-[1.02] hover:border-blue-500/50
-                 transition-all duration-300 glow-hover"
+      className="group relative flex flex-col bg-white dark:bg-slate-900
+                 border border-slate-200 dark:border-slate-800
+                 rounded-lg overflow-hidden
+                 hover:border-slate-400 dark:hover:border-slate-600
+                 transition-colors duration-200"
       style={cardLink ? { cursor: 'pointer' } : undefined}
     >
-      {/* Stretched invisible link covers the whole card */}
       {cardLink && (
         <a
           href={cardLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute inset-0 z-[1] rounded-2xl"
+          className="absolute inset-0 z-[1] rounded-lg"
           aria-label={`Open ${project.title}`}
           tabIndex={-1}
         />
       )}
 
-      {/* Thumbnail */}
-      <div className="relative z-[2] h-48 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
-        {project.imageUrl && !imgFailed ? (
+      {project.imageUrl && !imgFailed && (
+        <div className="relative z-[2] h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
           <img
             src={project.imageUrl}
             alt={project.title}
             loading="lazy"
             decoding="async"
             onError={() => setImgFailed(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover"
           />
-        ) : (
-          <span className="text-5xl font-black text-blue-500/20 select-none">
-            {project.title?.charAt(0) ?? '?'}
+        </div>
+      )}
+
+      <div className="relative z-[2] flex flex-col flex-1 p-5">
+        {project.featured && (
+          <span className="font-mono text-[10px] text-green-600 dark:text-green-400 uppercase tracking-widest mb-3">
+            ● Live
           </span>
         )}
-      </div>
 
-      {/* Body */}
-      <div className="relative z-[2] flex flex-col flex-1 p-6">
-        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">
+        <h3 className="font-display font-semibold text-slate-900 dark:text-white text-base mb-2 group-hover:text-accent transition-colors">
           {project.title}
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4 line-clamp-3 flex-1">
+
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4 flex-1">
           {project.description}
         </p>
 
+        {project.longDescription && (
+          <div className="mb-4 pl-3 border-l-2 border-accent/30">
+            <p className="text-xs text-slate-500 dark:text-slate-500 leading-relaxed italic">
+              {project.longDescription}
+            </p>
+          </div>
+        )}
+
         {project.techStack?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-5">
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {project.techStack.map((tech) => (
               <span
                 key={tech}
-                className="px-2 py-0.5 text-xs rounded-md
-                           bg-blue-50 dark:bg-blue-500/10
-                           text-blue-600 dark:text-blue-400
-                           border border-blue-100 dark:border-blue-500/20"
+                className="font-mono px-1.5 py-0.5 text-[11px] rounded
+                           bg-slate-100 dark:bg-slate-800
+                           text-slate-600 dark:text-slate-400
+                           border border-slate-200 dark:border-slate-700"
               >
                 {tech}
               </span>
@@ -69,19 +77,18 @@ export default function ProjectCard({ project }) {
           </div>
         )}
 
-        <div className="flex items-center gap-4 pt-1 border-t border-slate-100 dark:border-slate-700/50">
+        <div className="flex items-center gap-4 pt-3 border-t border-slate-100 dark:border-slate-800">
           {project.liveUrl && (
             <a
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="relative z-[3] inline-flex items-center gap-1.5 text-sm font-medium
-                         text-blue-600 dark:text-blue-400
-                         hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+              className="relative z-[3] inline-flex items-center gap-1.5 text-xs font-medium
+                         text-accent hover:text-accent-hover transition-colors"
             >
-              <ExternalLink size={14} />
-              Live Demo
+              <ExternalLink size={12} />
+              Live
             </a>
           )}
           {project.githubUrl && (
@@ -90,12 +97,12 @@ export default function ProjectCard({ project }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="relative z-[3] inline-flex items-center gap-1.5 text-sm font-medium
+              className="relative z-[3] inline-flex items-center gap-1.5 text-xs font-medium
                          text-slate-500 dark:text-slate-400
                          hover:text-slate-900 dark:hover:text-white transition-colors"
             >
-              <Github size={14} />
-              Source
+              <Github size={12} />
+              Code
             </a>
           )}
         </div>

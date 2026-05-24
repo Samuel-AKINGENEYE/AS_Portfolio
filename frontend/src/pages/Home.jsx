@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
-  Code2, Database, Wrench, Globe, ChevronRight, Star, Loader2,
+  Code2, Database, Wrench, Globe, ChevronRight, Loader2,
   Home as HomeIcon, Layers, Award,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
@@ -10,22 +10,11 @@ import Footer from '../components/Footer.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
 import CertificateCard from '../components/CertificateCard.jsx';
 import WhatsAppButton from '../components/WhatsAppButton.jsx';
-import StarBackground from '../components/StarBackground.jsx';
-import TypingText from '../components/TypingText.jsx';
-import CountUp from '../components/CountUp.jsx';
 import Timeline from '../components/Timeline.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
 import {
   portfolioApi, analyticsApi, contactApi,
 } from '../services/api.js';
-
-const HERO_TEXTS = ['Full Stack Developer', 'React & Node.js Expert', 'API Builder', 'Problem Solver'];
-
-const TESTIMONIALS = [
-  { feedback: 'Samuel helped us launch a strong MVP in under a month.', author: 'Amina Kayitesi', role: 'Founder, Kivu Labs', rating: 5 },
-  { feedback: 'The product interface is clean, performant, and easy to maintain.', author: 'Jean Mukamana', role: 'Product Lead', rating: 5 },
-  { feedback: 'Reliable, detail-oriented, and responsive — Samuel consistently delivered.', author: 'Emily S.', role: 'CTO, LearnHub Rwanda', rating: 5 },
-];
 
 const STATIC_SKILLS = [
   { category: 'Frontend', items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'HTML/CSS', 'JavaScript', 'Figma'] },
@@ -43,21 +32,11 @@ function getVisitorId() {
   return id;
 }
 
-function StarRating({ rating }) {
-  return (
-    <div className="flex gap-0.5">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} size={13} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300 dark:text-slate-600'} />
-      ))}
-    </div>
-  );
-}
-
 function SectionHeader({ title, subtitle, className = '' }) {
   return (
-    <div className={`text-center mb-12 reveal ${className}`}>
-      <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{title}</h2>
-      {subtitle && <p className="text-slate-500 dark:text-slate-400 mt-3">{subtitle}</p>}
+    <div className={`mb-12 reveal ${className}`}>
+      <h2 className="font-display text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{title}</h2>
+      {subtitle && <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{subtitle}</p>}
     </div>
   );
 }
@@ -175,11 +154,6 @@ export default function Home() {
     analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
   }, [profile?.resumeUrl]);
 
-  const projectCount = projects.length;
-  const certificateCount = certificates.length;
-  const skillCount = skills.length;
-  const experienceCount = experience.length;
-
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-white dark:bg-slate-900">
@@ -211,106 +185,73 @@ export default function Home() {
       <WhatsAppButton />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center pt-16 px-6 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-950 transition-colors duration-300">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-3xl" />
-        </div>
-        <div className="relative z-10 max-w-6xl mx-auto w-full py-20">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+        <div className="relative z-10 max-w-6xl mx-auto w-full py-24 lg:py-32">
+          <div className="grid lg:grid-cols-[1fr_280px] gap-16 items-start">
             {/* Left — text */}
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-xs font-medium mb-6 animate-slide-up">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                {profile?.availability || 'Available for Work'}
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-3 text-slate-900 dark:text-white animate-slide-up-d1">
-                Hi, I'm{' '}
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                  {profile?.name?.split(' ')[0] || 'Samuel'}
-                </span>
-              </h1>
-              <div className="text-xl md:text-2xl lg:text-3xl font-semibold text-slate-600 dark:text-slate-300 mb-4 animate-slide-up-d2">
-                <TypingText texts={HERO_TEXTS} />
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6 max-w-lg animate-slide-up-d3">
-                {profile?.bio || 'Building tools used by 500+ users across Africa. I write code that creates real impact.'}
+              <p className="font-mono text-xs text-green-600 dark:text-green-400 mb-10 tracking-widest uppercase animate-slide-up">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-2 align-middle" />
+                {profile?.availability || 'Available for work'}
               </p>
-              <div className="flex flex-wrap gap-3 mb-6 animate-slide-up-d4">
-                <a href="#projects" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all">
-                  View My Work <ChevronRight size={16} />
-                </a>
-                <a href="#contact" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all">
-                  Contact Me
-                </a>
-              </div>
 
-              {/* Mobile profile card — only shown on small screens */}
-              <div className="lg:hidden flex items-center gap-4 p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 animate-slide-up-d4">
-                {profile?.avatar ? (
-                  <img
-                    src={profile.avatar}
-                    alt={profile?.name || 'Profile'}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-blue-500/30 shrink-0"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0">
-                    <span className="text-xl font-bold text-blue-500/40 select-none">SA</span>
-                  </div>
-                )}
-                <div>
-                  <p className="font-semibold text-slate-900 dark:text-white text-sm">
-                    {profile?.name || 'Samuel AKINGENEYE'}
-                  </p>
-                  {profile?.location && (
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                      <MapPin size={11} className="text-blue-500" />
-                      {profile.location}
-                    </p>
-                  )}
-                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    {profile?.availability || 'Available for work'}
-                  </p>
-                </div>
-              </div>
-            </div>
+              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-slate-900 dark:text-white mb-6 animate-slide-up-d1">
+                I build software<br />
+                <span className="text-accent">for the African web.</span>
+              </h1>
 
-            {/* Right — floating avatar (desktop only) */}
-            <div className="hidden lg:flex justify-center animate-slide-right">
-              <div className="relative animate-float">
-                <div className="relative w-80 h-80 rounded-[2rem] overflow-hidden border border-blue-500/20 shadow-2xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
-                  {profile?.avatar
-                    ? <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center"><span className="text-8xl font-black text-blue-500/30 dark:text-blue-500/20">SA</span></div>
-                  }
-                </div>
-                {profile?.location && (
-                  <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2 whitespace-nowrap border border-slate-200 dark:border-slate-700">
-                    <MapPin size={14} className="text-blue-500" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{profile.location}</span>
-                  </div>
+              <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3 max-w-xl animate-slide-up-d2">
+                {profile?.bio || 'Full-stack engineer based in Kigali, Rwanda — building production tools used by 500+ users across Africa.'}
+              </p>
+
+              <p className="font-mono text-sm text-slate-400 dark:text-slate-500 mb-10 animate-slide-up-d3">
+                {profile?.location ? `${profile.location} · ` : ''}Node.js · React · MongoDB
+              </p>
+
+              <div className="flex flex-wrap gap-3 animate-slide-up-d4">
+                <a
+                  href="#projects"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-colors text-sm"
+                >
+                  See my work <ChevronRight size={14} />
+                </a>
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-500 dark:hover:border-slate-500 font-medium rounded-md transition-colors text-sm"
+                >
+                  Get in touch
+                </a>
+                {profile?.resumeUrl && (
+                  <button
+                    onClick={handleResumeDownload}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-500 dark:hover:border-slate-500 font-medium rounded-md transition-colors text-sm"
+                  >
+                    <Download size={14} /> Resume
+                  </button>
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ── Stats ────────────────────────────────────────────────────── */}
-      <section className="py-14 px-6 bg-slate-50 dark:bg-slate-800/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[
-              { end: projectCount, suffix: '+', label: 'Projects Built', color: 'text-blue-500', delay: 'reveal-d1' },
-              { end: certificateCount, suffix: '', label: 'Certifications', color: 'text-green-500', delay: 'reveal-d2' },
-              { end: skillCount, suffix: '', label: 'Skills', color: 'text-purple-500', delay: 'reveal-d3' },
-              { end: experienceCount, suffix: '', label: 'Years Active', color: 'text-orange-500', delay: 'reveal-d4' },
-            ].map(({ end, suffix, label, color, delay }) => (
-              <div key={label} className={`text-center p-5 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 reveal ${delay}`}>
-                <p className={`text-3xl md:text-4xl font-bold ${color}`}><CountUp end={end} />{suffix}</p>
-                <p className="text-xs md:text-sm text-slate-500 mt-1">{label}</p>
-              </div>
-            ))}
+            {/* Right — avatar, desktop only */}
+            <div className="hidden lg:block animate-slide-right">
+              {profile?.avatar ? (
+                <img
+                  src={profile.avatar}
+                  alt={profile?.name || 'Samuel AKINGENEYE'}
+                  className="w-full aspect-square rounded-xl object-cover border border-slate-200 dark:border-slate-800"
+                />
+              ) : (
+                <div className="w-full aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center justify-center">
+                  <span className="font-display text-6xl font-bold text-slate-300 dark:text-slate-600 select-none">SA</span>
+                </div>
+              )}
+              {profile?.location && (
+                <p className="font-mono text-xs text-slate-500 dark:text-slate-500 mt-3 flex items-center gap-1.5">
+                  <MapPin size={11} className="text-accent" />
+                  {profile.location}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -318,17 +259,17 @@ export default function Home() {
       {/* ── Projects ─────────────────────────────────────────────────── */}
       <section id="projects" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Featured Projects" subtitle="Things I've built and shipped" />
+          <SectionHeader title="Work" />
           {allTechs.length > 1 && (
             <div className="flex flex-wrap gap-2 justify-center mb-10">
               {allTechs.map(tech => (
                 <button
                   key={tech}
                   onClick={() => setTechFilter(tech)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                  className={`font-mono px-3 py-1 rounded text-xs font-medium transition-colors border ${
                     techFilter === tech
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500'
+                      ? 'bg-accent text-white border-accent'
+                      : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-accent/50 hover:text-accent'
                   }`}
                 >
                   {tech}
@@ -346,33 +287,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Skills ───────────────────────────────────────────────────── */}
-      <section id="skills" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
+      {/* ── Stack ────────────────────────────────────────────────────── */}
+      <section id="skills" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-900/50">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Skills" subtitle="Technologies and tools I work with" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <SectionHeader title="Stack" />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             {hasApiSkills
               ? Object.entries(skillsByCategory).map(([category, items], idx) => (
-                  <div key={category} className={`bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d${Math.min(idx + 1, 6)}`}>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-center sm:text-left">{category}</h3>
-                    <ul className="space-y-3">
+                  <div key={category} className={`reveal reveal-d${Math.min(idx + 1, 6)}`}>
+                    <p className="font-mono text-[11px] text-accent uppercase tracking-widest mb-4">{category}</p>
+                    <ul className="space-y-2.5">
                       {[...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map(s => (
-                        <li key={s._id} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3">
-                          <SkillIcon name={s.name} size={18} />
-                          {s.name}
+                        <li key={s._id} className="flex items-center gap-3">
+                          <SkillIcon name={s.name} size={16} className="shrink-0 text-slate-400" />
+                          <span className="font-mono text-sm text-slate-700 dark:text-slate-300">{s.name}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 ))
               : STATIC_SKILLS.map(({ category, items }, idx) => (
-                  <div key={category} className={`bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 reveal reveal-d${idx + 1}`}>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-200 dark:border-slate-700 text-center sm:text-left">{category}</h3>
-                    <ul className="space-y-3">
+                  <div key={category} className={`reveal reveal-d${idx + 1}`}>
+                    <p className="font-mono text-[11px] text-accent uppercase tracking-widest mb-4">{category}</p>
+                    <ul className="space-y-2.5">
                       {items.map(name => (
-                        <li key={name} className="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-3">
-                          <SkillIcon name={name} size={18} />
-                          {name}
+                        <li key={name} className="flex items-center gap-3">
+                          <SkillIcon name={name} size={16} className="shrink-0 text-slate-400" />
+                          <span className="font-mono text-sm text-slate-700 dark:text-slate-300">{name}</span>
                         </li>
                       ))}
                     </ul>
@@ -386,7 +327,7 @@ export default function Home() {
       {/* ── Experience ───────────────────────────────────────────────── */}
       <section id="experience" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Work Experience" subtitle="My professional journey" />
+          <SectionHeader title="Experience" />
           <div className="max-w-3xl mx-auto">
             {experience.length > 0
               ? <Timeline items={experience} type="experience" />
@@ -399,7 +340,7 @@ export default function Home() {
       {/* ── Education ────────────────────────────────────────────────── */}
       <section id="education" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Education" subtitle="My academic background" />
+          <SectionHeader title="Education" />
           <div className="max-w-3xl mx-auto">
             {education.length > 0
               ? <Timeline items={education} type="education" />
@@ -412,17 +353,17 @@ export default function Home() {
       {/* ── Certificates ─────────────────────────────────────────────── */}
       <section id="certificates" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Certificates" subtitle="Credentials and certifications earned" />
+          <SectionHeader title="Certificates" />
           {allCertCategories.length > 1 && (
             <div className="flex flex-wrap gap-2 justify-center mb-10">
               {allCertCategories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => setCertFilter(cat)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                  className={`font-mono px-3 py-1 rounded text-xs font-medium transition-colors border ${
                     certFilter === cat
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500'
+                      ? 'bg-accent text-white border-accent'
+                      : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-accent/50 hover:text-accent'
                   }`}
                 >
                   {cat}
@@ -443,29 +384,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Testimonials ─────────────────────────────────────────────── */}
-      <section id="testimonials" className="py-16 md:py-24 px-6 bg-slate-50 dark:bg-slate-800/20">
-        <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Testimonials" subtitle="What clients and colleagues say" />
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className={`bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm reveal reveal-d${i + 1}`}>
-                <StarRating rating={t.rating} />
-                <p className="text-sm italic mt-3 mb-4 text-slate-600 dark:text-slate-400">"{t.feedback}"</p>
-                <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
-                  <p className="font-semibold text-sm text-slate-900 dark:text-white">{t.author}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{t.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Contact ──────────────────────────────────────────────────── */}
       <section id="contact" className="py-16 md:py-24 px-6 bg-white dark:bg-slate-900">
         <div className="max-w-6xl mx-auto">
-          <SectionHeader title="Get In Touch" subtitle="Have a project in mind? Let's talk." />
+          <SectionHeader title="Contact" />
           <div className="grid lg:grid-cols-2 gap-10 md:gap-12 max-w-4xl mx-auto">
             {/* Contact form */}
             <form onSubmit={handleContact} className="space-y-4 reveal reveal-d1">
@@ -478,23 +400,23 @@ export default function Home() {
                 required placeholder="Your name"
                 value={contactForm.name}
                 onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
               <input
                 required type="email" placeholder="Your email"
                 value={contactForm.email}
                 onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
               <textarea
                 required rows={5} placeholder="Your message"
                 value={contactForm.message}
                 onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-colors"
               />
               <button
                 type="submit" disabled={sending}
-                className="w-full py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-all disabled:opacity-60"
+                className="w-full py-3 rounded-md bg-accent hover:bg-accent-hover text-white font-medium transition-colors disabled:opacity-60"
               >
                 {sending ? 'Sending...' : 'Send Message'}
               </button>
@@ -505,22 +427,22 @@ export default function Home() {
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3>
                 <div className="flex flex-wrap gap-3">
-                  {social.github && <a href={social.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Github size={20} /></a>}
-                  {social.linkedin && <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Linkedin size={20} /></a>}
-                  {social.twitter && <a href={social.twitter} target="_blank" rel="noopener noreferrer" className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Twitter size={20} /></a>}
-                  {profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition-all"><Mail size={20} /></a>}
+                  {social.github && <a href={social.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Github size={18} /></a>}
+                  {social.linkedin && <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Linkedin size={18} /></a>}
+                  {social.twitter && <a href={social.twitter} target="_blank" rel="noopener noreferrer" className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Twitter size={18} /></a>}
+                  {profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Mail size={18} /></a>}
                 </div>
               </div>
               {profile?.location && (
                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                  <MapPin size={16} className="text-blue-500" />
+                  <MapPin size={16} className="text-accent" />
                   <span>{profile.location}</span>
                 </div>
               )}
               {profile?.email && (
                 <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                  <Mail size={16} className="text-blue-500" />
-                  <a href={`mailto:${profile.email}`} className="hover:text-blue-500">{profile.email}</a>
+                  <Mail size={16} className="text-accent" />
+                  <a href={`mailto:${profile.email}`} className="hover:text-accent">{profile.email}</a>
                 </div>
               )}
 
@@ -529,7 +451,7 @@ export default function Home() {
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
                   <button
                     onClick={handleResumeDownload}
-                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border-2 border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 font-medium"
+                    className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 rounded-md border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-accent hover:text-accent transition-colors font-medium"
                   >
                     <Download size={16} />
                     Download Resume
