@@ -43,6 +43,18 @@
     @apply max-w-6xl mx-auto;
   }
 
+  /* ── Glass card (used by Timeline) ─────────────────── */
+  .card-glass {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.7);
+  }
+  :is(.dark) .card-glass {
+    background: rgba(30, 41, 59, 0.65);
+    border-color: rgba(51, 65, 85, 0.45);
+  }
+
   /* ── Glow hover ──────────────────────────────────────── */
   .glow-hover {
     transition: box-shadow 0.3s ease, border-color 0.3s ease;

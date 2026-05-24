@@ -123,6 +123,9 @@ function RunProfileModal({ profile, onClose }) {
 function SectionHeader({ title, subtitle, className = '' }) {
   return (
     <div className={`mb-12 reveal ${className}`}>
+      <p className="font-mono text-[11px] text-accent/40 dark:text-accent/30 mb-2 tracking-widest select-none">
+        {'// '}{title.toLowerCase()}
+      </p>
       <h2 className="font-display text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{title}</h2>
       {subtitle && <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">{subtitle}</p>}
     </div>
@@ -286,7 +289,15 @@ export default function Home() {
       <WhatsAppButton />
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 bg-white dark:bg-slate-900 transition-colors duration-300">
+      <section id="hero" className="relative min-h-screen flex items-center pt-16 px-6 bg-white dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+        {/* Dot-grid background */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.35] dark:opacity-[0.12]"
+          style={{ backgroundImage: 'radial-gradient(circle, rgba(148,163,184,0.3) 1px, transparent 1px)', backgroundSize: '36px 36px' }}
+        />
+        {/* Ambient colour blobs */}
+        <div className="absolute -top-24 -left-24 w-[480px] h-[480px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[360px] h-[360px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-6xl mx-auto w-full py-24 lg:py-32">
           <div className="grid lg:grid-cols-[1fr_460px] gap-12 items-start">
             {/* Left — text */}
@@ -669,30 +680,41 @@ export default function Home() {
               </form>
             </div>
 
-            {/* Connect + resume */}
-            <div className="space-y-5 reveal reveal-d2">
+            {/* Connect */}
+            <div className="space-y-6 reveal reveal-d2">
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Connect with me</h3>
-                <div className="flex flex-wrap gap-3">
-                  {social.github && <a href={social.github} target="_blank" rel="noopener noreferrer" className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Github size={18} /></a>}
-                  {social.linkedin && <a href={social.linkedin} target="_blank" rel="noopener noreferrer" className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Linkedin size={18} /></a>}
-                  {social.twitter && <a href={social.twitter} target="_blank" rel="noopener noreferrer" className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Twitter size={18} /></a>}
-                  {profile?.email && <a href={`mailto:${profile.email}`} className="p-3 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-accent hover:text-accent transition-colors"><Mail size={18} /></a>}
+                <p className="font-mono text-[10px] text-accent/40 tracking-widest uppercase mb-1 select-none">{'// connect'}</p>
+                <h3 className="font-display font-semibold text-slate-900 dark:text-white mb-4">Let's work together</h3>
+
+                {/* Terminal-style link rows */}
+                <div className="space-y-2">
+                  {[
+                    social.github   && { href: social.github,   Icon: Github,   label: 'GitHub',          comment: 'view_code',   ext: true  },
+                    social.linkedin && { href: social.linkedin, Icon: Linkedin, label: 'LinkedIn',         comment: 'connect',     ext: true  },
+                    social.twitter  && { href: social.twitter,  Icon: Twitter,  label: 'Twitter',          comment: 'follow',      ext: true  },
+                    profile?.email  && { href: `mailto:${profile.email}`, Icon: Mail, label: profile.email, comment: 'send_mail', ext: false },
+                  ].filter(Boolean).map(({ href, Icon, label, comment, ext }) => (
+                    <a
+                      key={href}
+                      href={href}
+                      {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 hover:border-accent/50 hover:bg-accent/5 group transition-all"
+                    >
+                      <span className="font-mono text-accent/40 text-xs select-none shrink-0">{'→'}</span>
+                      <Icon size={14} className="text-slate-400 dark:text-slate-500 group-hover:text-accent transition-colors shrink-0" />
+                      <span className="font-mono text-xs text-slate-700 dark:text-slate-300 group-hover:text-accent transition-colors truncate">{label}</span>
+                      <span className="ml-auto font-mono text-[10px] text-slate-300 dark:text-slate-600 shrink-0 pl-2">{'// '}{comment}</span>
+                    </a>
+                  ))}
                 </div>
               </div>
+
               {profile?.location && (
-                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                  <MapPin size={16} className="text-accent" />
+                <div className="flex items-center gap-2 font-mono text-[11px] text-slate-400 dark:text-slate-500 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <MapPin size={11} className="text-accent/60 shrink-0" />
                   <span>{profile.location}</span>
                 </div>
               )}
-              {profile?.email && (
-                <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
-                  <Mail size={16} className="text-accent" />
-                  <a href={`mailto:${profile.email}`} className="hover:text-accent">{profile.email}</a>
-                </div>
-              )}
-
             </div>
           </div>
         </div>

@@ -10,8 +10,9 @@ export default function ProjectCard({ project }) {
       className="group relative flex flex-col bg-white dark:bg-slate-900
                  border border-slate-200 dark:border-slate-800
                  rounded-lg overflow-hidden
-                 hover:border-slate-400 dark:hover:border-slate-600
-                 transition-colors duration-200"
+                 hover:border-accent/50 dark:hover:border-accent/40
+                 hover:shadow-lg hover:shadow-accent/5
+                 transition-all duration-200"
       style={cardLink ? { cursor: 'pointer' } : undefined}
     >
       {cardLink && (
@@ -40,8 +41,9 @@ export default function ProjectCard({ project }) {
 
       <div className="relative z-[2] flex flex-col flex-1 p-5">
         {project.featured && (
-          <span className="font-mono text-[10px] text-green-600 dark:text-green-400 uppercase tracking-widest mb-3">
-            ● Live
+          <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-green-600 dark:text-green-400 uppercase tracking-widest mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+            Live
           </span>
         )}
 
