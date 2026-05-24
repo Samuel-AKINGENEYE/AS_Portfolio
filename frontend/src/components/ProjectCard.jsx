@@ -8,9 +8,16 @@ function toSlug(str = '') {
 export default function ProjectCard({ project }) {
   const [imgFailed, setImgFailed] = useState(false);
   const s = toSlug(project.title);
+  const cardHref = project.liveUrl || project.githubUrl || null;
 
   return (
-    <div className="group flex flex-col rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300">
+    <a
+      href={cardHref ?? undefined}
+      target={cardHref ? '_blank' : undefined}
+      rel={cardHref ? 'noopener noreferrer' : undefined}
+      className="group flex flex-col rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300"
+      style={!cardHref ? { pointerEvents: 'none' } : undefined}
+    >
 
       {/* ── macOS title bar ───────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50 shrink-0">
@@ -106,6 +113,7 @@ export default function ProjectCard({ project }) {
               href={project.liveUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1.5 font-mono text-[11px] text-accent hover:text-accent-hover transition-colors shrink-0"
             >
               <ExternalLink size={11} /> Live
@@ -116,6 +124,7 @@ export default function ProjectCard({ project }) {
               href={project.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-1.5 font-mono text-[11px] text-slate-400 hover:text-white transition-colors shrink-0"
             >
               <Github size={11} /> Code
@@ -123,6 +132,6 @@ export default function ProjectCard({ project }) {
           )}
         </div>
       )}
-    </div>
+    </a>
   );
 }
