@@ -4,7 +4,7 @@ import {
   Github, Linkedin, Twitter, Mail, MapPin, Calendar,
   Briefcase, Code2, Database, Wrench, Globe,
   Star, StarHalf, MessageSquare, ChevronRight,
-  ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp, Download,
+  ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp, Download, X, FileText,
 } from 'lucide-react';
 
 import Navbar           from '../components/Navbar.jsx';
@@ -71,6 +71,50 @@ const CERT_CATEGORIES = ['All', 'AI/ML', 'Web Dev', 'Cybersecurity', 'Other'];
 const PAGE_SIZE = 6; // default visible items for projects & certs
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+function ResumeModal({ onClose }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-4xl h-[90vh] bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-medium text-sm">
+            <FileText size={16} className="text-blue-500" />
+            Samuel AKINGENEYE — Resume
+          </div>
+          <div className="flex items-center gap-3">
+            <a
+              href="/resume.pdf"
+              download="Samuel_AKINGENEYE_Resume.pdf"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium transition-colors"
+            >
+              <Download size={13} /> Download
+            </a>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* PDF viewer */}
+        <iframe
+          src="/resume.pdf#toolbar=0"
+          title="Resume Preview"
+          className="flex-1 w-full border-0"
+        />
+      </div>
+    </div>
+  );
+}
 
 function StarRating({ rating }) {
   return (
@@ -226,11 +270,12 @@ function PageSkeleton() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [projects,     setProjects]     = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [profile,      setProfile]      = useState(null);
-  const [certFilter,   setCertFilter]   = useState('All');
-  const [loading,      setLoading]      = useState(true);
+  const [projects,      setProjects]      = useState([]);
+  const [certificates,  setCertificates]  = useState([]);
+  const [profile,       setProfile]       = useState(null);
+  const [certFilter,    setCertFilter]    = useState('All');
+  const [loading,       setLoading]       = useState(true);
+  const [showResume,    setShowResume]    = useState(false);
 
   // Pagination state
   const [showAllProjects, setShowAllProjects] = useState(false);
@@ -274,6 +319,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      {showResume && <ResumeModal onClose={() => setShowResume(false)} />}
       <Navbar />
 
       {/* ══════════════════════ HERO ══════════════════════ */}
@@ -316,13 +362,12 @@ export default function Home() {
                 <a href="#contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-400 dark:hover:text-blue-400 font-medium transition-colors">
                   Contact Me <Mail size={16} />
                 </a>
-                <a
-                  href="/resume.pdf"
-                  download="Samuel_AKINGENEYE_Resume.pdf"
+                <button
+                  onClick={() => setShowResume(true)}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-green-500 hover:text-green-500 dark:hover:border-green-400 dark:hover:text-green-400 font-medium transition-colors"
                 >
-                  Download CV <Download size={16} />
-                </a>
+                  View CV <FileText size={16} />
+                </button>
               </div>
 
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-medium">
