@@ -329,7 +329,7 @@ export default function Home() {
 
               <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight text-slate-900 dark:text-white mb-6 animate-slide-up-d1">
                 I build software<br />
-                <span className="text-accent">for the African web.</span>
+                <span className="text-accent">that makes an impact.</span>
               </h1>
 
               <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3 max-w-xl animate-slide-up-d2">
