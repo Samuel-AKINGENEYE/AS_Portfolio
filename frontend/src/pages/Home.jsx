@@ -227,6 +227,7 @@ export default function Home() {
     setSending(true);
     try {
       await contactApi.send({ ...contactForm, visitorId: getVisitorId() });
+      analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'contact_form' }).catch(() => {});
       toast.success("Message sent! I'll reply soon.");
       setContactForm({ name: '', email: '', subject: '', message: '', honeypot: '' });
     } catch (err) {

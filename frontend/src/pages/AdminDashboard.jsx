@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code,
   BookOpen, Briefcase, Upload, BarChart2, Eye, Play,
   MessageSquare, RefreshCw, Image, FileText, Inbox, Mail, MailOpen, ZoomIn,
-  Menu, Zap, Terminal,
+  Menu, Zap, Terminal, Clock, Users, TrendingUp, Activity,
 } from 'lucide-react';
 import {
   projectsApi, certificatesApi, profileApi, skillsApi,
@@ -842,6 +842,20 @@ function StatCard({ icon: Icon, label, value, accent = '#3b82f6' }) {
   );
 }
 
+function timeAgo(dateStr) {
+  const diff = (Date.now() - new Date(dateStr)) / 1000;
+  if (diff < 60) return `${Math.floor(diff)}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+const EVENT_META = {
+  pageview:     { label: 'page_view',     color: '#3b82f6' },
+  profile_view: { label: 'profile_view',  color: '#10b981' },
+  contact_form: { label: 'contact_form',  color: '#f59e0b' },
+};
+
 function AnalyticsTab() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -855,9 +869,36 @@ function AnalyticsTab() {
   }, [days]);
   useEffect(() => { load(); }, [load]);
 
+  // Build a full array of every day in the period, filling gaps with 0
+  const dailyChart = useMemo(() => {
+    const map = {};
+    (stats?.dailyViews ?? []).forEach(d => { map[d._id] = d.count; });
+    return Array.from({ length: days }, (_, i) => {
+      const d = new Date(Date.now() - (days - 1 - i) * 86_400_000);
+      const key = d.toISOString().split('T')[0];
+      return { date: key, count: map[key] ?? 0 };
+    });
+  }, [stats?.dailyViews, days]);
+
+  const maxDay = Math.max(...dailyChart.map(d => d.count), 1);
+
+  const contactRate = stats?.uniqueVisitors > 0
+    ? ((stats.contactForms / stats.uniqueVisitors) * 100).toFixed(1)
+    : '0.0';
+
+  const avgViews = stats?.uniqueVisitors > 0
+    ? (stats.totalViews / stats.uniqueVisitors).toFixed(1)
+    : '0';
+
+  const peakHour = stats?.peakHour != null
+    ? `${String(stats.peakHour).padStart(2, '0')}:00`
+    : '—';
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
+    <div className="space-y-6">
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
           <p className="font-mono text-[11px] text-slate-600">// analytics.getStats()</p>
           <p className="font-mono text-xs text-slate-500 mt-0.5">
@@ -876,15 +917,88 @@ function AnalyticsTab() {
           <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={12} /></button>
         </div>
       </div>
-      {loading ? <SkeletonRows count={1} /> : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard icon={Eye} label="page_views" value={stats?.totalViews?.toLocaleString()} accent="#3b82f6" />
-          <StatCard icon={BarChart2} label="unique_visitors" value={stats?.uniqueVisitors?.toLocaleString()} accent="#a855f7" />
-          <StatCard icon={Play} label="profile_views" value={stats?.profileViews?.toLocaleString()} accent="#10b981" />
-          <StatCard icon={MessageSquare} label="contact_forms" value={stats?.contactForms?.toLocaleString()} accent="#f59e0b" />
-        </div>
+
+      {loading ? <SkeletonRows count={4} /> : (
+        <>
+          {/* ── Traffic ── */}
+          <div>
+            <p className="font-mono text-[10px] text-slate-700 mb-2">// traffic</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <StatCard icon={Eye}          label="page_views"      value={stats?.totalViews?.toLocaleString()}    accent="#3b82f6" />
+              <StatCard icon={Users}        label="unique_visitors" value={stats?.uniqueVisitors?.toLocaleString()} accent="#a855f7" />
+              <StatCard icon={Play}         label="profile_views"   value={stats?.profileViews?.toLocaleString()}   accent="#10b981" />
+              <StatCard icon={MessageSquare} label="contact_forms"  value={stats?.contactForms?.toLocaleString()}   accent="#f59e0b" />
+            </div>
+          </div>
+
+          {/* ── Engagement ── */}
+          <div>
+            <p className="font-mono text-[10px] text-slate-700 mb-2">// engagement</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <StatCard icon={TrendingUp}  label="return_visitors"   value={stats?.returnVisitors?.toLocaleString()} accent="#6366f1" />
+              <StatCard icon={Activity}    label="contact_rate"       value={`${contactRate}%`}                       accent="#ec4899" />
+              <StatCard icon={BarChart2}   label="views/visitor"      value={avgViews}                                accent="#14b8a6" />
+              <StatCard icon={Clock}       label="peak_hour_(utc)"    value={peakHour}                                accent="#f97316" />
+            </div>
+          </div>
+
+          {/* ── Daily views bar chart ── */}
+          <div className="p-4 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="font-mono text-[10px] text-slate-600">// daily_pageviews</p>
+              <p className="font-mono text-[10px] text-slate-700">max: {maxDay}</p>
+            </div>
+            <div className="flex items-end gap-px h-24">
+              {dailyChart.map(({ date, count }) => (
+                <div
+                  key={date}
+                  className="group relative flex-1 rounded-t-[1px] transition-colors"
+                  style={{
+                    height: `${Math.max(2, (count / maxDay) * 100)}%`,
+                    background: count > 0 ? '#3b82f6' : 'rgba(255,255,255,0.04)',
+                    minHeight: count > 0 ? '3px' : '2px',
+                  }}
+                >
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
+                    <div className="rounded px-1.5 py-1 whitespace-nowrap" style={{ background: '#1e1e1e', border: `1px solid ${C.border}` }}>
+                      <p className="font-mono text-[9px] text-slate-400">{date.slice(5)}</p>
+                      <p className="font-mono text-[10px] text-blue-300 font-bold text-center">{count}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-1">
+              <p className="font-mono text-[9px] text-slate-700">{dailyChart[0]?.date?.slice(5)}</p>
+              <p className="font-mono text-[9px] text-slate-700">today</p>
+            </div>
+          </div>
+
+          {/* ── Recent activity ── */}
+          <div>
+            <p className="font-mono text-[10px] text-slate-700 mb-2">// recent_activity</p>
+            {stats?.recentEvents?.length > 0 ? (
+              <div className="space-y-1">
+                {stats.recentEvents.map((ev, i) => {
+                  const meta = EVENT_META[ev.event] ?? { label: ev.event, color: '#6b7280' };
+                  return (
+                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: meta.color }} />
+                      <span className="font-mono text-[11px] w-28 shrink-0" style={{ color: meta.color }}>{meta.label}</span>
+                      <span className="font-mono text-[11px] text-slate-600 truncate flex-1">{ev.page}</span>
+                      <span className="font-mono text-[10px] text-slate-700 shrink-0">{timeAgo(ev.createdAt)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="font-mono text-xs text-slate-700 py-6 text-center">no events recorded yet</p>
+            )}
+          </div>
+
+          <p className="font-mono text-[10px] text-slate-700">// data from mongodb · tracking fires on page load, profile open, and contact submit</p>
+        </>
       )}
-      <p className="font-mono text-[10px] text-slate-700 mt-4">// stats counted from mongodb — tracking fires on each page load and user action</p>
     </div>
   );
 }

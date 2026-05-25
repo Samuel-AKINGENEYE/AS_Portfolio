@@ -23,11 +23,53 @@ router.get('/stats', verifyToken, async (req, res) => {
     const days = Math.min(parseInt(req.query.days) || 30, 365);
     const since = new Date(Date.now() - days * 86_400_000);
 
-    const [totalViews, uniqueIds, profileViews, contactForms] = await Promise.all([
+    const [
+      totalViews,
+      uniqueIds,
+      profileViews,
+      contactForms,
+      dailyViews,
+      returnVisitorsResult,
+      hourlyPeak,
+      recentEvents,
+    ] = await Promise.all([
       Analytics.countDocuments({ event: 'pageview', createdAt: { $gte: since } }),
+
       Analytics.distinct('visitorId', { event: 'pageview', visitorId: { $ne: '' }, createdAt: { $gte: since } }),
+
       Analytics.countDocuments({ event: 'profile_view', createdAt: { $gte: since } }),
+
       Analytics.countDocuments({ event: 'contact_form', createdAt: { $gte: since } }),
+
+      // Daily pageview counts for the bar chart
+      Analytics.aggregate([
+        { $match: { event: 'pageview', createdAt: { $gte: since } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
+
+      // Visitors with more than one visit (return visitors)
+      Analytics.aggregate([
+        { $match: { event: 'pageview', visitorId: { $ne: '' }, createdAt: { $gte: since } } },
+        { $group: { _id: '$visitorId', visits: { $sum: 1 } } },
+        { $match: { visits: { $gt: 1 } } },
+        { $count: 'count' },
+      ]),
+
+      // Hour of day with most traffic
+      Analytics.aggregate([
+        { $match: { event: 'pageview', createdAt: { $gte: since } } },
+        { $group: { _id: { $hour: '$createdAt' }, count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 1 },
+      ]),
+
+      // Last 15 events for the activity feed
+      Analytics.find({ createdAt: { $gte: since } })
+        .sort({ createdAt: -1 })
+        .limit(15)
+        .select('event page createdAt')
+        .lean(),
     ]);
 
     res.json({
@@ -37,6 +79,10 @@ router.get('/stats', verifyToken, async (req, res) => {
         uniqueVisitors: uniqueIds.length,
         profileViews,
         contactForms,
+        dailyViews,
+        returnVisitors: returnVisitorsResult[0]?.count ?? 0,
+        peakHour: hourlyPeak[0]?._id ?? null,
+        recentEvents,
       },
     });
   } catch (err) {
