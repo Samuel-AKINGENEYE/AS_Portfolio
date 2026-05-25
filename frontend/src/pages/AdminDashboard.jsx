@@ -1108,7 +1108,14 @@ function MessagesTab({ onUnreadChange }) {
                 <div className="px-4 pb-4 pt-1 ml-8" style={{ borderTop: `1px solid ${C.border}` }}>
                   <p className="font-mono text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
                   <div className="mt-3 flex items-center gap-3">
-                    <a href={`mailto:${msg.email}?subject=Re: Your message&body=Hi ${msg.name},%0A%0A`} className="font-mono text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><Mail size={11} /> reply via email</a>
+                    <a
+                      href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(msg.email)}&su=${encodeURIComponent(`Re: ${msg.subject || 'Your message'}`)}&body=${encodeURIComponent(`Hi ${msg.name},\n\n`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                    >
+                      <Mail size={11} /> reply via gmail
+                    </a>
                     {!msg.read && <button onClick={() => handleMarkRead(msg)} className="font-mono text-xs text-slate-600 hover:text-slate-400">mark as read</button>}
                   </div>
                 </div>
