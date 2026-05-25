@@ -256,26 +256,62 @@ export default function Home() {
   }, [profile?.resumeUrl]);
 
   if (loading) {
+    const bootLines = [
+      { prefix: '$',  text: 'node portfolio.js',          color: '#58a6ff', delay: 0    },
+      { prefix: '⟩',  text: 'Loading environment…',        color: '#8b949e', delay: 0.35 },
+      { prefix: '✓',  text: 'ENV configured',              color: '#3fb950', delay: 0.7  },
+      { prefix: '⟩',  text: 'Importing modules…',          color: '#8b949e', delay: 1.05 },
+      { prefix: '✓',  text: 'React · Express · Tailwind',  color: '#58a6ff', delay: 1.4  },
+      { prefix: '⟩',  text: 'Connecting to database…',     color: '#8b949e', delay: 1.7  },
+      { prefix: '✓',  text: 'MongoDB connected',           color: '#3fb950', delay: 2.05 },
+      { prefix: '⟩',  text: slow ? 'Server warming up, hang tight…' : 'Fetching portfolio data…', color: '#8b949e', delay: 2.35 },
+      { prefix: '✓',  text: 'All systems ready',           color: '#f0883e', delay: 2.7  },
+    ];
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-white dark:bg-slate-900">
-        <div className="relative animate-fade-in">
-          <span className="text-6xl font-black tracking-tight text-slate-900 dark:text-white select-none">
-            <span className="text-blue-500">{'{'}</span>SA<span className="text-blue-500">{'}'}</span>
-          </span>
-          <span className="absolute inset-x-0 -bottom-2 h-0.5 rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 opacity-80" />
-        </div>
-        <div className="flex gap-2.5">
-          {[0, 1, 2, 3].map(i => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: '#0d1117' }}>
+        <div className="w-full max-w-lg mx-4 sm:mx-auto">
+          {/* macOS-style title bar */}
+          <div
+            className="flex items-center gap-2 px-4 py-3 rounded-t-xl border border-b-0"
+            style={{ background: '#161b22', borderColor: '#30363d' }}
+          >
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
+            <span className="ml-3 font-mono text-xs" style={{ color: '#8b949e' }}>
+              ~/portfolio — zsh
+            </span>
+          </div>
+          {/* Terminal body */}
+          <div
+            className="px-6 py-5 rounded-b-xl border font-mono text-sm leading-relaxed"
+            style={{ background: '#0d1117', borderColor: '#30363d' }}
+          >
+            {bootLines.map((line, i) => (
+              <div
+                key={i}
+                className="flex items-baseline gap-3 mb-1.5 opacity-0"
+                style={{ animation: 'termLine 0.25s ease forwards', animationDelay: `${line.delay}s` }}
+              >
+                <span className="font-bold shrink-0 w-4 text-center" style={{ color: line.color }}>
+                  {line.prefix}
+                </span>
+                <span style={{ color: '#e6edf3' }}>{line.text}</span>
+              </div>
+            ))}
+            {/* Blinking cursor */}
             <div
-              key={i}
-              className="w-2.5 h-2.5 rounded-full bg-blue-500"
-              style={{ animation: `dotBounce 1.2s ease-in-out ${i * 0.18}s infinite` }}
-            />
-          ))}
+              className="flex items-baseline gap-3 mt-2 opacity-0"
+              style={{ animation: 'termLine 0.25s ease forwards', animationDelay: '3s' }}
+            >
+              <span className="font-bold w-4 text-center" style={{ color: '#3fb950' }}>$</span>
+              <span
+                className="inline-block w-2 h-[1em] align-middle"
+                style={{ background: '#3fb950', animation: 'termBlink 1s step-end infinite' }}
+              />
+            </div>
+          </div>
         </div>
-        <p className="text-sm text-slate-400 animate-pulse tracking-wide">
-          {slow ? 'Server is waking up, hang tight…' : 'Loading portfolio…'}
-        </p>
       </div>
     );
   }

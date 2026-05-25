@@ -5,7 +5,7 @@ import {
   Briefcase, Code2, Database, Wrench, Globe,
   Star, StarHalf, MessageSquare, ChevronRight,
   ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp, Download, X, FileText,
-  Play, FolderOpen,
+  Play, FolderOpen, GitCommit, GraduationCap,
 } from 'lucide-react';
 
 import Navbar           from '../components/Navbar.jsx';
@@ -14,7 +14,7 @@ import ProjectCard      from '../components/ProjectCard.jsx';
 import CertificateCard  from '../components/CertificateCard.jsx';
 import GitHubCalendar   from '../components/GitHubCalendar.jsx';
 import { SkillIcon }    from '../components/SkillIcon.jsx';
-import { projectsApi, certificatesApi, profileApi, contactApi } from '../services/api.js';
+import { projectsApi, certificatesApi, profileApi, contactApi, experienceApi, educationApi } from '../services/api.js';
 
 // ─── Static skill data (used as display source; SVG icons come from SkillIcon) ─
 
@@ -241,27 +241,72 @@ function ContactForm() {
   );
 }
 
-// ── Full-page initial skeleton shown during first data load ───────────────────
+// ── Coder-themed terminal loading screen ──────────────────────────────────────
 
-function PageSkeleton() {
+const BOOT_LINES = [
+  { prefix: '$',  text: 'node portfolio.js',              color: '#58a6ff', delay: 0    },
+  { prefix: '⟩',  text: 'Loading environment…',           color: '#8b949e', delay: 0.35 },
+  { prefix: '✓',  text: 'ENV configured',                 color: '#3fb950', delay: 0.7  },
+  { prefix: '⟩',  text: 'Importing modules…',             color: '#8b949e', delay: 1.05 },
+  { prefix: '✓',  text: 'React · Express · Tailwind',     color: '#58a6ff', delay: 1.4  },
+  { prefix: '⟩',  text: 'Connecting to database…',        color: '#8b949e', delay: 1.7  },
+  { prefix: '✓',  text: 'MongoDB connected',              color: '#3fb950', delay: 2.05 },
+  { prefix: '⟩',  text: 'Fetching portfolio data…',       color: '#8b949e', delay: 2.35 },
+  { prefix: '✓',  text: 'All systems ready',              color: '#f0883e', delay: 2.7  },
+];
+
+function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="animate-pulse space-y-10 px-6 py-20 max-w-6xl mx-auto">
-        {/* Hero placeholder */}
-        <div className="h-96 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
-        {/* Projects grid */}
-        <div className="h-8 w-48 bg-slate-200 dark:bg-slate-800 rounded-lg mx-auto" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-72 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
-          ))}
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: '#0d1117' }}>
+      <div className="w-full max-w-lg mx-4 sm:mx-auto">
+        {/* macOS-style title bar */}
+        <div
+          className="flex items-center gap-2 px-4 py-3 rounded-t-xl border border-b-0"
+          style={{ background: '#161b22', borderColor: '#30363d' }}
+        >
+          <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
+          <span className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
+          <span className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
+          <span className="ml-3 font-mono text-xs" style={{ color: '#8b949e' }}>
+            ~/portfolio — zsh
+          </span>
         </div>
-        {/* Skills */}
-        <div className="h-8 w-48 bg-slate-200 dark:bg-slate-800 rounded-lg mx-auto" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-48 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+
+        {/* Terminal body */}
+        <div
+          className="px-6 py-5 rounded-b-xl border font-mono text-sm leading-relaxed"
+          style={{ background: '#0d1117', borderColor: '#30363d' }}
+        >
+          {BOOT_LINES.map((line, i) => (
+            <div
+              key={i}
+              className="flex items-baseline gap-3 mb-1.5 opacity-0"
+              style={{
+                animation: 'termLine 0.25s ease forwards',
+                animationDelay: `${line.delay}s`,
+              }}
+            >
+              <span className="font-bold shrink-0 w-4 text-center" style={{ color: line.color }}>
+                {line.prefix}
+              </span>
+              <span style={{ color: '#e6edf3' }}>{line.text}</span>
+            </div>
           ))}
+
+          {/* Blinking cursor */}
+          <div
+            className="flex items-baseline gap-3 mt-2 opacity-0"
+            style={{
+              animation: 'termLine 0.25s ease forwards',
+              animationDelay: '3s',
+            }}
+          >
+            <span className="font-bold w-4 text-center" style={{ color: '#3fb950' }}>$</span>
+            <span
+              className="inline-block w-2 h-4 align-middle"
+              style={{ background: '#3fb950', animation: 'blink 1s step-end infinite' }}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -273,6 +318,8 @@ function PageSkeleton() {
 export default function Home() {
   const [projects,      setProjects]      = useState([]);
   const [certificates,  setCertificates]  = useState([]);
+  const [experience,    setExperience]    = useState([]);
+  const [education,     setEducation]     = useState([]);
   const [profile,       setProfile]       = useState(null);
   const [certFilter,    setCertFilter]    = useState('All');
   const [loading,       setLoading]       = useState(true);
@@ -286,14 +333,18 @@ export default function Home() {
 
   useEffect(() => {
     const load = async () => {
-      const [projRes, certRes, profRes] = await Promise.allSettled([
+      const [projRes, certRes, profRes, expRes, eduRes] = await Promise.allSettled([
         projectsApi.getAll(true),
         certificatesApi.getAll(),
         profileApi.get(),
+        experienceApi.getAll(),
+        educationApi.getAll(),
       ]);
       if (projRes.status === 'fulfilled') setProjects(projRes.value.data.data ?? []);
       if (certRes.status === 'fulfilled') setCertificates(certRes.value.data.data ?? []);
       if (profRes.status === 'fulfilled') setProfile(profRes.value.data.data ?? null);
+      if (expRes.status === 'fulfilled') setExperience(expRes.value.data.data ?? []);
+      if (eduRes.status === 'fulfilled') setEducation(eduRes.value.data.data ?? []);
       setLoading(false);
     };
     load();
@@ -307,14 +358,18 @@ export default function Home() {
   const displayProjects = showAllProjects ? projects      : projects.slice(0, PAGE_SIZE);
   const displayCerts    = showAllCerts    ? filteredCerts : filteredCerts.slice(0, PAGE_SIZE);
 
+  const fmtDate = (d) => {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
   const social = profile?.socialLinks ?? {
     github:   'https://github.com/Samuel-AKINGENEYE',
     linkedin: 'https://linkedin.com/in/samuel-akingeneye',
     twitter:  'https://twitter.com/samuel_ak',
   };
 
-  // Show full-page skeleton on very first load (before any data arrives)
-  if (loading) return <><Navbar /><PageSkeleton /></>;
+  if (loading) return <LoadingScreen />;
 
   // ─── Page ─────────────────────────────────────────────────────────────────
 
@@ -637,6 +692,240 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </Section>
+
+      {/* ══════════════════════ EXPERIENCE ══════════════════════ */}
+      <Section id="experience" className="bg-white dark:bg-slate-800/30">
+        <SectionHead
+          title="Experience"
+          sub="Professional journey and key contributions"
+        />
+        {experience.length > 0 ? (
+          <div className="max-w-4xl mx-auto">
+            <div className="relative">
+              {/* Vertical timeline line */}
+              <div className="absolute left-[19px] top-5 bottom-5 w-px bg-gradient-to-b from-blue-500/60 via-slate-300/40 dark:via-slate-600/40 to-transparent" />
+
+              <div className="space-y-8">
+                {experience.map((exp) => (
+                  <div key={exp._id} className="relative flex gap-6">
+                    {/* Timeline dot */}
+                    <div className="relative z-10 flex-shrink-0 mt-3.5">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                        exp.current
+                          ? 'bg-green-500/15 border-green-500 shadow-lg shadow-green-500/20'
+                          : 'bg-[#0d1117] border-slate-600'
+                      }`}>
+                        {exp.current
+                          ? <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                          : <GitCommit size={15} className="text-blue-400/70" />
+                        }
+                      </div>
+                    </div>
+
+                    {/* VS Code–style editor card */}
+                    <div className="flex-1 rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl glow-hover">
+                      {/* Title bar */}
+                      <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                          <span className="ml-3 font-mono text-[11px] text-slate-400">
+                            {exp.company.toLowerCase().replace(/\s+/g, '-')}.ts
+                          </span>
+                        </div>
+                        {exp.current && (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/15 border border-green-500/30 text-green-400 text-[10px] font-mono">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                            active
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Code body */}
+                      <div className="px-5 py-4 font-mono text-[12px] leading-[1.85] space-y-0">
+                        {/* L1 — company comment */}
+                        <div className="flex gap-3">
+                          <span className="text-slate-600 w-5 text-right shrink-0 select-none">1</span>
+                          <span className="text-slate-500">
+                            {'// '}{exp.company}{exp.location ? ` · ${exp.location}` : ''}
+                          </span>
+                        </div>
+                        {/* L2 — role */}
+                        <div className="flex gap-3">
+                          <span className="text-slate-600 w-5 text-right shrink-0 select-none">2</span>
+                          <span>
+                            <span className="text-[#c792ea]">const </span>
+                            <span className="text-[#82aaff]">role </span>
+                            <span className="text-slate-300">= </span>
+                            <span className="text-[#c3e88d]">"{exp.position}"</span>
+                            <span className="text-slate-400">;</span>
+                          </span>
+                        </div>
+                        {/* L3 — date range */}
+                        <div className="flex gap-3">
+                          <span className="text-slate-600 w-5 text-right shrink-0 select-none">3</span>
+                          <span className="text-slate-500">
+                            {'// '}
+                            {exp.startDate ? fmtDate(exp.startDate) : '?'}{' → '}
+                            {exp.current ? 'Present' : (exp.endDate ? fmtDate(exp.endDate) : '?')}
+                          </span>
+                        </div>
+                        {/* L4 — blank */}
+                        <div className="flex gap-3">
+                          <span className="text-slate-600 w-5 text-right shrink-0 select-none">4</span>
+                          <span>&nbsp;</span>
+                        </div>
+                        {/* L5+ — achievements array */}
+                        {exp.achievements?.length > 0 ? (
+                          <>
+                            <div className="flex gap-3">
+                              <span className="text-slate-600 w-5 text-right shrink-0 select-none">5</span>
+                              <span>
+                                <span className="text-[#c792ea]">const </span>
+                                <span className="text-[#82aaff]">highlights </span>
+                                <span className="text-slate-300">= [</span>
+                              </span>
+                            </div>
+                            {exp.achievements.map((ach, ai) => (
+                              <div key={ai} className="flex gap-3">
+                                <span className="text-slate-600 w-5 text-right shrink-0 select-none">{6 + ai}</span>
+                                <span className="pl-4 break-words">
+                                  <span className="text-[#c3e88d]">"{ach}"</span>
+                                  {ai < exp.achievements.length - 1 && <span className="text-slate-400">,</span>}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex gap-3">
+                              <span className="text-slate-600 w-5 text-right shrink-0 select-none">{6 + exp.achievements.length}</span>
+                              <span className="text-slate-300">];</span>
+                            </div>
+                          </>
+                        ) : exp.description ? (
+                          <div className="flex gap-3">
+                            <span className="text-slate-600 w-5 text-right shrink-0 select-none">5</span>
+                            <span className="text-slate-500 break-words">{'/* '}{exp.description}{' */'}</span>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-center text-slate-400 font-mono text-sm">
+            <span className="text-slate-600">// </span>No experience entries yet — add some in the admin dashboard.
+          </p>
+        )}
+      </Section>
+
+      {/* ══════════════════════ EDUCATION ══════════════════════ */}
+      <Section id="education">
+        <SectionHead
+          title="Education"
+          sub="The foundation behind my technical mindset"
+        />
+        {education.length > 0 ? (
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+            {education.map((edu) => {
+              const lineOffset = edu.field ? 1 : 0;
+              return (
+                <div key={edu._id} className="rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl glow-hover">
+                  {/* Title bar */}
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700/50">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
+                      <div className="ml-3 flex items-center gap-1.5 font-mono text-[11px] text-slate-400">
+                        <GraduationCap size={12} className="text-purple-400" />
+                        {edu.institution.toLowerCase().replace(/\s+/g, '-')}.ts
+                      </div>
+                    </div>
+                    {edu.current && (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-mono">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                        enrolled
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Code body */}
+                  <div className="px-5 py-4 font-mono text-[12px] leading-[1.85] space-y-0">
+                    {/* L1 — class declaration */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">1</span>
+                      <span>
+                        <span className="text-[#c792ea]">class </span>
+                        <span className="text-[#f07178]">
+                          {edu.institution.replace(/[^a-zA-Z0-9]/g, '')}
+                        </span>
+                        <span className="text-slate-300"> {'{'}</span>
+                      </span>
+                    </div>
+                    {/* L2 — degree */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">2</span>
+                      <span className="pl-4">
+                        <span className="text-[#ffcb6b]">degree</span>
+                        <span className="text-slate-400"> = </span>
+                        <span className="text-[#c3e88d]">"{edu.degree}"</span>
+                        <span className="text-slate-400">;</span>
+                      </span>
+                    </div>
+                    {/* L3 — field (optional) */}
+                    {edu.field && (
+                      <div className="flex gap-3">
+                        <span className="text-slate-600 w-5 text-right shrink-0 select-none">3</span>
+                        <span className="pl-4">
+                          <span className="text-[#ffcb6b]">field</span>
+                          <span className="text-slate-400"> = </span>
+                          <span className="text-[#c3e88d]">"{edu.field}"</span>
+                          <span className="text-slate-400">;</span>
+                        </span>
+                      </div>
+                    )}
+                    {/* L3/4 — dates comment */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">{3 + lineOffset}</span>
+                      <span className="pl-4 text-slate-500">
+                        {'// '}
+                        {edu.startDate ? fmtDate(edu.startDate) : ''}
+                        {(edu.startDate && (edu.endDate || edu.current)) ? ' → ' : ''}
+                        {edu.current ? 'Present' : (edu.endDate ? fmtDate(edu.endDate) : '')}
+                      </span>
+                    </div>
+                    {/* closing brace */}
+                    <div className="flex gap-3">
+                      <span className="text-slate-600 w-5 text-right shrink-0 select-none">{4 + lineOffset}</span>
+                      <span className="text-slate-300">{'}'}</span>
+                    </div>
+                    {/* description block comment */}
+                    {edu.description && (
+                      <>
+                        <div className="flex gap-3">
+                          <span className="text-slate-600 w-5 text-right shrink-0 select-none">{5 + lineOffset}</span>
+                          <span>&nbsp;</span>
+                        </div>
+                        <div className="flex gap-3">
+                          <span className="text-slate-600 w-5 text-right shrink-0 select-none">{6 + lineOffset}</span>
+                          <span className="text-slate-500 break-words">{'/* '}{edu.description}{' */'}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-center text-slate-400 font-mono text-sm">
+            <span className="text-slate-600">// </span>No education entries yet — add some in the admin dashboard.
+          </p>
+        )}
       </Section>
 
       {/* ══════════════════════ CERTIFICATIONS ══════════════════════ */}

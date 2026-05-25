@@ -23,6 +23,16 @@
   }
 }
 
+@keyframes termLine {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes termBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
 @layer utilities {
   .text-gradient {
     background: linear-gradient(135deg, #E8703A 0%, #D4612C 100%);
