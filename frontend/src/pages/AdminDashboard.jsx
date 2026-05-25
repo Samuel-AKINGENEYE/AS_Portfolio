@@ -929,36 +929,127 @@ function AnalyticsTab() {
           </div>
 
           {/* ── Daily views bar chart ── */}
-          <div className="p-4 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="font-mono text-[10px] text-slate-600">// daily_pageviews</p>
-              <p className="font-mono text-[10px] text-slate-700">max: {maxDay}</p>
-            </div>
-            <div className="flex items-end gap-px h-24">
-              {dailyChart.map(({ date, count }) => (
-                <div
-                  key={date}
-                  className="group relative flex-1 rounded-t-[1px] transition-colors"
-                  style={{
-                    height: `${Math.max(2, (count / maxDay) * 100)}%`,
-                    background: count > 0 ? '#3b82f6' : 'rgba(255,255,255,0.04)',
-                    minHeight: count > 0 ? '3px' : '2px',
-                  }}
-                >
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity">
-                    <div className="rounded px-1.5 py-1 whitespace-nowrap" style={{ background: '#1e1e1e', border: `1px solid ${C.border}` }}>
-                      <p className="font-mono text-[9px] text-slate-400">{date.slice(5)}</p>
-                      <p className="font-mono text-[10px] text-blue-300 font-bold text-center">{count}</p>
-                    </div>
+          {(() => {
+            const totalPeriod = dailyChart.reduce((s, d) => s + d.count, 0);
+            const avgDay = dailyChart.length ? (totalPeriod / dailyChart.length).toFixed(1) : 0;
+            const gridLines = [
+              { pct: 100, label: maxDay },
+              { pct: 50,  label: Math.round(maxDay * 0.5) },
+              { pct: 25,  label: Math.round(maxDay * 0.25) },
+            ];
+            // x-axis: show label every ~7 days, always show first + last
+            const labelEvery = days <= 7 ? 1 : days <= 14 ? 2 : 7;
+            const todayStr = new Date().toISOString().split('T')[0];
+            return (
+              <div className="rounded-xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                {/* Chart header */}
+                <div className="flex items-center justify-between px-5 pt-4 pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+                  <div>
+                    <p className="font-mono text-[10px] text-slate-600">// daily_pageviews</p>
+                    <p className="font-mono text-xs text-slate-300 mt-0.5">
+                      <span className="text-blue-400 font-bold">{totalPeriod.toLocaleString()}</span>
+                      <span className="text-slate-600 mx-1.5">·</span>
+                      <span className="text-slate-500">avg {avgDay}/day</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono text-[10px] text-slate-600">peak</p>
+                    <p className="font-mono text-xs font-bold text-blue-400">{maxDay.toLocaleString()}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-1">
-              <p className="font-mono text-[9px] text-slate-700">{dailyChart[0]?.date?.slice(5)}</p>
-              <p className="font-mono text-[9px] text-slate-700">today</p>
-            </div>
-          </div>
+
+                {/* Chart body */}
+                <div className="px-5 pt-4 pb-2">
+                  <div className="relative">
+                    {/* Y-axis grid lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none" style={{ height: '112px' }}>
+                      {gridLines.map(({ pct, label }) => (
+                        <div key={pct} className="flex items-center gap-2 w-full" style={{ position: 'absolute', bottom: `${pct}%`, transform: 'translateY(50%)' }}>
+                          <span className="font-mono text-[9px] text-slate-700 w-6 text-right shrink-0">{label}</span>
+                          <div className="flex-1 border-t border-dashed" style={{ borderColor: 'rgba(255,255,255,0.04)' }} />
+                        </div>
+                      ))}
+                      {/* Zero baseline */}
+                      <div className="flex items-center gap-2 w-full absolute bottom-0">
+                        <span className="font-mono text-[9px] text-slate-700 w-6 text-right shrink-0">0</span>
+                        <div className="flex-1 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }} />
+                      </div>
+                    </div>
+
+                    {/* Bars */}
+                    <div className="flex items-end gap-px ml-8" style={{ height: '112px' }}>
+                      {dailyChart.map(({ date, count }, i) => {
+                        const isToday = date === todayStr;
+                        const heightPct = Math.max(count > 0 ? 2 : 0, (count / maxDay) * 100);
+                        const isAboveAvg = count > parseFloat(avgDay);
+                        return (
+                          <div key={date} className="group relative flex-1 flex flex-col justify-end" style={{ height: '100%' }}>
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 pointer-events-none z-20 transition-all duration-150 scale-95 group-hover:scale-100">
+                              <div className="rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-xl" style={{ background: '#161b22', border: `1px solid rgba(59,130,246,0.4)` }}>
+                                <p className="font-mono text-[9px] text-slate-400 text-center">{date.slice(5)}</p>
+                                <p className="font-mono text-sm font-bold text-center" style={{ color: isToday ? '#60a5fa' : isAboveAvg ? '#34d399' : '#93c5fd' }}>{count}</p>
+                                <p className="font-mono text-[9px] text-slate-600 text-center">views</p>
+                              </div>
+                              <div className="w-2 h-2 mx-auto -mt-1 rotate-45 rounded-sm" style={{ background: '#161b22', border: `1px solid rgba(59,130,246,0.4)`, borderTop: 'none', borderLeft: 'none' }} />
+                            </div>
+
+                            {/* Bar */}
+                            <div
+                              className="w-full rounded-t-sm transition-all duration-200 group-hover:brightness-125"
+                              style={{
+                                height: `${heightPct}%`,
+                                minHeight: count > 0 ? '2px' : '1px',
+                                background: isToday
+                                  ? 'linear-gradient(to top, #2563eb, #60a5fa)'
+                                  : isAboveAvg
+                                  ? 'linear-gradient(to top, #1d4ed8, #3b82f6)'
+                                  : count > 0
+                                  ? 'linear-gradient(to top, #1e3a5f, #2563eb88)'
+                                  : 'rgba(255,255,255,0.03)',
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* X-axis date labels */}
+                  <div className="flex ml-8 mt-2">
+                    {dailyChart.map(({ date }, i) => {
+                      const show = i === 0 || i === dailyChart.length - 1 || i % labelEvery === 0;
+                      return (
+                        <div key={date} className="flex-1 text-center">
+                          {show && (
+                            <span className="font-mono text-[9px] text-slate-700">
+                              {i === dailyChart.length - 1 ? 'today' : date.slice(5)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Legend */}
+                <div className="flex items-center gap-4 px-5 py-2.5" style={{ borderTop: `1px solid ${C.border}` }}>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-sm" style={{ background: 'linear-gradient(to top, #2563eb, #60a5fa)' }} />
+                    <span className="font-mono text-[9px] text-slate-600">today</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-sm" style={{ background: 'linear-gradient(to top, #1d4ed8, #3b82f6)' }} />
+                    <span className="font-mono text-[9px] text-slate-600">above avg</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-sm" style={{ background: 'linear-gradient(to top, #1e3a5f, #2563eb88)' }} />
+                    <span className="font-mono text-[9px] text-slate-600">below avg</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           <p className="font-mono text-[10px] text-slate-700">// data from mongodb · tracking fires on page load, profile open, and contact submit</p>
         </>
