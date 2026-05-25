@@ -34,8 +34,17 @@ router.post('/send', async (req, res) => {
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || '';
   const userAgent = req.headers['user-agent'] || '';
 
-  // Save to MongoDB
-  const saved = await Message.create({ name, email, message, ip, userAgent }).catch(err => {
+  // Track analytics first so we can link the _id to the message
+  const analyticsDoc = await Analytics.create({
+    event: 'contact_form',
+    page: '/contact',
+    visitorId,
+    ip,
+    userAgent,
+  }).catch(() => null);
+
+  // Save to MongoDB with the analytics reference
+  const saved = await Message.create({ name, email, message, ip, userAgent, analyticsId: analyticsDoc?._id ?? null }).catch(err => {
     console.error('Failed to save message:', err.message);
     return null;
   });
@@ -71,15 +80,6 @@ router.post('/send', async (req, res) => {
     console.log(`📬 Contact [NO SMTP configured] — From: ${name} <${email}>\n   ${message}`);
   }
 
-  // Track analytics
-  Analytics.create({
-    event: 'contact_form',
-    page: '/contact',
-    visitorId,
-    ip,
-    userAgent,
-  }).catch(() => {});
-
   res.json({ success: true, message: "Message received! I'll get back to you soon.", id: saved?._id });
 });
 
@@ -109,6 +109,9 @@ router.delete('/messages/:id', verifyToken, async (req, res) => {
   try {
     const msg = await Message.findByIdAndDelete(req.params.id);
     if (!msg) return res.status(404).json({ success: false, error: 'Message not found.' });
+    if (msg.analyticsId) {
+      await Analytics.findByIdAndDelete(msg.analyticsId).catch(() => {});
+    }
     res.json({ success: true, data: { message: 'Deleted.' } });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to delete message.' });

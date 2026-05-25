@@ -842,20 +842,6 @@ function StatCard({ icon: Icon, label, value, accent = '#3b82f6' }) {
   );
 }
 
-function timeAgo(dateStr) {
-  const diff = (Date.now() - new Date(dateStr)) / 1000;
-  if (diff < 60) return `${Math.floor(diff)}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
-
-const EVENT_META = {
-  pageview:     { label: 'page_view',     color: '#3b82f6' },
-  profile_view: { label: 'profile_view',  color: '#10b981' },
-  contact_form: { label: 'contact_form',  color: '#f59e0b' },
-};
-
 function AnalyticsTab() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -972,28 +958,6 @@ function AnalyticsTab() {
               <p className="font-mono text-[9px] text-slate-700">{dailyChart[0]?.date?.slice(5)}</p>
               <p className="font-mono text-[9px] text-slate-700">today</p>
             </div>
-          </div>
-
-          {/* ── Recent activity ── */}
-          <div>
-            <p className="font-mono text-[10px] text-slate-700 mb-2">// recent_activity</p>
-            {stats?.recentEvents?.length > 0 ? (
-              <div className="space-y-1">
-                {stats.recentEvents.map((ev, i) => {
-                  const meta = EVENT_META[ev.event] ?? { label: ev.event, color: '#6b7280' };
-                  return (
-                    <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: meta.color }} />
-                      <span className="font-mono text-[11px] w-28 shrink-0" style={{ color: meta.color }}>{meta.label}</span>
-                      <span className="font-mono text-[11px] text-slate-600 truncate flex-1">{ev.page}</span>
-                      <span className="font-mono text-[10px] text-slate-700 shrink-0">{timeAgo(ev.createdAt)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="font-mono text-xs text-slate-700 py-6 text-center">no events recorded yet</p>
-            )}
           </div>
 
           <p className="font-mono text-[10px] text-slate-700">// data from mongodb · tracking fires on page load, profile open, and contact submit</p>

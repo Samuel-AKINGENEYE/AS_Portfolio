@@ -8,6 +8,7 @@ const messageSchema = new mongoose.Schema(
     read: { type: Boolean, default: false },
     ip: { type: String, default: '' },
     userAgent: { type: String, default: '' },
+    analyticsId: { type: mongoose.Schema.Types.ObjectId, ref: 'Analytics', default: null },
   },
   { timestamps: true }
 );

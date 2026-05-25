@@ -31,7 +31,6 @@ router.get('/stats', verifyToken, async (req, res) => {
       dailyViews,
       returnVisitorsResult,
       hourlyPeak,
-      recentEvents,
     ] = await Promise.all([
       Analytics.countDocuments({ event: 'pageview', createdAt: { $gte: since } }),
 
@@ -63,13 +62,6 @@ router.get('/stats', verifyToken, async (req, res) => {
         { $sort: { count: -1 } },
         { $limit: 1 },
       ]),
-
-      // Last 15 events for the activity feed
-      Analytics.find({ createdAt: { $gte: since } })
-        .sort({ createdAt: -1 })
-        .limit(15)
-        .select('event page createdAt')
-        .lean(),
     ]);
 
     res.json({
@@ -82,7 +74,6 @@ router.get('/stats', verifyToken, async (req, res) => {
         dailyViews,
         returnVisitors: returnVisitorsResult[0]?.count ?? 0,
         peakHour: hourlyPeak[0]?._id ?? null,
-        recentEvents,
       },
     });
   } catch (err) {
