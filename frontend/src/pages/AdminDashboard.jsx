@@ -5,67 +5,144 @@ import {
   LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code,
   BookOpen, Briefcase, Upload, BarChart2, Eye, Download,
   MessageSquare, RefreshCw, Image, FileText, Inbox, Mail, MailOpen, ZoomIn,
-  Menu,
+  Menu, Zap, Terminal,
 } from 'lucide-react';
 import {
   projectsApi, certificatesApi, profileApi, skillsApi,
   educationApi, experienceApi, analyticsApi, uploadApi, contactApi,
 } from '../services/api.js';
-import DarkModeToggle from '../components/DarkModeToggle.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
 
-const INPUT = 'w-full px-3 py-2.5 rounded-lg text-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/60 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors';
-const LABEL = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5';
-const BTN = 'inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed';
-const BTN_G = 'px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors';
+// ─── Always-dark style tokens ─────────────────────────────────────────────────
 
-function Spinner() { return <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />; }
+const C = {
+  page:    '#0d1117',
+  bar:     '#1c1c1e',
+  sidebar: '#161b22',
+  editor:  '#1e1e1e',
+  card:    '#0d1117',
+  border:  'rgba(255,255,255,0.07)',
+};
+
+const INPUT =
+  'w-full px-3 py-2 rounded-lg text-sm font-mono ' +
+  'bg-[#0d1117] border border-[rgba(255,255,255,0.1)] text-slate-200 ' +
+  'placeholder:text-slate-600 ' +
+  'focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 ' +
+  'transition-colors';
+
+const LABEL = 'block font-mono text-[11px] text-slate-500 mb-1.5 tracking-wide';
+
+const BTN =
+  'inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg ' +
+  'bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs ' +
+  'transition-colors disabled:opacity-60 disabled:cursor-not-allowed';
+
+const BTN_G =
+  'px-4 py-2 rounded-lg font-mono text-xs ' +
+  'border border-[rgba(255,255,255,0.1)] text-slate-400 ' +
+  'hover:bg-[rgba(255,255,255,0.05)] transition-colors';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function Spinner() {
+  return <span className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />;
+}
+
+function LineNum({ n }) {
+  return <span className="text-slate-700 text-xs font-mono w-5 text-right shrink-0 select-none">{n}</span>;
+}
 
 function SkeletonRows({ count = 3 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="h-16 rounded-xl bg-slate-200 dark:bg-slate-700 animate-pulse px-4 py-3">
-          <div className="h-3.5 w-1/3 rounded bg-slate-300 dark:bg-slate-600 mb-2" />
-          <div className="h-3 w-2/3 rounded bg-slate-300 dark:bg-slate-600" />
-        </div>
+        <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: C.card, border: `1px solid ${C.border}` }} />
       ))}
     </div>
   );
 }
 
+// ─── Section header ───────────────────────────────────────────────────────────
+
+function SectionHeader({ comment, count, onAdd, addLabel }) {
+  return (
+    <div className="flex items-center justify-between mb-5">
+      <div>
+        <p className="font-mono text-[11px] text-slate-600">// {comment}</p>
+        <p className="font-mono text-xs text-slate-500 mt-0.5">
+          <span className="text-purple-400">const </span>
+          <span className="text-blue-300">items </span>
+          <span className="text-slate-600">= </span>
+          <span className="text-emerald-400">[ </span>
+          <span className="text-yellow-400">{count} entries</span>
+          <span className="text-emerald-400"> ]</span>
+        </p>
+      </div>
+      <button onClick={onAdd} className={BTN}>
+        <Plus size={12} />
+        {addLabel}
+      </button>
+    </div>
+  );
+}
+
+// ─── Item card ────────────────────────────────────────────────────────────────
+
+function ItemRow({ lineNum, children, onEdit, onDelete }) {
+  return (
+    <div
+      className="flex items-start gap-3 p-3.5 rounded-lg group transition-colors"
+      style={{ background: C.card, border: `1px solid ${C.border}` }}
+    >
+      {lineNum !== undefined && <LineNum n={lineNum} />}
+      <div className="flex-1 min-w-0">{children}</div>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        {onEdit && (
+          <button onClick={onEdit} className="p-1.5 rounded text-slate-600 hover:text-blue-400 hover:bg-white/5 transition-colors">
+            <Edit2 size={13} />
+          </button>
+        )}
+        {onDelete && (
+          <button onClick={onDelete} className="p-1.5 rounded text-slate-600 hover:text-red-400 hover:bg-white/5 transition-colors">
+            <Trash2 size={13} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+
 function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[85vh] flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
-          <h3 className="font-semibold text-slate-900 dark:text-white">{title}</h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <X size={18} />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="relative w-full max-w-lg rounded-xl shadow-2xl max-h-[85vh] flex flex-col"
+        style={{ background: C.editor, border: `1px solid ${C.border}` }}
+      >
+        <div
+          className="flex items-center justify-between px-5 py-3 shrink-0"
+          style={{ borderBottom: `1px solid ${C.border}` }}
+        >
+          <div className="flex items-center gap-2">
+            <Terminal size={13} className="text-blue-400" />
+            <span className="font-mono text-sm text-slate-200">{title}</span>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors">
+            <X size={15} />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1 px-6 py-5">{children}</div>
+        <div className="overflow-y-auto flex-1 px-5 py-4">{children}</div>
       </div>
     </div>
   );
 }
 
-function ItemRow({ children, onEdit, onDelete }) {
-  return (
-    <div className="flex flex-col sm:flex-row items-start gap-4 p-4 min-w-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
-      <div className="flex-1 min-w-0">{children}</div>
-      <div className="flex items-center gap-1 shrink-0">
-        {onEdit && <button onClick={onEdit} className="p-2 rounded-lg text-slate-400 hover:text-blue-500 transition-colors"><Edit2 size={14} /></button>}
-        {onDelete && <button onClick={onDelete} className="p-2 rounded-lg text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>}
-      </div>
-    </div>
-  );
-}
+// ─── Image upload field ───────────────────────────────────────────────────────
 
-// ──────────────────────────────────────────────────────────────────────────
-// Reusable image upload field (file picker; URL input hidden by default)
-// ──────────────────────────────────────────────────────────────────────────
 function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }) {
   const [uploading, setUploading] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
@@ -79,12 +156,8 @@ function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }
       const res = await uploadApi.uploadImage(file, folder);
       onChange(res.data.data.url);
       toast.success('Image uploaded!');
-    } catch {
-      toast.error('Upload failed');
-    } finally {
-      setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
-    }
+    } catch { toast.error('Upload failed'); }
+    finally { setUploading(false); if (inputRef.current) inputRef.current.value = ''; }
   };
 
   return (
@@ -92,46 +165,35 @@ function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }
       <label className={LABEL}>{label}</label>
       <div className="space-y-2">
         {value && (
-          <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
+          <div className="relative w-20 h-20 rounded-lg overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
             <img src={value} alt={label} className="w-full h-full object-cover" />
             <button
               type="button"
               onClick={() => onChange('')}
-              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-red-500/80 transition-colors"
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500/80 transition-colors"
             >
-              <X size={10} />
+              <X size={9} />
             </button>
           </div>
         )}
         <div className="flex items-center gap-3 flex-wrap">
-          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-            <Image size={13} />
-            {uploading ? 'Uploading…' : value ? 'Replace Image' : 'Upload Image'}
+          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploading ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
+            <Image size={11} />
+            {uploading ? 'uploading...' : value ? 'replace' : 'upload image'}
             <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
           </label>
-          <button
-            type="button"
-            onClick={() => setShowUrl(v => !v)}
-            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2"
-          >
-            {showUrl ? 'hide URL field' : 'or paste URL'}
+          <button type="button" onClick={() => setShowUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 transition-colors">
+            {showUrl ? 'hide url' : 'or paste url'}
           </button>
         </div>
-        {showUrl && (
-          <input
-            type="url"
-            placeholder="Paste image URL here"
-            value={value || ''}
-            onChange={e => onChange(e.target.value)}
-            className={INPUT}
-          />
-        )}
+        {showUrl && <input type="url" placeholder="https://..." value={value || ''} onChange={e => onChange(e.target.value)} className={INPUT} />}
       </div>
     </div>
   );
 }
 
-// Reusable file upload field (PDF / any file; URL input hidden by default)
+// ─── File upload field ────────────────────────────────────────────────────────
+
 function FileUploadField({ label, value, onChange, folder, accept, fieldName = 'file', icon: Icon = FileText }) {
   const [uploading, setUploading] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
@@ -147,12 +209,8 @@ function FileUploadField({ label, value, onChange, folder, accept, fieldName = '
         : await uploadApi.uploadFile(file, folder);
       onChange(res.data.data.url);
       toast.success('File uploaded!');
-    } catch {
-      toast.error('Upload failed');
-    } finally {
-      setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
-    }
+    } catch { toast.error('Upload failed'); }
+    finally { setUploading(false); if (inputRef.current) inputRef.current.value = ''; }
   };
 
   return (
@@ -160,44 +218,32 @@ function FileUploadField({ label, value, onChange, folder, accept, fieldName = '
       <label className={LABEL}>{label}</label>
       <div className="space-y-2">
         {value && (
-          <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-green-500 hover:text-green-600">
-            <Icon size={13} /> View current file
+          <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-xs text-emerald-400 hover:text-emerald-300">
+            <Icon size={11} /> view current file
           </a>
         )}
         <div className="flex items-center gap-3 flex-wrap">
-          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-            <Upload size={13} />
-            {uploading ? 'Uploading…' : value ? `Replace ${label}` : `Upload ${label}`}
+          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploading ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
+            <Upload size={11} />
+            {uploading ? 'uploading...' : value ? `replace ${label.toLowerCase()}` : `upload ${label.toLowerCase()}`}
             <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
           </label>
-          <button
-            type="button"
-            onClick={() => setShowUrl(v => !v)}
-            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2"
-          >
-            {showUrl ? 'hide URL field' : 'or paste URL'}
+          <button type="button" onClick={() => setShowUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 transition-colors">
+            {showUrl ? 'hide url' : 'or paste url'}
           </button>
         </div>
-        {showUrl && (
-          <input
-            type="url"
-            placeholder="Paste file URL here"
-            value={value || ''}
-            onChange={e => onChange(e.target.value)}
-            className={INPUT}
-          />
-        )}
+        {showUrl && <input type="url" placeholder="https://..." value={value || ''} onChange={e => onChange(e.target.value)} className={INPUT} />}
       </div>
     </div>
   );
 }
 
-// Upload field for certificates: accepts images OR PDFs
+// ─── Certificate upload (image or PDF) ───────────────────────────────────────
+
 function CertificateUploadField({ label, value, onChange, folder }) {
   const [uploading, setUploading] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
   const inputRef = useRef(null);
-
   const isPdf = (url) => url && /\.(pdf)(\?|$)/i.test(url);
 
   const handleFile = async (e) => {
@@ -205,20 +251,13 @@ function CertificateUploadField({ label, value, onChange, folder }) {
     if (!file) return;
     setUploading(true);
     try {
-      let res;
-      if (file.type === 'application/pdf') {
-        res = await uploadApi.uploadFile(file, folder);
-      } else {
-        res = await uploadApi.uploadImage(file, folder);
-      }
+      const res = file.type === 'application/pdf'
+        ? await uploadApi.uploadFile(file, folder)
+        : await uploadApi.uploadImage(file, folder);
       onChange(res.data.data.url);
       toast.success('File uploaded!');
-    } catch {
-      toast.error('Upload failed');
-    } finally {
-      setUploading(false);
-      if (inputRef.current) inputRef.current.value = '';
-    }
+    } catch { toast.error('Upload failed'); }
+    finally { setUploading(false); if (inputRef.current) inputRef.current.value = ''; }
   };
 
   return (
@@ -228,112 +267,37 @@ function CertificateUploadField({ label, value, onChange, folder }) {
         {value && (
           isPdf(value) ? (
             <div className="flex items-center gap-2">
-              <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600">
-                <FileText size={13} /> View PDF
+              <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-xs text-blue-400 hover:text-blue-300">
+                <FileText size={11} /> view pdf
               </a>
-              <button type="button" onClick={() => onChange('')} className="text-xs text-red-400 hover:text-red-600">Remove</button>
+              <button type="button" onClick={() => onChange('')} className="font-mono text-xs text-red-500 hover:text-red-400">remove</button>
             </div>
           ) : (
-            <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
+            <div className="relative w-20 h-20 rounded-lg overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               <img src={value} alt={label} className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => onChange('')}
-                className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-red-500/80 transition-colors"
-              >
-                <X size={10} />
+              <button type="button" onClick={() => onChange('')} className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                <X size={9} />
               </button>
             </div>
           )
         )}
         <div className="flex items-center gap-3 flex-wrap">
-          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploading ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-            <Upload size={13} />
-            {uploading ? 'Uploading…' : value ? 'Replace File' : 'Upload Image or PDF'}
+          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploading ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
+            <Upload size={11} />
+            {uploading ? 'uploading...' : value ? 'replace file' : 'upload image or pdf'}
             <input ref={inputRef} type="file" accept="image/*,.pdf,application/pdf" onChange={handleFile} className="hidden" disabled={uploading} />
           </label>
-          <button
-            type="button"
-            onClick={() => setShowUrl(v => !v)}
-            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2"
-          >
-            {showUrl ? 'hide URL field' : 'or paste URL'}
+          <button type="button" onClick={() => setShowUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 transition-colors">
+            {showUrl ? 'hide url' : 'or paste url'}
           </button>
         </div>
-        {showUrl && (
-          <input
-            type="url"
-            placeholder="Paste image or PDF URL here"
-            value={value || ''}
-            onChange={e => onChange(e.target.value)}
-            className={INPUT}
-          />
-        )}
+        {showUrl && <input type="url" placeholder="https://..." value={value || ''} onChange={e => onChange(e.target.value)} className={INPUT} />}
       </div>
     </div>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// PROJECTS TAB
-// ──────────────────────────────────────────────────────────────────────────
-function ProjectsTab() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try { const r = await projectsApi.getAll(); setProjects(r.data.data ?? []); }
-    catch { toast.error('Failed to load projects'); }
-    finally { setLoading(false); }
-  }, []);
-  useEffect(() => { load(); }, [load]);
-
-  const handleSave = async (data) => {
-    try {
-      if (modal === 'add') await projectsApi.create(data);
-      else await projectsApi.update(modal._id, data);
-      toast.success('Saved!');
-      setModal(null); load();
-    } catch { toast.error('Save failed'); }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this project?')) return;
-    try { await projectsApi.remove(id); toast.success('Deleted'); load(); }
-    catch { toast.error('Delete failed'); }
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Projects ({projects.length})</h2>
-        <button onClick={() => setModal('add')} className={BTN}><Plus size={14} /> Add Project</button>
-      </div>
-      {loading ? <SkeletonRows /> : (
-        <div className="space-y-3">
-          {projects.map(p => (
-            <ItemRow key={p._id} onEdit={() => setModal(p)} onDelete={() => handleDelete(p._id)}>
-              <div className="flex flex-col sm:flex-row items-start gap-3 min-w-0 w-full">
-                {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="w-10 h-10 rounded-lg object-cover shrink-0" />}
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-sm truncate">{p.title}</p>
-                  <p className="text-xs text-slate-500 break-words whitespace-pre-wrap max-w-full">{p.description}</p>
-                </div>
-              </div>
-            </ItemRow>
-          ))}
-        </div>
-      )}
-      {modal && (
-        <Modal title={modal === 'add' ? 'Add Project' : 'Edit Project'} onClose={() => setModal(null)}>
-          <ProjectForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
-        </Modal>
-      )}
-    </div>
-  );
-}
+// ─── Projects Tab ─────────────────────────────────────────────────────────────
 
 function ProjectForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(
@@ -351,23 +315,113 @@ function ProjectForm({ initial, onSave, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div><label className={LABEL}>Title *</label><input required value={form.title} onChange={e => set('title', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Description *</label><textarea required rows={2} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Tech Stack (comma-separated)</label><input value={form.techStack} onChange={e => set('techStack', e.target.value)} className={INPUT} /></div>
-      <ImageUploadField label="Project Image" value={form.imageUrl} onChange={v => set('imageUrl', v)} folder="portfolio/projects" />
+      <div><label className={LABEL}>// title</label><input required value={form.title} onChange={e => set('title', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// description</label><textarea required rows={2} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// techStack (comma-separated)</label><input value={form.techStack} onChange={e => set('techStack', e.target.value)} className={INPUT} placeholder="React, Node.js, MongoDB" /></div>
+      <ImageUploadField label="// imageUrl" value={form.imageUrl} onChange={v => set('imageUrl', v)} folder="portfolio/projects" />
       <div className="grid grid-cols-2 gap-3">
-        <div><label className={LABEL}>Live URL</label><input type="url" value={form.liveUrl} onChange={e => set('liveUrl', e.target.value)} className={INPUT} /></div>
-        <div><label className={LABEL}>GitHub URL</label><input type="url" value={form.githubUrl} onChange={e => set('githubUrl', e.target.value)} className={INPUT} /></div>
+        <div><label className={LABEL}>// liveUrl</label><input type="url" value={form.liveUrl} onChange={e => set('liveUrl', e.target.value)} className={INPUT} /></div>
+        <div><label className={LABEL}>// githubUrl</label><input type="url" value={form.githubUrl} onChange={e => set('githubUrl', e.target.value)} className={INPUT} /></div>
       </div>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.featured} onChange={e => set('featured', e.target.checked)} /><span>Featured</span></label>
-      <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
+      <label className="flex items-center gap-2.5 cursor-pointer">
+        <input type="checkbox" checked={form.featured} onChange={e => set('featured', e.target.checked)} className="w-3.5 h-3.5 rounded" />
+        <span className="font-mono text-xs text-slate-400">featured: <span className="text-yellow-400">true</span></span>
+      </label>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={12} />}{saving ? 'saving...' : '> save()'}</button>
+        <button type="button" onClick={onCancel} className={BTN_G}>cancel</button>
+      </div>
     </form>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// CERTIFICATES TAB
-// ──────────────────────────────────────────────────────────────────────────
+function ProjectsTab() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { const r = await projectsApi.getAll(); setProjects(r.data.data ?? []); }
+    catch { toast.error('Failed to load projects'); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  const handleSave = async (data) => {
+    try {
+      if (modal === 'add') await projectsApi.create(data);
+      else await projectsApi.update(modal._id, data);
+      toast.success('Saved!'); setModal(null); load();
+    } catch { toast.error('Save failed'); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this project?')) return;
+    try { await projectsApi.remove(id); toast.success('Deleted'); load(); }
+    catch { toast.error('Delete failed'); }
+  };
+
+  return (
+    <div>
+      <SectionHeader comment="manage projects" count={projects.length} onAdd={() => setModal('add')} addLabel="new_project()" />
+      {loading ? <SkeletonRows /> : (
+        <div className="space-y-2">
+          {projects.map((p, i) => (
+            <ItemRow key={p._id} lineNum={i + 1} onEdit={() => setModal(p)} onDelete={() => handleDelete(p._id)}>
+              <div className="flex items-center gap-2.5">
+                {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="w-8 h-8 rounded object-cover shrink-0" />}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-sm text-slate-200 truncate">{p.title}</p>
+                    {p.featured && <span className="font-mono text-[9px] px-1.5 py-0.5 rounded shrink-0" style={{ background: 'rgba(234,179,8,0.15)', color: '#eab308' }}>featured</span>}
+                  </div>
+                  <p className="font-mono text-xs text-slate-600 truncate">{p.description}</p>
+                </div>
+              </div>
+            </ItemRow>
+          ))}
+        </div>
+      )}
+      {modal && (
+        <Modal title={modal === 'add' ? 'new_project()' : `edit("${modal.title}")`} onClose={() => setModal(null)}>
+          <ProjectForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── Certificates Tab ─────────────────────────────────────────────────────────
+
+const CERT_CATEGORIES = ['AI/ML', 'Web Dev', 'Cybersecurity', 'Other'];
+
+function CertificateForm({ initial, onSave, onCancel }) {
+  const [form, setForm] = useState(initial || { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Other' });
+  const [saving, setSaving] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); setSaving(true);
+    try { await onSave(form); } finally { setSaving(false); }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div><label className={LABEL}>// name</label><input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// issuer</label><input required value={form.issuer} onChange={e => set('issuer', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// category</label><select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}>{CERT_CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>
+      <div><label className={LABEL}>// issueDate</label><input type="date" value={form.issueDate ? form.issueDate.split('T')[0] : ''} onChange={e => set('issueDate', e.target.value)} className={INPUT} /></div>
+      <CertificateUploadField label="// imageUrl (image or pdf)" value={form.imageUrl} onChange={v => set('imageUrl', v)} folder="portfolio/certificates" />
+      <div><label className={LABEL}>// credentialUrl</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} /></div>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={12} />}{saving ? 'saving...' : '> save()'}</button>
+        <button type="button" onClick={onCancel} className={BTN_G}>cancel</button>
+      </div>
+    </form>
+  );
+}
+
 function CertificatesTab() {
   const [certs, setCerts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -398,41 +452,34 @@ function CertificatesTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Certificates ({certs.length})</h2>
-        <button onClick={() => setModal('add')} className={BTN}><Plus size={14} /> Add Certificate</button>
-      </div>
+      <SectionHeader comment="manage certificates" count={certs.length} onAdd={() => setModal('add')} addLabel="new_cert()" />
       {loading ? <SkeletonRows /> : (
-        <div className="space-y-3">
-          {certs.map(c => (
-            <ItemRow key={c._id} onEdit={() => setModal(c)} onDelete={() => handleDelete(c._id)}>
-              <div className="flex items-center gap-3">
+        <div className="space-y-2">
+          {certs.map((c, i) => (
+            <ItemRow key={c._id} lineNum={i + 1} onEdit={() => setModal(c)} onDelete={() => handleDelete(c._id)}>
+              <div className="flex items-center gap-2.5">
                 {c.imageUrl
                   ? /\.(pdf)(\?|$)/i.test(c.imageUrl)
                     ? (
                       <a href={c.imageUrl} target="_blank" rel="noopener noreferrer"
-                        title="View PDF certificate"
-                        className="w-10 h-10 rounded-lg shrink-0 ring-1 ring-slate-200 dark:ring-slate-600 hover:ring-blue-400 transition-all bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-                        <FileText size={16} className="text-red-500" />
+                        className="w-8 h-8 rounded flex items-center justify-center shrink-0"
+                        style={{ background: 'rgba(239,68,68,0.1)', border: `1px solid ${C.border}` }}>
+                        <FileText size={14} className="text-red-400" />
                       </a>
                     )
                     : (
-                      <button
-                        onClick={() => setPreview(c)}
-                        title="Preview certificate"
-                        className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 ring-1 ring-slate-200 dark:ring-slate-600 hover:ring-blue-400 transition-all group"
-                      >
+                      <button onClick={() => setPreview(c)} className="relative w-8 h-8 rounded overflow-hidden shrink-0 group" style={{ border: `1px solid ${C.border}` }}>
                         <img src={c.imageUrl} alt={c.name} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-all">
-                          <ZoomIn size={12} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all">
+                          <ZoomIn size={10} className="text-white opacity-0 group-hover:opacity-100" />
                         </div>
                       </button>
                     )
-                  : <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center shrink-0"><Award size={14} className="text-slate-400" /></div>
+                  : <div className="w-8 h-8 rounded flex items-center justify-center shrink-0" style={{ background: C.editor, border: `1px solid ${C.border}` }}><Award size={12} className="text-slate-600" /></div>
                 }
-                <div>
-                  <p className="font-medium text-sm">{c.name}</p>
-                  <p className="text-xs text-slate-500">{c.issuer} · {c.category}</p>
+                <div className="min-w-0">
+                  <p className="font-mono text-sm text-slate-200 truncate">{c.name}</p>
+                  <p className="font-mono text-xs text-slate-600">{c.issuer} · {c.category}</p>
                 </div>
               </div>
             </ItemRow>
@@ -440,37 +487,35 @@ function CertificatesTab() {
         </div>
       )}
       {modal && (
-        <Modal title={modal === 'add' ? 'Add Certificate' : 'Edit Certificate'} onClose={() => setModal(null)}>
+        <Modal title={modal === 'add' ? 'new_cert()' : `edit("${modal.name}")`} onClose={() => setModal(null)}>
           <CertificateForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
         </Modal>
       )}
       {preview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setPreview(null)}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-          <div className="relative max-w-2xl w-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 dark:border-slate-700">
+          <div className="relative max-w-2xl w-full rounded-xl overflow-hidden shadow-2xl" style={{ background: C.editor, border: `1px solid ${C.border}` }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
               <div>
-                <p className="font-semibold text-sm">{preview.name}</p>
-                <p className="text-xs text-slate-500">{preview.issuer} · {preview.category}</p>
+                <p className="font-mono text-sm text-slate-200">{preview.name}</p>
+                <p className="font-mono text-[11px] text-slate-500">{preview.issuer} · {preview.category}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {preview.credentialUrl && (
-                  <a href={preview.credentialUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1"><Eye size={12} /> View Credential</a>
+                  <a href={preview.credentialUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><Eye size={11} /> credential</a>
                 )}
-                <button onClick={() => setPreview(null)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"><X size={16} /></button>
+                <button onClick={() => setPreview(null)} className="p-1.5 rounded text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors"><X size={14} /></button>
               </div>
             </div>
             {/\.(pdf)(\?|$)/i.test(preview.imageUrl)
               ? (
-                <div className="flex flex-col items-center justify-center py-16 gap-4 bg-slate-50 dark:bg-slate-900">
-                  <FileText size={48} className="text-red-400" />
-                  <p className="text-sm text-slate-500">{preview.name}</p>
-                  <a href={preview.imageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm hover:bg-blue-600 transition-colors">
-                    <Eye size={14} /> Open PDF
-                  </a>
+                <div className="flex flex-col items-center justify-center py-16 gap-4" style={{ background: C.page }}>
+                  <FileText size={40} className="text-red-400" />
+                  <p className="font-mono text-sm text-slate-500">{preview.name}</p>
+                  <a href={preview.imageUrl} target="_blank" rel="noopener noreferrer" className={BTN}><Eye size={12} /> open pdf</a>
                 </div>
               )
-              : <img src={preview.imageUrl} alt={preview.name} className="w-full max-h-[70vh] object-contain bg-slate-50 dark:bg-slate-900 p-4" />
+              : <img src={preview.imageUrl} alt={preview.name} className="w-full max-h-[70vh] object-contain p-4" style={{ background: C.page }} />
             }
           </div>
         </div>
@@ -479,10 +524,12 @@ function CertificatesTab() {
   );
 }
 
-const CERT_CATEGORIES = ['AI/ML', 'Web Dev', 'Cybersecurity', 'Other'];
+// ─── Skills Tab ───────────────────────────────────────────────────────────────
 
-function CertificateForm({ initial, onSave, onCancel }) {
-  const [form, setForm] = useState(initial || { name: '', issuer: '', issueDate: '', credentialUrl: '', imageUrl: '', category: 'Other' });
+const SKILL_CATEGORIES = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
+
+function SkillForm({ initial, onSave, onCancel }) {
+  const [form, setForm] = useState(initial || { name: '', category: 'Frontend', icon: '' });
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -491,28 +538,34 @@ function CertificateForm({ initial, onSave, onCancel }) {
     try { await onSave(form); } finally { setSaving(false); }
   };
 
+  const iconLookup = form.icon || form.name;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div><label className={LABEL}>Name *</label><input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Issuer *</label><input required value={form.issuer} onChange={e => set('issuer', e.target.value)} className={INPUT} /></div>
       <div>
-        <label className={LABEL}>Category</label>
-        <select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}>
-          {CERT_CATEGORIES.map(c => <option key={c}>{c}</option>)}
-        </select>
+        <label className={LABEL}>// name</label>
+        <div className="flex items-center gap-2">
+          {iconLookup && (
+            <span className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+              <SkillIcon name={iconLookup} size={18} />
+            </span>
+          )}
+          <input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} placeholder="e.g. React, Python, Docker…" />
+        </div>
+        <p className="font-mono text-[10px] text-slate-600 mt-1">icon auto-generated from name — override below if needed</p>
       </div>
-      <div><label className={LABEL}>Issue Date</label><input type="date" value={form.issueDate ? form.issueDate.split('T')[0] : ''} onChange={e => set('issueDate', e.target.value)} className={INPUT} /></div>
-      <CertificateUploadField label="Certificate File (Image or PDF)" value={form.imageUrl} onChange={v => set('imageUrl', v)} folder="portfolio/certificates" />
-      <div><label className={LABEL}>Credential URL</label><input type="url" value={form.credentialUrl} onChange={e => set('credentialUrl', e.target.value)} className={INPUT} /></div>
-      <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
+      <div><label className={LABEL}>// category</label><select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}>{SKILL_CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>
+      <div>
+        <label className={LABEL}>// icon override <span className="text-slate-600 font-normal">(optional)</span></label>
+        <input value={form.icon || ''} onChange={e => set('icon', e.target.value)} className={INPUT} placeholder="e.g. Vue.js, Node.js" />
+      </div>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={12} />}{saving ? 'saving...' : '> save()'}</button>
+        <button type="button" onClick={onCancel} className={BTN_G}>cancel</button>
+      </div>
     </form>
   );
 }
-
-// ──────────────────────────────────────────────────────────────────────────
-// SKILLS TAB
-// ──────────────────────────────────────────────────────────────────────────
-const SKILL_CATEGORIES = ['Frontend', 'Backend', 'Database', 'Tools', 'Other'];
 
 function SkillsTab() {
   const [skills, setSkills] = useState([]);
@@ -545,18 +598,18 @@ function SkillsTab() {
 
   return (
     <div>
-      <div className="flex justify-between mb-6"><h2 className="text-lg font-semibold">Skills ({skills.length})</h2><button onClick={() => setModal('add')} className={BTN}><Plus size={14} /> Add Skill</button></div>
+      <SectionHeader comment="manage skills" count={skills.length} onAdd={() => setModal('add')} addLabel="new_skill()" />
       {loading ? <SkeletonRows /> : (
-        <div className="space-y-6">
+        <div className="space-y-5">
           {SKILL_CATEGORIES.filter(c => grouped[c]?.length).map(cat => (
             <div key={cat}>
-              <p className="text-xs font-semibold text-slate-500 mb-2">{cat}</p>
-              <div className="space-y-2">
-                {grouped[cat].map(s => (
-                  <ItemRow key={s._id} onEdit={() => setModal(s)} onDelete={() => handleDelete(s._id)}>
+              <p className="font-mono text-[10px] text-slate-600 mb-2">// {cat.toLowerCase()}</p>
+              <div className="space-y-1.5">
+                {grouped[cat].map((s, i) => (
+                  <ItemRow key={s._id} lineNum={i + 1} onEdit={() => setModal(s)} onDelete={() => handleDelete(s._id)}>
                     <div className="flex items-center gap-2.5">
-                      <SkillIcon name={s.icon || s.name} size={20} />
-                      <span className="font-medium text-sm">{s.name}</span>
+                      <SkillIcon name={s.icon || s.name} size={18} />
+                      <span className="font-mono text-sm text-slate-200">{s.name}</span>
                     </div>
                   </ItemRow>
                 ))}
@@ -565,13 +618,19 @@ function SkillsTab() {
           ))}
         </div>
       )}
-      {modal && <Modal title={modal === 'add' ? 'Add Skill' : 'Edit Skill'} onClose={() => setModal(null)}><SkillForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} /></Modal>}
+      {modal && (
+        <Modal title={modal === 'add' ? 'new_skill()' : `edit("${modal.name}")`} onClose={() => setModal(null)}>
+          <SkillForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
     </div>
   );
 }
 
-function SkillForm({ initial, onSave, onCancel }) {
-  const [form, setForm] = useState(initial || { name: '', category: 'Frontend', icon: '' });
+// ─── Education Tab ────────────────────────────────────────────────────────────
+
+function EducationForm({ initial, onSave, onCancel }) {
+  const [form, setForm] = useState(initial || { institution: '', degree: '', startDate: '', endDate: '', current: false });
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -580,35 +639,24 @@ function SkillForm({ initial, onSave, onCancel }) {
     try { await onSave(form); } finally { setSaving(false); }
   };
 
-  const iconLookup = form.icon || form.name;
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className={LABEL}>Name *</label>
-        <div className="flex items-center gap-2">
-          {iconLookup && (
-            <span className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
-              <SkillIcon name={iconLookup} size={20} />
-            </span>
-          )}
-          <input required value={form.name} onChange={e => set('name', e.target.value)} className={INPUT} placeholder="e.g. React, Python, Docker…" />
-        </div>
-        <p className="text-xs text-slate-400 mt-1">Icon auto-generated from the name — override below if needed.</p>
+      <div><label className={LABEL}>// institution</label><input required value={form.institution} onChange={e => set('institution', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// degree</label><input required value={form.degree} onChange={e => set('degree', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// startDate</label><input type="date" value={form.startDate ? form.startDate.split('T')[0] : ''} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// endDate</label><input type="date" value={form.endDate ? form.endDate.split('T')[0] : ''} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
+      <label className="flex items-center gap-2.5 cursor-pointer">
+        <input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} className="w-3.5 h-3.5 rounded" />
+        <span className="font-mono text-xs text-slate-400">current: <span className="text-yellow-400">true</span></span>
+      </label>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={12} />}{saving ? 'saving...' : '> save()'}</button>
+        <button type="button" onClick={onCancel} className={BTN_G}>cancel</button>
       </div>
-      <div><label className={LABEL}>Category</label><select value={form.category} onChange={e => set('category', e.target.value)} className={INPUT}>{SKILL_CATEGORIES.map(c => <option key={c}>{c}</option>)}</select></div>
-      <div>
-        <label className={LABEL}>Icon name override <span className="text-slate-400 font-normal">(optional)</span></label>
-        <input value={form.icon || ''} onChange={e => set('icon', e.target.value)} className={INPUT} placeholder="e.g. Vue.js, Node.js — leave blank to use skill name" />
-      </div>
-      <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
     </form>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// EDUCATION TAB
-// ──────────────────────────────────────────────────────────────────────────
 function EducationTab() {
   const [edu, setEdu] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -638,15 +686,30 @@ function EducationTab() {
 
   return (
     <div>
-      <div className="flex justify-between mb-6"><h2 className="text-lg font-semibold">Education ({edu.length})</h2><button onClick={() => setModal('add')} className={BTN}><Plus size={14} /> Add Education</button></div>
-      {loading ? <SkeletonRows /> : edu.map(e => (<ItemRow key={e._id} onEdit={() => setModal(e)} onDelete={() => handleDelete(e._id)}><p className="font-medium text-sm">{e.degree} - {e.institution}</p></ItemRow>))}
-      {modal && <Modal title={modal === 'add' ? 'Add Education' : 'Edit Education'} onClose={() => setModal(null)}><EducationForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} /></Modal>}
+      <SectionHeader comment="manage education" count={edu.length} onAdd={() => setModal('add')} addLabel="new_edu()" />
+      {loading ? <SkeletonRows /> : (
+        <div className="space-y-2">
+          {edu.map((e, i) => (
+            <ItemRow key={e._id} lineNum={i + 1} onEdit={() => setModal(e)} onDelete={() => handleDelete(e._id)}>
+              <p className="font-mono text-sm text-slate-200">{e.degree}</p>
+              <p className="font-mono text-xs text-slate-600">{e.institution}</p>
+            </ItemRow>
+          ))}
+        </div>
+      )}
+      {modal && (
+        <Modal title={modal === 'add' ? 'new_edu()' : `edit("${modal.institution}")`} onClose={() => setModal(null)}>
+          <EducationForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
     </div>
   );
 }
 
-function EducationForm({ initial, onSave, onCancel }) {
-  const [form, setForm] = useState(initial || { institution: '', degree: '', startDate: '', endDate: '', current: false });
+// ─── Experience Tab ───────────────────────────────────────────────────────────
+
+function ExperienceForm({ initial, onSave, onCancel }) {
+  const [form, setForm] = useState(initial || { company: '', position: '', startDate: '', endDate: '', current: false, description: '' });
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -657,19 +720,23 @@ function EducationForm({ initial, onSave, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div><label className={LABEL}>Institution *</label><input required value={form.institution} onChange={e => set('institution', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Degree *</label><input required value={form.degree} onChange={e => set('degree', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Start Date</label><input type="date" value={form.startDate ? form.startDate.split('T')[0] : ''} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>End Date</label><input type="date" value={form.endDate ? form.endDate.split('T')[0] : ''} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} /><span>Current</span></label>
-      <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
+      <div><label className={LABEL}>// company</label><input required value={form.company} onChange={e => set('company', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// position</label><input required value={form.position} onChange={e => set('position', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// startDate</label><input type="date" value={form.startDate ? form.startDate.split('T')[0] : ''} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// endDate</label><input type="date" value={form.endDate ? form.endDate.split('T')[0] : ''} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
+      <label className="flex items-center gap-2.5 cursor-pointer">
+        <input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} className="w-3.5 h-3.5 rounded" />
+        <span className="font-mono text-xs text-slate-400">current: <span className="text-yellow-400">true</span></span>
+      </label>
+      <div><label className={LABEL}>// description</label><textarea rows={3} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT} /></div>
+      <div className="flex gap-3 pt-2">
+        <button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={12} />}{saving ? 'saving...' : '> save()'}</button>
+        <button type="button" onClick={onCancel} className={BTN_G}>cancel</button>
+      </div>
     </form>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// EXPERIENCE TAB
-// ──────────────────────────────────────────────────────────────────────────
 function ExperienceTab() {
   const [exp, setExp] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -699,39 +766,28 @@ function ExperienceTab() {
 
   return (
     <div>
-      <div className="flex justify-between mb-6"><h2 className="text-lg font-semibold">Experience ({exp.length})</h2><button onClick={() => setModal('add')} className={BTN}><Plus size={14} /> Add Experience</button></div>
-      {loading ? <SkeletonRows /> : exp.map(e => (<ItemRow key={e._id} onEdit={() => setModal(e)} onDelete={() => handleDelete(e._id)}><p className="font-medium text-sm">{e.position} - {e.company}</p></ItemRow>))}
-      {modal && <Modal title={modal === 'add' ? 'Add Experience' : 'Edit Experience'} onClose={() => setModal(null)}><ExperienceForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} /></Modal>}
+      <SectionHeader comment="manage experience" count={exp.length} onAdd={() => setModal('add')} addLabel="new_exp()" />
+      {loading ? <SkeletonRows /> : (
+        <div className="space-y-2">
+          {exp.map((e, i) => (
+            <ItemRow key={e._id} lineNum={i + 1} onEdit={() => setModal(e)} onDelete={() => handleDelete(e._id)}>
+              <p className="font-mono text-sm text-slate-200">{e.position}</p>
+              <p className="font-mono text-xs text-slate-600">{e.company}</p>
+            </ItemRow>
+          ))}
+        </div>
+      )}
+      {modal && (
+        <Modal title={modal === 'add' ? 'new_exp()' : `edit("${modal.position}")`} onClose={() => setModal(null)}>
+          <ExperienceForm initial={modal !== 'add' ? modal : null} onSave={handleSave} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
     </div>
   );
 }
 
-function ExperienceForm({ initial, onSave, onCancel }) {
-  const [form, setForm] = useState(initial || { company: '', position: '', startDate: '', endDate: '', current: false, description: '' });
-  const [saving, setSaving] = useState(false);
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+// ─── Profile Tab ──────────────────────────────────────────────────────────────
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); setSaving(true);
-    try { await onSave(form); } finally { setSaving(false); }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div><label className={LABEL}>Company *</label><input required value={form.company} onChange={e => set('company', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Position *</label><input required value={form.position} onChange={e => set('position', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Start Date</label><input type="date" value={form.startDate ? form.startDate.split('T')[0] : ''} onChange={e => set('startDate', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>End Date</label><input type="date" value={form.endDate ? form.endDate.split('T')[0] : ''} onChange={e => set('endDate', e.target.value)} className={INPUT} /></div>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.current} onChange={e => set('current', e.target.checked)} /><span>Current</span></label>
-      <div><label className={LABEL}>Description</label><textarea rows={3} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT} /></div>
-      <div className="flex gap-3"><button type="submit" disabled={saving} className={BTN + ' flex-1'}>{saving ? <Spinner /> : <Save size={14} />}Save</button><button type="button" onClick={onCancel} className={BTN_G}>Cancel</button></div>
-    </form>
-  );
-}
-
-// ──────────────────────────────────────────────────────────────────────────
-// PROFILE TAB
-// ──────────────────────────────────────────────────────────────────────────
 function ProfileTab() {
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -744,36 +800,25 @@ function ProfileTab() {
   const [showResumeUrl, setShowResumeUrl] = useState(false);
 
   useEffect(() => {
-    profileApi.get()
-      .then(r => setForm(r.data.data))
-      .catch(() => toast.error('Failed to load profile'))
-      .finally(() => setLoading(false));
+    profileApi.get().then(r => setForm(r.data.data)).catch(() => toast.error('Failed to load profile')).finally(() => setLoading(false));
   }, []);
 
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setSocial = (k, v) => setForm(f => ({ ...f, socialLinks: { ...f.socialLinks, [k]: v } }));
 
   const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     setUploadingAvatar(true);
-    try {
-      const res = await uploadApi.uploadAvatar(file);
-      setField('avatar', res.data.data.url);
-      toast.success('Avatar uploaded!');
-    } catch { toast.error('Avatar upload failed'); }
+    try { const res = await uploadApi.uploadAvatar(file); setField('avatar', res.data.data.url); toast.success('Avatar uploaded!'); }
+    catch { toast.error('Avatar upload failed'); }
     finally { setUploadingAvatar(false); if (avatarRef.current) avatarRef.current.value = ''; }
   };
 
   const handleResumeUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     setUploadingResume(true);
-    try {
-      const res = await uploadApi.uploadResume(file);
-      setField('resumeUrl', res.data.data.url);
-      toast.success('Resume uploaded!');
-    } catch { toast.error('Resume upload failed'); }
+    try { const res = await uploadApi.uploadResume(file); setField('resumeUrl', res.data.data.url); toast.success('Resume uploaded!'); }
+    catch { toast.error('Resume upload failed'); }
     finally { setUploadingResume(false); if (resumeRef.current) resumeRef.current.value = ''; }
   };
 
@@ -784,105 +829,95 @@ function ProfileTab() {
     finally { setSaving(false); }
   };
 
-  if (loading) return <div className="text-sm text-slate-500 py-8 text-center">Loading profile…</div>;
+  if (loading) return <div className="space-y-2">{Array.from({ length: 6 }, (_, i) => <div key={i} className="h-10 rounded-lg animate-pulse" style={{ background: C.card }} />)}</div>;
   if (!form) return null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
-      <h2 className="text-lg font-semibold">Profile Settings</h2>
+    <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
+      <p className="font-mono text-[11px] text-slate-600">// profile settings</p>
 
       {/* Avatar */}
       <div>
-        <label className={LABEL}>Avatar</label>
+        <label className={LABEL}>// avatar</label>
         <div className="flex items-start gap-4">
           {form.avatar
-            ? <img src={form.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover shrink-0 border-2 border-slate-200 dark:border-slate-600" />
-            : <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0"><User size={24} className="text-slate-400" /></div>
+            ? <img src={form.avatar} alt="Avatar" className="w-14 h-14 rounded-full object-cover shrink-0" style={{ border: `2px solid ${C.border}` }} />
+            : <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0" style={{ background: C.card, border: `1px solid ${C.border}` }}><User size={20} className="text-slate-600" /></div>
           }
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-3 flex-wrap">
-              <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingAvatar ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-                <Image size={13} />
-                {uploadingAvatar ? 'Uploading…' : form.avatar ? 'Replace Avatar' : 'Upload Avatar'}
+              <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploadingAvatar ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
+                <Image size={11} />{uploadingAvatar ? 'uploading...' : form.avatar ? 'replace avatar' : 'upload avatar'}
                 <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" disabled={uploadingAvatar} />
               </label>
-              <button type="button" onClick={() => setShowAvatarUrl(v => !v)} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2">
-                {showAvatarUrl ? 'hide URL field' : 'or paste URL'}
+              <button type="button" onClick={() => setShowAvatarUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400">
+                {showAvatarUrl ? 'hide url' : 'or paste url'}
               </button>
             </div>
-            {showAvatarUrl && (
-              <input type="url" placeholder="Paste image URL here" value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} />
-            )}
+            {showAvatarUrl && <input type="url" placeholder="https://..." value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} />}
           </div>
         </div>
       </div>
 
       {/* Resume */}
       <div>
-        <label className={LABEL}>Resume (PDF)</label>
+        <label className={LABEL}>// resumeUrl (pdf)</label>
         <div className="space-y-2">
           {form.resumeUrl && (
-            <a href={form.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-green-500 hover:text-green-600">
-              <Download size={13} /> View current resume
+            <a href={form.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-xs text-emerald-400 hover:text-emerald-300">
+              <Download size={11} /> view current resume
             </a>
           )}
           <div className="flex items-center gap-3 flex-wrap">
-            <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${uploadingResume ? 'opacity-60 cursor-not-allowed' : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 text-slate-700 dark:text-slate-300'}`}>
-              <Upload size={13} />
-              {uploadingResume ? 'Uploading…' : form.resumeUrl ? 'Replace Resume (PDF)' : 'Upload Resume (PDF)'}
+            <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploadingResume ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
+              <Upload size={11} />{uploadingResume ? 'uploading...' : form.resumeUrl ? 'replace resume' : 'upload resume (pdf)'}
               <input ref={resumeRef} type="file" accept=".pdf,application/pdf" onChange={handleResumeUpload} className="hidden" disabled={uploadingResume} />
             </label>
-            <button type="button" onClick={() => setShowResumeUrl(v => !v)} className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline underline-offset-2">
-              {showResumeUrl ? 'hide URL field' : 'or paste URL'}
+            <button type="button" onClick={() => setShowResumeUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400">
+              {showResumeUrl ? 'hide url' : 'or paste url'}
             </button>
           </div>
-          {showResumeUrl && (
-            <input type="url" placeholder="Paste resume URL here" value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT} />
-          )}
+          {showResumeUrl && <input type="url" placeholder="https://..." value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT} />}
+          <p className="font-mono text-[10px] text-slate-700">appears in the download resume button on the contact section</p>
         </div>
-        <p className="text-xs text-slate-400 mt-1">Uploaded resume will appear in the "Download Resume" button on the contact section.</p>
       </div>
 
-      <div><label className={LABEL}>Name</label><input value={form.name || ''} onChange={e => setField('name', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Title</label><input value={form.title || ''} onChange={e => setField('title', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Bio</label><textarea rows={4} value={form.bio || ''} onChange={e => setField('bio', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Location</label><input value={form.location || ''} onChange={e => setField('location', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Email</label><input type="email" value={form.email || ''} onChange={e => setField('email', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Availability</label><input value={form.availability || ''} onChange={e => setField('availability', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>Years of Experience</label><input type="number" min="0" value={form.yearsOfExperience || 0} onChange={e => setField('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div>
+      <div><label className={LABEL}>// name</label><input value={form.name || ''} onChange={e => setField('name', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// title</label><input value={form.title || ''} onChange={e => setField('title', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// bio</label><textarea rows={4} value={form.bio || ''} onChange={e => setField('bio', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// location</label><input value={form.location || ''} onChange={e => setField('location', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// email</label><input type="email" value={form.email || ''} onChange={e => setField('email', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// availability</label><input value={form.availability || ''} onChange={e => setField('availability', e.target.value)} className={INPUT} /></div>
+      <div><label className={LABEL}>// yearsOfExperience</label><input type="number" min="0" value={form.yearsOfExperience || 0} onChange={e => setField('yearsOfExperience', Number(e.target.value))} className={INPUT} /></div>
 
       <div>
-        <h3 className="font-medium text-sm mb-3">Social Links</h3>
+        <p className="font-mono text-[11px] text-slate-600 mb-3">// socialLinks</p>
         {['github', 'linkedin', 'twitter'].map(key => (
-          <div key={key} className="mb-3">
-            <label className={LABEL}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-            <input type="url" value={form.socialLinks?.[key] || ''} onChange={e => setSocial(key, e.target.value)} className={INPUT} />
+          <div key={key} className="flex items-center gap-2 mb-2">
+            <span className="font-mono text-xs text-green-400 w-16 shrink-0">{key}:</span>
+            <input type="url" value={form.socialLinks?.[key] || ''} onChange={e => setSocial(key, e.target.value)} className={INPUT} placeholder={`https://${key}.com/...`} />
           </div>
         ))}
       </div>
 
-      <button type="submit" disabled={saving} className={BTN}>{saving ? <Spinner /> : <Save size={14} />} Save Profile</button>
+      <button type="submit" disabled={saving} className={BTN}>
+        {saving ? <Spinner /> : <Save size={12} />}
+        {saving ? 'saving...' : '> profile.save()'}
+      </button>
     </form>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// ANALYTICS TAB
-// ──────────────────────────────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, color = 'blue' }) {
-  const colors = {
-    blue: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    green: 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400',
-    purple: 'bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400',
-    orange: 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400',
-  };
+// ─── Analytics Tab ────────────────────────────────────────────────────────────
+
+function StatCard({ icon: Icon, label, value, accent = '#3b82f6' }) {
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 rounded-xl">
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${colors[color]}`}>
-        <Icon size={18} />
+    <div className="p-4 rounded-lg" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+      <div className="flex items-center gap-2 mb-3">
+        <Icon size={14} style={{ color: accent }} />
+        <span className="font-mono text-[11px] text-slate-500">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-slate-900 dark:text-white">{value ?? '—'}</p>
-      <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+      <p className="font-mono text-2xl font-bold text-slate-200">{value ?? '—'}</p>
     </div>
   );
 }
@@ -902,33 +937,40 @@ function AnalyticsTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Analytics</h2>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="font-mono text-[11px] text-slate-600">// analytics.getStats()</p>
+          <p className="font-mono text-xs text-slate-500 mt-0.5">
+            <span className="text-purple-400">const </span>
+            <span className="text-blue-300">period </span>
+            <span className="text-slate-600">= </span>
+            <span className="text-yellow-400">{days} days</span>
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <select value={days} onChange={e => setDays(Number(e.target.value))} className={INPUT + ' w-36'}>
-            <option value={7}>Last 7 days</option>
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last 90 days</option>
+            <option value={7}>last 7 days</option>
+            <option value={30}>last 30 days</option>
+            <option value={90}>last 90 days</option>
           </select>
-          <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={14} /></button>
+          <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={12} /></button>
         </div>
       </div>
       {loading ? <SkeletonRows count={1} /> : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard icon={Eye} label="Page Views" value={stats?.totalViews?.toLocaleString()} color="blue" />
-          <StatCard icon={BarChart2} label="Unique Visitors" value={stats?.uniqueVisitors?.toLocaleString()} color="purple" />
-          <StatCard icon={Download} label="Resume Downloads" value={stats?.resumeDownloads?.toLocaleString()} color="green" />
-          <StatCard icon={MessageSquare} label="Contact Forms" value={stats?.contactForms?.toLocaleString()} color="orange" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCard icon={Eye} label="page_views" value={stats?.totalViews?.toLocaleString()} accent="#3b82f6" />
+          <StatCard icon={BarChart2} label="unique_visitors" value={stats?.uniqueVisitors?.toLocaleString()} accent="#a855f7" />
+          <StatCard icon={Download} label="resume_downloads" value={stats?.resumeDownloads?.toLocaleString()} accent="#10b981" />
+          <StatCard icon={MessageSquare} label="contact_forms" value={stats?.contactForms?.toLocaleString()} accent="#f59e0b" />
         </div>
       )}
-      <p className="text-xs text-slate-400 mt-4">Stats are counted from MongoDB — tracking fires on each page load and tracked user actions.</p>
+      <p className="font-mono text-[10px] text-slate-700 mt-4">// stats counted from mongodb — tracking fires on each page load and user action</p>
     </div>
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// MESSAGES TAB
-// ──────────────────────────────────────────────────────────────────────────
+// ─── Messages Tab ─────────────────────────────────────────────────────────────
+
 function MessagesTab({ onUnreadChange }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -936,16 +978,14 @@ function MessagesTab({ onUnreadChange }) {
   const [expanded, setExpanded] = useState(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setLoadError(false);
+    setLoading(true); setLoadError(false);
     try {
       const r = await contactApi.getMessages();
       const data = r.data.data ?? [];
       setMessages(data);
       onUnreadChange?.(data.filter(m => !m.read).length);
-    } catch {
-      setLoadError(true);
-    } finally { setLoading(false); }
+    } catch { setLoadError(true); }
+    finally { setLoading(false); }
   }, [onUnreadChange]);
 
   useEffect(() => { load(); }, [load]);
@@ -974,62 +1014,68 @@ function MessagesTab({ onUnreadChange }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold">Messages</h2>
-          <span className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors ${
-            unread > 0
-              ? 'bg-green-500 text-white'
-              : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
-          }`}>
-            {unread > 0 ? `${unread} unread` : 'all read'}
-          </span>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="font-mono text-[11px] text-slate-600">// inbox messages</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="font-mono text-xs text-slate-500">
+              <span className="text-purple-400">const </span>
+              <span className="text-blue-300">unread </span>
+              <span className="text-slate-600">= </span>
+              <span className="text-yellow-400">{unread}</span>
+            </p>
+          </div>
         </div>
-        <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={14} /></button>
+        <button onClick={load} className={BTN_G} title="Refresh"><RefreshCw size={12} /></button>
       </div>
+
       {loading ? <SkeletonRows count={3} /> : loadError ? (
-        <div className="text-center py-16 text-slate-400">
-          <Inbox size={36} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm mb-4">Could not load messages</p>
-          <button onClick={load} className={BTN_G + ' text-sm'}>Try Again</button>
+        <div className="text-center py-16">
+          <Inbox size={32} className="mx-auto mb-3 text-slate-700" />
+          <p className="font-mono text-sm text-slate-600 mb-4">could not load messages</p>
+          <button onClick={load} className={BTN_G}>try again</button>
         </div>
       ) : messages.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <Inbox size={36} className="mx-auto mb-3 opacity-40" />
-          <p className="text-sm">No messages yet</p>
+        <div className="text-center py-16">
+          <Inbox size={32} className="mx-auto mb-3 text-slate-700" />
+          <p className="font-mono text-sm text-slate-600">no messages yet</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {messages.map(msg => (
             <div
               key={msg._id}
-              className={`rounded-xl border transition-all overflow-hidden ${msg.read ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'bg-blue-50/60 dark:bg-blue-900/10 border-blue-200 dark:border-blue-700/40'}`}
+              className="rounded-lg overflow-hidden transition-all"
+              style={{
+                background: msg.read ? C.card : 'rgba(59,130,246,0.05)',
+                border: msg.read ? `1px solid ${C.border}` : '1px solid rgba(59,130,246,0.2)',
+              }}
             >
               <div
-                className="flex items-start gap-4 p-4 cursor-pointer"
+                className="flex items-start gap-3 p-3.5 cursor-pointer"
                 onClick={() => { setExpanded(expanded === msg._id ? null : msg._id); handleMarkRead(msg); }}
               >
-                <div className={`mt-0.5 shrink-0 ${msg.read ? 'text-slate-400' : 'text-blue-500'}`}>
-                  {msg.read ? <MailOpen size={16} /> : <Mail size={16} />}
+                <div className={`mt-0.5 shrink-0 ${msg.read ? 'text-slate-600' : 'text-blue-400'}`}>
+                  {msg.read ? <MailOpen size={14} /> : <Mail size={14} />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-3">
-                    <p className={`text-sm font-medium truncate ${msg.read ? 'text-slate-700 dark:text-slate-300' : 'text-slate-900 dark:text-white'}`}>{msg.name}</p>
-                    <p className="text-xs text-slate-400 shrink-0">{new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    <p className={`font-mono text-sm truncate ${msg.read ? 'text-slate-400' : 'text-slate-200'}`}>{msg.name}</p>
+                    <p className="font-mono text-[10px] text-slate-600 shrink-0">{new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   </div>
-                  <p className="text-xs text-slate-500 truncate">{msg.email}</p>
-                  {expanded !== msg._id && (
-                    <p className="text-xs text-slate-500 mt-1 line-clamp-1">{msg.message}</p>
-                  )}
+                  <p className="font-mono text-xs text-slate-600 truncate">{msg.email}</p>
+                  {expanded !== msg._id && <p className="font-mono text-xs text-slate-700 mt-0.5 truncate">{msg.message}</p>}
                 </div>
-                <button onClick={e => { e.stopPropagation(); handleDelete(msg._id); }} className="p-1.5 shrink-0 rounded-lg text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={13} /></button>
+                <button onClick={e => { e.stopPropagation(); handleDelete(msg._id); }} className="p-1.5 shrink-0 rounded text-slate-700 hover:text-red-400 hover:bg-white/5 transition-colors">
+                  <Trash2 size={12} />
+                </button>
               </div>
               {expanded === msg._id && (
-                <div className="px-4 pb-4 pt-0 border-t border-slate-200/60 dark:border-slate-700/60 ml-8">
-                  <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                <div className="px-4 pb-4 pt-1 ml-8" style={{ borderTop: `1px solid ${C.border}` }}>
+                  <p className="font-mono text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
                   <div className="mt-3 flex items-center gap-3">
-                    <a href={`mailto:${msg.email}?subject=Re: Your message&body=Hi ${msg.name},%0A%0A`} className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors"><Mail size={12} /> Reply via Email</a>
-                    {!msg.read && <button onClick={() => handleMarkRead(msg)} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Mark as read</button>}
+                    <a href={`mailto:${msg.email}?subject=Re: Your message&body=Hi ${msg.name},%0A%0A`} className="font-mono text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1"><Mail size={11} /> reply via email</a>
+                    {!msg.read && <button onClick={() => handleMarkRead(msg)} className="font-mono text-xs text-slate-600 hover:text-slate-400">mark as read</button>}
                   </div>
                 </div>
               )}
@@ -1041,18 +1087,17 @@ function MessagesTab({ onUnreadChange }) {
   );
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// MAIN DASHBOARD
-// ──────────────────────────────────────────────────────────────────────────
+// ─── Main Dashboard ────────────────────────────────────────────────────────────
+
 const TABS = [
-  { id: 'projects', label: 'Projects', Icon: Layers },
-  { id: 'certificates', label: 'Certificates', Icon: Award },
-  { id: 'messages', label: 'Messages', Icon: Inbox },
-  { id: 'skills', label: 'Skills', Icon: Code },
-  { id: 'education', label: 'Education', Icon: BookOpen },
-  { id: 'experience', label: 'Experience', Icon: Briefcase },
-  { id: 'analytics', label: 'Analytics', Icon: BarChart2 },
-  { id: 'profile', label: 'Profile', Icon: User },
+  { id: 'projects',     label: 'projects.js',     file: 'projects.js',     Icon: Layers    },
+  { id: 'certificates', label: 'certificates.js',  file: 'certificates.js', Icon: Award     },
+  { id: 'messages',     label: 'messages.js',      file: 'messages.js',     Icon: Inbox     },
+  { id: 'skills',       label: 'skills.js',        file: 'skills.js',       Icon: Code      },
+  { id: 'education',    label: 'education.js',     file: 'education.js',    Icon: BookOpen  },
+  { id: 'experience',   label: 'experience.js',    file: 'experience.js',   Icon: Briefcase },
+  { id: 'analytics',    label: 'analytics.js',     file: 'analytics.js',    Icon: BarChart2 },
+  { id: 'profile',      label: 'profile.js',       file: 'profile.js',      Icon: User      },
 ];
 
 export default function AdminDashboard() {
@@ -1061,144 +1106,199 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch unread count immediately on mount so the badge is visible before opening Messages
   useEffect(() => {
     contactApi.getMessages()
-      .then(r => {
-        const data = r.data.data ?? [];
-        setUnreadCount(data.filter(m => !m.read).length);
-      })
+      .then(r => { const data = r.data.data ?? []; setUnreadCount(data.filter(m => !m.read).length); })
       .catch(() => {});
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
-    toast.success('Logged out');
+    toast.success('Session ended');
     navigate('/admin/login');
   };
 
-  const activeTab = TABS.find(item => item.id === tab)?.label || 'Dashboard';
+  const activeTab = TABS.find(t => t.id === tab);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <div className="max-w-7xl mx-auto lg:flex lg:items-start gap-6 p-4 sm:p-6">
-        <aside className="hidden lg:block w-full lg:w-72 xl:w-80 shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-sm">
-          <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-700">
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400 mb-2">Admin Dashboard</p>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">SA Dashboard</h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Manage portfolio content</p>
-              </div>
-              <DarkModeToggle />
-            </div>
+    <div className="min-h-screen flex flex-col" style={{ background: C.page }}>
+
+      {/* VS Code title bar */}
+      <div
+        className="flex items-center gap-3 px-4 py-2 shrink-0 z-40"
+        style={{ background: C.bar, borderBottom: `1px solid ${C.border}` }}
+      >
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
+        </div>
+        <div className="flex-1 flex items-center justify-center gap-2">
+          <Zap size={12} className="text-blue-400" />
+          <span className="font-mono text-xs text-slate-400">
+            SA<span className="text-blue-400">.</span>admin —{' '}
+            <span className="text-slate-300">{activeTab?.file ?? 'dashboard.jsx'}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link to="/" target="_blank" className="font-mono text-[11px] text-slate-500 hover:text-blue-400 transition-colors hidden sm:block">
+            ↗ view site
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-mono text-[11px] text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          >
+            <LogOut size={11} />
+            <span className="hidden sm:inline">logout</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0">
+
+        {/* VS Code sidebar (desktop) */}
+        <aside
+          className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0"
+          style={{ background: C.sidebar, borderRight: `1px solid ${C.border}` }}
+        >
+          {/* Explorer header */}
+          <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <p className="font-mono text-[10px] text-slate-600 uppercase tracking-widest">Explorer</p>
+            <p className="font-mono text-xs text-slate-400 mt-0.5">Portfolio CMS</p>
           </div>
-          <div className="space-y-2 p-4">
-            {TABS.map(({ id, label, Icon }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`group w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/20' : 'text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-              >
-                <Icon size={16} className={tab === id ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-500'} />
-                <span>{label}</span>
-                {id === 'messages' && (
-                  <span className={`ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] rounded-full text-[11px] font-semibold ${unreadCount > 0 ? 'bg-green-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300'}`}>
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-            ))}
+
+          {/* File tree */}
+          <div className="flex-1 overflow-y-auto py-2">
+            <p className="font-mono text-[10px] text-slate-600 px-4 py-1 uppercase tracking-widest">src / admin</p>
+            {TABS.map(({ id, file, Icon }) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className="w-full flex items-center gap-2 px-4 py-1.5 font-mono text-xs transition-colors relative"
+                  style={{
+                    background: active ? 'rgba(59,130,246,0.08)' : 'transparent',
+                    color: active ? '#e2e8f0' : '#6b7280',
+                    borderLeft: active ? '2px solid #3b82f6' : '2px solid transparent',
+                  }}
+                >
+                  <Icon size={12} className={active ? 'text-blue-400' : 'text-slate-700'} />
+                  <span className="truncate">{file}</span>
+                  {id === 'messages' && (
+                    <span
+                      className="ml-auto shrink-0 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full font-mono text-[10px] font-bold"
+                      style={{
+                        background: unreadCount > 0 ? '#22c55e' : 'rgba(255,255,255,0.06)',
+                        color: unreadCount > 0 ? '#fff' : '#4b5563',
+                      }}
+                    >
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-3">
-            <Link to="/" className="block text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">View site</Link>
-            <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 flex items-center gap-1">
-              <LogOut size={14} /> Logout
+
+          {/* Sidebar footer */}
+          <div className="p-3 space-y-1" style={{ borderTop: `1px solid ${C.border}` }}>
+            <Link to="/" className="block font-mono text-xs text-blue-400 hover:text-blue-300 transition-colors px-1">↗ view site</Link>
+            <button onClick={handleLogout} className="w-full text-left font-mono text-xs text-slate-600 hover:text-red-400 flex items-center gap-1.5 transition-colors px-1">
+              <LogOut size={11} /> logout
             </button>
           </div>
         </aside>
 
+        {/* Mobile sidebar drawer */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-            <div className="relative h-full w-full max-w-xs bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 shadow-2xl overflow-y-auto">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400 mb-1">Menu</p>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Admin</h2>
-                </div>
-                <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" aria-label="Close menu">
-                  <X size={20} />
-                </button>
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+            <div className="relative h-full w-64 flex flex-col" style={{ background: C.sidebar, borderRight: `1px solid ${C.border}` }}>
+              <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+                <p className="font-mono text-xs text-slate-400">Portfolio CMS</p>
+                <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-colors"><X size={14} /></button>
               </div>
-              <div className="space-y-2 p-4">
-                {TABS.map(({ id, label, Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      setTab(id);
-                      setSidebarOpen(false);
-                    }}
-                    className={`group w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-all ${tab === id ? 'bg-blue-500 text-white shadow-sm shadow-blue-500/20' : 'text-slate-700 dark:text-slate-300 bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-                  >
-                    <Icon size={16} className={tab === id ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-500'} />
-                    <span>{label}</span>
-                    {id === 'messages' && (
-                      <span className={`ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] rounded-full text-[11px] font-semibold ${unreadCount > 0 ? 'bg-green-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300'}`}>
-                        {unreadCount}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-              <div className="border-t border-slate-200 dark:border-slate-700 p-4 space-y-3">
-                <Link to="/" className="block text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">View site</Link>
-                <button onClick={handleLogout} className="w-full text-left text-sm text-red-500 hover:text-red-600 flex items-center gap-2">
-                  <LogOut size={14} /> Logout
-                </button>
+              <div className="flex-1 overflow-y-auto py-2">
+                {TABS.map(({ id, file, Icon }) => {
+                  const active = tab === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => { setTab(id); setSidebarOpen(false); }}
+                      className="w-full flex items-center gap-2 px-4 py-2 font-mono text-xs transition-colors"
+                      style={{
+                        background: active ? 'rgba(59,130,246,0.08)' : 'transparent',
+                        color: active ? '#e2e8f0' : '#6b7280',
+                        borderLeft: active ? '2px solid #3b82f6' : '2px solid transparent',
+                      }}
+                    >
+                      <Icon size={12} className={active ? 'text-blue-400' : 'text-slate-700'} />
+                      <span className="truncate">{file}</span>
+                      {id === 'messages' && (
+                        <span className="ml-auto shrink-0 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full font-mono text-[10px] font-bold"
+                          style={{ background: unreadCount > 0 ? '#22c55e' : 'rgba(255,255,255,0.06)', color: unreadCount > 0 ? '#fff' : '#4b5563' }}>
+                          {unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
         )}
 
-        <main className="flex-1">
-          <div className="lg:hidden mb-4">
-            <div className="flex items-center justify-between gap-3 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Menu size={16} /> Menu
-              </button>
-              <div className="text-right">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Current section</p>
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">{activeTab}</p>
-              </div>
-            </div>
+        {/* Editor content area */}
+        <main className="flex-1 flex flex-col min-w-0 overflow-auto" style={{ background: C.editor }}>
+
+          {/* Mobile top bar */}
+          <div className="lg:hidden flex items-center justify-between px-4 py-2.5" style={{ background: C.bar, borderBottom: `1px solid ${C.border}` }}>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="inline-flex items-center gap-2 font-mono text-xs text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              <Menu size={14} /> explorer
+            </button>
+            <span className="font-mono text-xs text-slate-500">{activeTab?.file}</span>
           </div>
 
-          <div className="mb-6">
-            <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Current section</p>
-                  <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">{activeTab}</h2>
-                </div>
-              </div>
-            </div>
+          {/* File doc comment */}
+          <div className="px-6 pt-6 pb-2">
+            <p className="font-mono text-[11px] text-slate-700">{'/**'}</p>
+            <p className="font-mono text-[11px] text-slate-700">{` * @file ${activeTab?.file}`}</p>
+            <p className="font-mono text-[11px] text-slate-700">{' * @author Samuel AKINGENEYE'}</p>
+            <p className="font-mono text-[11px] text-slate-700">{' */'}</p>
           </div>
 
-          <div>
-            {tab === 'projects' && <ProjectsTab />}
+          {/* Tab content */}
+          <div className="flex-1 px-6 py-4 pb-16">
+            {tab === 'projects'     && <ProjectsTab />}
             {tab === 'certificates' && <CertificatesTab />}
-            {tab === 'messages' && <MessagesTab onUnreadChange={setUnreadCount} />}
-            {tab === 'skills' && <SkillsTab />}
-            {tab === 'education' && <EducationTab />}
-            {tab === 'experience' && <ExperienceTab />}
-            {tab === 'analytics' && <AnalyticsTab />}
-            {tab === 'profile' && <ProfileTab />}
+            {tab === 'messages'     && <MessagesTab onUnreadChange={setUnreadCount} />}
+            {tab === 'skills'       && <SkillsTab />}
+            {tab === 'education'    && <EducationTab />}
+            {tab === 'experience'   && <ExperienceTab />}
+            {tab === 'analytics'    && <AnalyticsTab />}
+            {tab === 'profile'      && <ProfileTab />}
           </div>
         </main>
+      </div>
+
+      {/* VS Code status bar */}
+      <div
+        className="flex items-center justify-between px-4 py-1 shrink-0"
+        style={{ background: '#007acc' }}
+      >
+        <div className="flex items-center gap-3 font-mono text-[10px] text-white/80">
+          <span>⚡ Portfolio CMS</span>
+          <span>main</span>
+        </div>
+        <div className="flex items-center gap-3 font-mono text-[10px] text-white/70">
+          <span>{activeTab?.file}</span>
+          <span>JavaScript</span>
+          <span>UTF-8</span>
+        </div>
       </div>
     </div>
   );
