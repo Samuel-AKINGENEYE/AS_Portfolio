@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
-  Github, Linkedin, Twitter, Mail, MapPin, Download, Send,
+  Github, Linkedin, Twitter, Mail, MapPin, Send,
   Code2, Database, Wrench, Globe, ChevronRight, Loader2,
   Home as HomeIcon, Layers, Award, Play, FolderOpen,
 } from 'lucide-react';
@@ -238,22 +238,6 @@ export default function Home() {
 
   const social = profile?.socialLinks ?? {};
 
-  const handleResumeDownload = useCallback((e) => {
-    e?.preventDefault();
-    if (!profile?.resumeUrl) return;
-    // Add fl_attachment so Cloudinary sends Content-Disposition: attachment,
-    // triggering a real browser download without any fetch/CORS complications.
-    const url = profile.resumeUrl.includes('res.cloudinary.com')
-      ? profile.resumeUrl.replace(/\/upload\/(?!fl_attachment)/, '/upload/fl_attachment/')
-      : profile.resumeUrl;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Samuel_AKINGENEYE_Resume.pdf';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'resume_download' }).catch(() => {});
-  }, [profile?.resumeUrl]);
 
   if (loading) {
     const bootLines = [
@@ -369,14 +353,6 @@ export default function Home() {
                 >
                   Get in touch
                 </a>
-                {profile?.resumeUrl && (
-                  <button
-                    onClick={handleResumeDownload}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-500 dark:hover:border-slate-500 font-medium rounded-md transition-colors text-sm"
-                  >
-                    <Download size={14} /> Resume
-                  </button>
-                )}
               </div>
             </div>
 
@@ -469,7 +445,10 @@ export default function Home() {
                   {/* Single button */}
                   <div className="px-4 pb-4 pt-1">
                     <button
-                      onClick={() => setShowProfileModal(true)}
+                      onClick={() => {
+                        setShowProfileModal(true);
+                        analyticsApi.track({ page: '/', visitorId: getVisitorId(), event: 'profile_view' }).catch(() => {});
+                      }}
                       className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition-colors shadow-lg shadow-accent/25"
                     >
                       <Play size={11} className="fill-white" /> Run Profile
@@ -811,15 +790,6 @@ export default function Home() {
               <span className="text-[10px] font-medium">{label}</span>
             </a>
           ))}
-          {profile?.resumeUrl && (
-            <button
-              onClick={handleResumeDownload}
-              className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 active:scale-95 transition-all"
-            >
-              <Download size={20} />
-              <span className="text-[10px] font-medium">Resume</span>
-            </button>
-          )}
         </div>
       </nav>
     </div>

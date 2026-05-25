@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const analyticsSchema = new mongoose.Schema({
-  event: { type: String, required: true, index: true }, // 'pageview' | 'resume_download' | 'contact_form'
+  event: { type: String, required: true, index: true }, // 'pageview' | 'profile_view' | 'contact_form'
   page: { type: String, default: '/' },
   visitorId: { type: String, default: '' },
   ip: { type: String, default: '' },

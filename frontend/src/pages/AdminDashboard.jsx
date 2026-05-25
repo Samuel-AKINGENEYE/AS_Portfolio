@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   LogOut, Plus, Edit2, Trash2, X, Save, Layers, Award, User, Code,
-  BookOpen, Briefcase, Upload, BarChart2, Eye, Download,
+  BookOpen, Briefcase, Upload, BarChart2, Eye, Play,
   MessageSquare, RefreshCw, Image, FileText, Inbox, Mail, MailOpen, ZoomIn,
   Menu, Zap, Terminal,
 } from 'lucide-react';
@@ -180,52 +180,6 @@ function ImageUploadField({ label, value, onChange, folder, accept = 'image/*' }
           <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploading ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
             <Image size={11} />
             {uploading ? 'uploading...' : value ? 'replace' : 'upload image'}
-            <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
-          </label>
-          <button type="button" onClick={() => setShowUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 transition-colors">
-            {showUrl ? 'hide url' : 'or paste url'}
-          </button>
-        </div>
-        {showUrl && <input type="url" placeholder="https://..." value={value || ''} onChange={e => onChange(e.target.value)} className={INPUT} />}
-      </div>
-    </div>
-  );
-}
-
-// ─── File upload field ────────────────────────────────────────────────────────
-
-function FileUploadField({ label, value, onChange, folder, accept, fieldName = 'file', icon: Icon = FileText }) {
-  const [uploading, setUploading] = useState(false);
-  const [showUrl, setShowUrl] = useState(false);
-  const inputRef = useRef(null);
-
-  const handleFile = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const res = fieldName === 'resume'
-        ? await uploadApi.uploadResume(file)
-        : await uploadApi.uploadFile(file, folder);
-      onChange(res.data.data.url);
-      toast.success('File uploaded!');
-    } catch { toast.error('Upload failed'); }
-    finally { setUploading(false); if (inputRef.current) inputRef.current.value = ''; }
-  };
-
-  return (
-    <div>
-      <label className={LABEL}>{label}</label>
-      <div className="space-y-2">
-        {value && (
-          <a href={value} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-xs text-emerald-400 hover:text-emerald-300">
-            <Icon size={11} /> view current file
-          </a>
-        )}
-        <div className="flex items-center gap-3 flex-wrap">
-          <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploading ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
-            <Upload size={11} />
-            {uploading ? 'uploading...' : value ? `replace ${label.toLowerCase()}` : `upload ${label.toLowerCase()}`}
             <input ref={inputRef} type="file" accept={accept} onChange={handleFile} className="hidden" disabled={uploading} />
           </label>
           <button type="button" onClick={() => setShowUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400 transition-colors">
@@ -793,11 +747,8 @@ function ProfileTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const avatarRef = useRef(null);
-  const resumeRef = useRef(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [uploadingResume, setUploadingResume] = useState(false);
   const [showAvatarUrl, setShowAvatarUrl] = useState(false);
-  const [showResumeUrl, setShowResumeUrl] = useState(false);
 
   useEffect(() => {
     profileApi.get().then(r => setForm(r.data.data)).catch(() => toast.error('Failed to load profile')).finally(() => setLoading(false));
@@ -812,14 +763,6 @@ function ProfileTab() {
     try { const res = await uploadApi.uploadAvatar(file); setField('avatar', res.data.data.url); toast.success('Avatar uploaded!'); }
     catch { toast.error('Avatar upload failed'); }
     finally { setUploadingAvatar(false); if (avatarRef.current) avatarRef.current.value = ''; }
-  };
-
-  const handleResumeUpload = async (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    setUploadingResume(true);
-    try { const res = await uploadApi.uploadResume(file); setField('resumeUrl', res.data.data.url); toast.success('Resume uploaded!'); }
-    catch { toast.error('Resume upload failed'); }
-    finally { setUploadingResume(false); if (resumeRef.current) resumeRef.current.value = ''; }
   };
 
   const handleSubmit = async (e) => {
@@ -856,29 +799,6 @@ function ProfileTab() {
             </div>
             {showAvatarUrl && <input type="url" placeholder="https://..." value={form.avatar || ''} onChange={e => setField('avatar', e.target.value)} className={INPUT} />}
           </div>
-        </div>
-      </div>
-
-      {/* Resume */}
-      <div>
-        <label className={LABEL}>// resumeUrl (pdf)</label>
-        <div className="space-y-2">
-          {form.resumeUrl && (
-            <a href={form.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-xs text-emerald-400 hover:text-emerald-300">
-              <Download size={11} /> view current resume
-            </a>
-          )}
-          <div className="flex items-center gap-3 flex-wrap">
-            <label className={`cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-xs transition-colors ${uploadingResume ? 'opacity-60 cursor-not-allowed text-slate-500' : 'text-slate-400 hover:text-blue-400'}`} style={{ border: `1px solid ${C.border}` }}>
-              <Upload size={11} />{uploadingResume ? 'uploading...' : form.resumeUrl ? 'replace resume' : 'upload resume (pdf)'}
-              <input ref={resumeRef} type="file" accept=".pdf,application/pdf" onChange={handleResumeUpload} className="hidden" disabled={uploadingResume} />
-            </label>
-            <button type="button" onClick={() => setShowResumeUrl(v => !v)} className="font-mono text-[10px] text-slate-600 hover:text-slate-400">
-              {showResumeUrl ? 'hide url' : 'or paste url'}
-            </button>
-          </div>
-          {showResumeUrl && <input type="url" placeholder="https://..." value={form.resumeUrl || ''} onChange={e => setField('resumeUrl', e.target.value)} className={INPUT} />}
-          <p className="font-mono text-[10px] text-slate-700">appears in the download resume button on the contact section</p>
         </div>
       </div>
 
@@ -960,7 +880,7 @@ function AnalyticsTab() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard icon={Eye} label="page_views" value={stats?.totalViews?.toLocaleString()} accent="#3b82f6" />
           <StatCard icon={BarChart2} label="unique_visitors" value={stats?.uniqueVisitors?.toLocaleString()} accent="#a855f7" />
-          <StatCard icon={Download} label="resume_downloads" value={stats?.resumeDownloads?.toLocaleString()} accent="#10b981" />
+          <StatCard icon={Play} label="profile_views" value={stats?.profileViews?.toLocaleString()} accent="#10b981" />
           <StatCard icon={MessageSquare} label="contact_forms" value={stats?.contactForms?.toLocaleString()} accent="#f59e0b" />
         </div>
       )}

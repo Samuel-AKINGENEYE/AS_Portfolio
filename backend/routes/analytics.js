@@ -23,10 +23,10 @@ router.get('/stats', verifyToken, async (req, res) => {
     const days = Math.min(parseInt(req.query.days) || 30, 365);
     const since = new Date(Date.now() - days * 86_400_000);
 
-    const [totalViews, uniqueIds, resumeDownloads, contactForms] = await Promise.all([
+    const [totalViews, uniqueIds, profileViews, contactForms] = await Promise.all([
       Analytics.countDocuments({ event: 'pageview', createdAt: { $gte: since } }),
       Analytics.distinct('visitorId', { event: 'pageview', visitorId: { $ne: '' }, createdAt: { $gte: since } }),
-      Analytics.countDocuments({ event: 'resume_download', createdAt: { $gte: since } }),
+      Analytics.countDocuments({ event: 'profile_view', createdAt: { $gte: since } }),
       Analytics.countDocuments({ event: 'contact_form', createdAt: { $gte: since } }),
     ]);
 
@@ -35,7 +35,7 @@ router.get('/stats', verifyToken, async (req, res) => {
       data: {
         totalViews,
         uniqueVisitors: uniqueIds.length,
-        resumeDownloads,
+        profileViews,
         contactForms,
       },
     });
