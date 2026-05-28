@@ -62,16 +62,26 @@ export default function ProjectCard({ project }) {
           {project.title}
         </h3>
 
-        {/* Problem / what it does */}
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
-          {project.description}
-        </p>
-
-        {/* Solution / why these technologies */}
-        {project.longDescription && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 italic leading-relaxed pl-3 border-l-2 border-blue-500/30 mb-2">
-            {project.longDescription}
+        {/* Problem */}
+        <div className="mb-3">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-red-500/10 text-red-500 dark:text-red-400 border border-red-500/20 mb-1.5">
+            Problem
+          </span>
+          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+            {project.description}
           </p>
+        </div>
+
+        {/* Solution */}
+        {project.longDescription && (
+          <div className="mb-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 mb-1.5">
+              Solution
+            </span>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              {project.longDescription}
+            </p>
+          </div>
         )}
 
         {/* Spacer — pushes tech + footer to the bottom */}
