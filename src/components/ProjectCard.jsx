@@ -85,7 +85,7 @@ export default function ProjectCard({ project }) {
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 mb-1.5">
               Solution
             </span>
-            <p className="font-mono italic text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="font-serif italic text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
               {project.solution}
             </p>
           </div>
