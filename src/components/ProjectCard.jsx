@@ -19,7 +19,7 @@ export default function ProjectCard({ project }) {
 
   return (
     <div
-      className="group relative flex flex-col bg-white dark:bg-slate-800
+      className="group relative flex flex-col h-[420px] bg-white dark:bg-slate-800
                  border border-slate-200 dark:border-slate-700
                  rounded-2xl overflow-hidden shadow-sm
                  hover:shadow-xl hover:scale-[1.02] hover:border-blue-500/50
@@ -37,8 +37,8 @@ export default function ProjectCard({ project }) {
         />
       )}
 
-      {/* Thumbnail */}
-      <div className="relative z-[2] h-48 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
+      {/* Thumbnail — fixed height so all cards share the same image band */}
+      <div className="relative z-[2] h-44 flex-shrink-0 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
         {thumbSrc ? (
           <img
             src={thumbSrc}
@@ -55,17 +55,17 @@ export default function ProjectCard({ project }) {
         )}
       </div>
 
-      {/* Body */}
-      <div className="relative z-[2] flex flex-col flex-1 p-6">
-        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">
+      {/* Body — fills remaining 244 px, content clipped so nothing escapes */}
+      <div className="relative z-[2] flex flex-col flex-1 min-h-0 p-5 overflow-hidden">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors line-clamp-1">
           {project.title}
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4 line-clamp-3 flex-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-3 line-clamp-2">
           {project.description}
         </p>
 
         {project.techStack?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-5">
+          <div className="flex flex-wrap gap-1.5 mb-3 max-h-[52px] overflow-hidden flex-shrink-0">
             {project.techStack.map((tech) => (
               <span
                 key={tech}
@@ -80,7 +80,10 @@ export default function ProjectCard({ project }) {
           </div>
         )}
 
-        <div className="flex items-center gap-4 pt-1 border-t border-slate-100 dark:border-slate-700/50">
+        {/* Pushes footer to the bottom */}
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-4 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex-shrink-0">
           {project.liveUrl && (
             <a
               href={project.liveUrl}

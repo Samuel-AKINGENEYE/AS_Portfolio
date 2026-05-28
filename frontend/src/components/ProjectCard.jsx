@@ -15,7 +15,7 @@ export default function ProjectCard({ project }) {
       href={cardHref ?? undefined}
       target={cardHref ? '_blank' : undefined}
       rel={cardHref ? 'noopener noreferrer' : undefined}
-      className="group flex flex-col rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300"
+      className="group flex flex-col h-[420px] rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300"
       style={!cardHref ? { pointerEvents: 'none' } : undefined}
     >
 
@@ -71,25 +71,27 @@ export default function ProjectCard({ project }) {
       )}
 
       {/* ── Plain-text content ────────────────────────────────── */}
-      <div className="flex-1 flex flex-col p-5 gap-3">
-        <h3 className="font-display font-semibold text-white text-base leading-snug group-hover:text-accent transition-colors">
+      <div className="flex-1 flex flex-col min-h-0 p-5 gap-2 overflow-hidden">
+        <h3 className="font-display font-semibold text-white text-base leading-snug group-hover:text-accent transition-colors line-clamp-1">
           {project.title}
         </h3>
 
         {project.description && (
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <p className="text-sm text-slate-400 leading-relaxed line-clamp-2">
             {project.description}
           </p>
         )}
 
         {project.longDescription && (
-          <p className="text-xs text-slate-500 italic leading-relaxed pl-3 border-l-2 border-slate-700">
+          <p className="text-xs text-slate-500 italic leading-relaxed pl-3 border-l-2 border-slate-700 line-clamp-2">
             {project.longDescription}
           </p>
         )}
 
+        <div className="flex-1" />
+
         {project.techStack?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
+          <div className="flex flex-wrap gap-1.5 max-h-[52px] overflow-hidden flex-shrink-0">
             {project.techStack.map((t) => (
               <span
                 key={t}
