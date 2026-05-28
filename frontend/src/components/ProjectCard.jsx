@@ -15,7 +15,7 @@ export default function ProjectCard({ project }) {
       href={cardHref ?? undefined}
       target={cardHref ? '_blank' : undefined}
       rel={cardHref ? 'noopener noreferrer' : undefined}
-      className="group flex flex-col h-[440px] rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300"
+      className="group flex flex-col h-[500px] rounded-xl overflow-hidden border border-slate-700/60 bg-[#0d1117] shadow-xl hover:border-accent/40 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-300"
       style={!cardHref ? { pointerEvents: 'none' } : undefined}
     >
 
@@ -77,10 +77,17 @@ export default function ProjectCard({ project }) {
           {project.title}
         </h3>
 
-        {/* Description — 3 lines always visible */}
+        {/* Short description */}
         {project.description && (
-          <p className="text-sm text-slate-400 leading-relaxed line-clamp-3">
+          <p className="text-sm text-slate-400 leading-relaxed mb-2 line-clamp-2">
             {project.description}
+          </p>
+        )}
+
+        {/* Long description — tech choices / motivation */}
+        {project.longDescription && (
+          <p className="text-xs text-slate-500 italic leading-relaxed line-clamp-2 pl-3 border-l-2 border-slate-700">
+            {project.longDescription}
           </p>
         )}
 

@@ -19,7 +19,7 @@ export default function ProjectCard({ project }) {
 
   return (
     <div
-      className="group relative flex flex-col h-[440px] bg-white dark:bg-slate-800
+      className="group relative flex flex-col h-[500px] bg-white dark:bg-slate-800
                  border border-slate-200 dark:border-slate-700
                  rounded-2xl overflow-hidden shadow-sm
                  hover:shadow-xl hover:scale-[1.02] hover:border-blue-500/50
@@ -62,10 +62,17 @@ export default function ProjectCard({ project }) {
           {project.title}
         </h3>
 
-        {/* Description — 3 lines always visible */}
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
+        {/* Short description */}
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2 line-clamp-2">
           {project.description}
         </p>
+
+        {/* Long description — tech choices / motivation */}
+        {project.longDescription && (
+          <p className="text-xs text-slate-400 dark:text-slate-500 italic leading-relaxed line-clamp-2 pl-3 border-l-2 border-blue-500/30">
+            {project.longDescription}
+          </p>
+        )}
 
         {/* Spacer — pushes tech + footer to the bottom */}
         <div className="flex-1" />
