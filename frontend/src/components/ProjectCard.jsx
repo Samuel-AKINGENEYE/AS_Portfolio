@@ -77,32 +77,32 @@ export default function ProjectCard({ project }) {
           {project.title}
         </h3>
 
-        {/* Description */}
+        {/* Description — Inter (sans), clean overview */}
         {project.description && (
-          <p className="text-sm text-slate-400 leading-relaxed mb-4">
+          <p className="font-sans text-sm text-slate-400 leading-relaxed mb-4">
             {project.description}
           </p>
         )}
 
-        {/* Problem */}
+        {/* Problem — Lora (serif), editorial/serious */}
         {project.problem && (
           <div className="mb-3">
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-red-500/10 text-red-400 border border-red-500/20 mb-1.5">
               Problem
             </span>
-            <p className="text-sm text-slate-400 leading-relaxed">
+            <p className="font-serif text-sm text-slate-300 leading-relaxed">
               {project.problem}
             </p>
           </div>
         )}
 
-        {/* Solution */}
+        {/* Solution — JetBrains Mono, code-flavoured */}
         {project.solution && (
           <div className="mb-2">
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-green-500/10 text-green-400 border border-green-500/20 mb-1.5">
               Solution
             </span>
-            <p className="text-sm text-slate-400 leading-relaxed">
+            <p className="font-mono text-xs text-slate-400 leading-relaxed">
               {project.solution}
             </p>
           </div>
