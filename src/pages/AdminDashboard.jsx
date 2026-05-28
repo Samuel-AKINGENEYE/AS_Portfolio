@@ -158,7 +158,7 @@ function SectionHeader({ comment, count, onAdd, addLabel }) {
 // ─── Project form ─────────────────────────────────────────────────────────────
 
 function ProjectForm({ initial, onSave, onCancel }) {
-  const blank = { title: '', description: '', longDescription: '', techStack: '', liveUrl: '', githubUrl: '', imageUrl: '', featured: false };
+  const blank = { title: '', description: '', longDescription: '', problem: '', solution: '', techStack: '', liveUrl: '', githubUrl: '', imageUrl: '', featured: false };
   const [form, setForm] = useState(initial ?? blank);
   const [saving, setSaving] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -174,7 +174,9 @@ function ProjectForm({ initial, onSave, onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div><label className={LABEL}>// title</label><input required value={form.title} onChange={e => set('title', e.target.value)} className={INPUT} /></div>
-      <div><label className={LABEL}>// description</label><textarea required rows={2} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT + ' resize-none'} /></div>
+      <div><label className={LABEL}>// description (brief overview)</label><textarea required rows={2} value={form.description} onChange={e => set('description', e.target.value)} className={INPUT + ' resize-none'} /></div>
+      <div><label className={LABEL}>// problem (what issue does it solve?)</label><textarea rows={2} value={form.problem} onChange={e => set('problem', e.target.value)} className={INPUT + ' resize-none'} placeholder="e.g. No accessible platform for..." /></div>
+      <div><label className={LABEL}>// solution (how does it solve it?)</label><textarea rows={2} value={form.solution} onChange={e => set('solution', e.target.value)} className={INPUT + ' resize-none'} placeholder="e.g. Provides a digital system that..." /></div>
       <div><label className={LABEL}>// techStack (comma-separated)</label><input value={form.techStack} onChange={e => set('techStack', e.target.value)} className={INPUT} placeholder="React, Node.js, MongoDB" /></div>
       <div className="grid grid-cols-2 gap-3">
         <div><label className={LABEL}>// liveUrl</label><input type="url" value={form.liveUrl} onChange={e => set('liveUrl', e.target.value)} className={INPUT} /></div>

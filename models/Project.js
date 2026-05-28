@@ -5,6 +5,8 @@ const projectSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     longDescription: { type: String, default: '' },
+    problem: { type: String, default: '' },
+    solution: { type: String, default: '' },
     techStack: [{ type: String, trim: true }],
     liveUrl: { type: String, trim: true, default: '' },
     githubUrl: { type: String, trim: true, default: '' },

@@ -62,24 +62,31 @@ export default function ProjectCard({ project }) {
           {project.title}
         </h3>
 
+        {/* Description */}
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+          {project.description}
+        </p>
+
         {/* Problem */}
-        <div className="mb-3">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-red-500/10 text-red-500 dark:text-red-400 border border-red-500/20 mb-1.5">
-            Problem
-          </span>
-          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-            {project.description}
-          </p>
-        </div>
+        {project.problem && (
+          <div className="mb-3">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-red-500/10 text-red-500 dark:text-red-400 border border-red-500/20 mb-1.5">
+              Problem
+            </span>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              {project.problem}
+            </p>
+          </div>
+        )}
 
         {/* Solution */}
-        {project.longDescription && (
+        {project.solution && (
           <div className="mb-2">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 mb-1.5">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 mb-1.5">
               Solution
             </span>
             <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              {project.longDescription}
+              {project.solution}
             </p>
           </div>
         )}
