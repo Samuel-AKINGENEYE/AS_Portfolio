@@ -19,7 +19,7 @@ export default function ProjectCard({ project }) {
 
   return (
     <div
-      className="group relative flex flex-col h-[500px] bg-white dark:bg-slate-800
+      className="group relative flex flex-col bg-white dark:bg-slate-800
                  border border-slate-200 dark:border-slate-700
                  rounded-2xl overflow-hidden shadow-sm
                  hover:shadow-xl hover:scale-[1.02] hover:border-blue-500/50
@@ -58,18 +58,18 @@ export default function ProjectCard({ project }) {
       {/* Body — 280 px remaining, laid out top→description→spacer→tech→footer */}
       <div className="relative z-[2] flex flex-col flex-1 min-h-0 p-5">
         {/* Title */}
-        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 line-clamp-1 group-hover:text-blue-500 transition-colors">
+        <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">
           {project.title}
         </h3>
 
-        {/* Short description */}
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2 line-clamp-2">
+        {/* Problem / what it does */}
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
           {project.description}
         </p>
 
-        {/* Long description — tech choices / motivation */}
+        {/* Solution / why these technologies */}
         {project.longDescription && (
-          <p className="text-xs text-slate-400 dark:text-slate-500 italic leading-relaxed line-clamp-2 pl-3 border-l-2 border-blue-500/30">
+          <p className="text-xs text-slate-400 dark:text-slate-500 italic leading-relaxed pl-3 border-l-2 border-blue-500/30 mb-2">
             {project.longDescription}
           </p>
         )}
