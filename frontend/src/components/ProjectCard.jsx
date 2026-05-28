@@ -77,9 +77,9 @@ export default function ProjectCard({ project }) {
           {project.title}
         </h3>
 
-        {/* Description — Inter, clean overview */}
+        {/* Description — Inter (sans), clean overview */}
         {project.description && (
-          <p className="font-inter text-sm text-slate-400 leading-relaxed mb-4">
+          <p className="font-sans text-sm text-slate-400 leading-relaxed mb-4">
             {project.description}
           </p>
         )}
