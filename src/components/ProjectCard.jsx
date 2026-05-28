@@ -38,7 +38,7 @@ export default function ProjectCard({ project }) {
       )}
 
       {/* Thumbnail — fixed 160 px so every card shares the same image band */}
-      <div className="relative z-[2] h-40 flex-shrink-0 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
+      <div className="relative z-[2] h-36 sm:h-40 flex-shrink-0 bg-gradient-to-br from-blue-500/10 via-slate-100 to-purple-500/10 dark:from-blue-500/10 dark:via-slate-800 dark:to-purple-500/10 overflow-hidden flex items-center justify-center">
         {thumbSrc ? (
           <img
             src={thumbSrc}
@@ -96,7 +96,7 @@ export default function ProjectCard({ project }) {
 
         {/* Tech stack — capped at 2 rows */}
         {project.techStack?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3 max-h-[52px] overflow-hidden flex-shrink-0">
+          <div className="flex flex-wrap gap-1.5 mb-3 flex-shrink-0">
             {project.techStack.map((tech) => (
               <span
                 key={tech}

@@ -57,7 +57,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <DarkModeToggle />
           <button
-            className="md:hidden p-1.5 text-slate-600 dark:text-slate-400"
+            className="md:hidden p-2.5 text-slate-600 dark:text-slate-400"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
           >

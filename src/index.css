@@ -5,16 +5,19 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     font-family: 'Inter', system-ui, sans-serif;
     @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100;
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
   }
 
   * {
     box-sizing: border-box;
+    min-width: 0;
   }
 
   /* Custom scrollbar */
@@ -52,19 +55,19 @@
   }
 
   .section {
-    @apply py-24 px-6;
+    @apply py-12 px-4 sm:py-16 sm:px-6 md:py-24;
   }
 
   .container-max {
-    @apply max-w-6xl mx-auto;
+    @apply max-w-6xl mx-auto w-full;
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-bold text-slate-900 dark:text-white;
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 dark:text-white;
   }
 
   .section-sub {
-    @apply text-slate-500 dark:text-slate-400 mt-3 max-w-xl mx-auto;
+    @apply text-slate-500 dark:text-slate-400 mt-3 max-w-xl mx-auto text-sm sm:text-base;
   }
 
   /* Animated gradient border on hover */

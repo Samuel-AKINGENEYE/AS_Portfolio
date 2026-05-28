@@ -381,14 +381,14 @@ export default function Home() {
       {/* ══════════════════════ HERO ══════════════════════ */}
       <section
         id="hero"
-        className="relative min-h-screen flex items-center pt-16 px-6 overflow-hidden"
+        className="relative min-h-screen flex items-center pt-16 px-4 sm:px-6 overflow-hidden"
       >
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500/5 blur-3xl" />
         </div>
 
         <div className="container-max w-full py-20 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Left — text */}
             <div className="animate-fade-in">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-green-500/10 border border-green-500/25 text-green-600 dark:text-green-400 text-sm font-medium mb-6">
@@ -396,14 +396,14 @@ export default function Home() {
                 Available Now!
               </div>
 
-              <h1 className="text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight mb-4">
                 Hi, I'm{' '}
                 <span className="text-gradient">Samuel</span>
                 <br />
                 <span className="text-gradient">AKINGENEYE</span>
               </h1>
 
-              <p className="text-xl font-semibold text-slate-600 dark:text-slate-300 mb-3">
+              <p className="text-base sm:text-lg md:text-xl font-semibold text-slate-600 dark:text-slate-300 mb-3">
                 Full Stack Developer
               </p>
               <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8 max-w-lg">
@@ -411,7 +411,7 @@ export default function Home() {
                 to civic engagement platforms — I write code that creates real impact.
               </p>
 
-              <div className="flex flex-wrap gap-4 mb-10">
+              <div className="flex flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-10">
                 <a href="#projects" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors shadow-lg shadow-blue-500/25">
                   View My Work <ChevronRight size={16} />
                 </a>
@@ -434,7 +434,7 @@ export default function Home() {
 
             {/* Right — VS Code editor card */}
             <div className="flex justify-center animate-fade-in">
-              <div className="relative w-full max-w-sm animate-float">
+              <div className="relative w-full max-w-xs sm:max-w-sm animate-float">
 
                 {/* Floating avatar circle */}
                 <div className="absolute -top-4 -right-4 z-10 w-12 h-12 rounded-full border-2 border-dashed border-orange-500/70 bg-[#0d1117] flex items-center justify-center shadow-xl shadow-orange-500/10 animate-spin-slow">
@@ -591,7 +591,7 @@ export default function Home() {
 
         {projects.length > 0 ? (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {displayProjects.map(p => <ProjectCard key={p._id} project={p} />)}
             </div>
             <ViewAllButton
@@ -677,7 +677,7 @@ export default function Home() {
           title="Testimonials"
           sub="Feedback from collaborators and clients"
         />
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {TESTIMONIALS.map((t, i) => (
             <div key={i} className="card p-6 glow-hover flex flex-col">
               <div className="mb-3"><StarRating rating={t.rating} /></div>
@@ -708,7 +708,7 @@ export default function Home() {
 
               <div className="space-y-8">
                 {experience.map((exp) => (
-                  <div key={exp._id} className="relative flex gap-6">
+                  <div key={exp._id} className="relative flex gap-3 sm:gap-6">
                     {/* Timeline dot */}
                     <div className="relative z-10 flex-shrink-0 mt-3.5">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
@@ -829,7 +829,7 @@ export default function Home() {
           sub="The foundation behind my technical mindset"
         />
         {education.length > 0 ? (
-          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+          <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-4 sm:gap-6">
             {education.map((edu) => {
               const lineOffset = edu.field ? 1 : 0;
               return (
@@ -954,7 +954,7 @@ export default function Home() {
 
         {filteredCerts.length > 0 ? (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {displayCerts.map(c => <CertificateCard key={c._id} certificate={c} />)}
             </div>
             <ViewAllButton
@@ -973,7 +973,7 @@ export default function Home() {
       {/* ══════════════════════ ABOUT ══════════════════════ */}
       <Section id="about">
         <SectionHead title="About Me" />
-        <div className="grid lg:grid-cols-2 gap-14 items-start">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-14 items-start">
           <div>
             <h3 className="text-lg font-semibold text-blue-500 mb-4">My Story</h3>
             <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-[15px]">
@@ -1017,7 +1017,7 @@ export default function Home() {
           title="Get In Touch"
           sub="Have a project in mind? Let's build something together."
         />
-        <div className="grid lg:grid-cols-2 gap-12 max-w-4xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 max-w-4xl mx-auto">
           <div>
             <h3 className="font-semibold text-slate-900 dark:text-white mb-5">Send a Message</h3>
             <ContactForm />
