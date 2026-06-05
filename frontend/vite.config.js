@@ -15,15 +15,23 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    target: 'es2020',
+    minify: 'esbuild',
+    cssMinify: true,
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['lucide-react', 'react-hot-toast'],
-          api: ['axios'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor':    ['lucide-react', 'react-hot-toast'],
+          'api':          ['axios'],
         },
       },
     },
-    chunkSizeWarningLimit: 600,
+  },
+
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'axios'],
   },
 });

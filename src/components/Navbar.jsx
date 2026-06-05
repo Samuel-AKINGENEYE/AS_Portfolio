@@ -3,18 +3,45 @@ import { Menu, X } from 'lucide-react';
 import DarkModeToggle from './DarkModeToggle.jsx';
 
 const NAV_LINKS = [
-  { label: 'Home', href: '#hero' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Skills', href: '#skills' },
+  { label: 'Home',       href: '#hero' },
+  { label: 'Projects',   href: '#projects' },
+  { label: 'Skills',     href: '#skills' },
   { label: 'Experience', href: '#experience' },
-  { label: 'Education', href: '#education' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Education',  href: '#education' },
+  { label: 'About',      href: '#about' },
+  { label: 'Contact',    href: '#contact' },
 ];
 
+const SECTION_IDS = NAV_LINKS.map(l => l.href.slice(1));
+
+function useActiveSection() {
+  const [active, setActive] = useState('hero');
+
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      },
+      { rootMargin: '-30% 0px -60% 0px', threshold: 0 }
+    );
+
+    SECTION_IDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+
+    return () => io.disconnect();
+  }, []);
+
+  return active;
+}
+
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const active                = useActiveSection();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -31,33 +58,40 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+
         {/* Logo */}
-        <a
-          href="#hero"
-          className="font-bold text-xl text-slate-900 dark:text-white tracking-tight"
-        >
+        <a href="#hero" className="font-bold text-xl text-slate-900 dark:text-white tracking-tight">
           SA<span className="text-blue-500">.</span>
         </a>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-7">
-          {NAV_LINKS.map(({ label, href }) => (
-            <a
-              key={label}
-              href={href}
-              className="text-sm font-medium text-slate-600 dark:text-slate-400
-                         hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-            >
-              {label}
-            </a>
-          ))}
+        <div className="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map(({ label, href }) => {
+            const isActive = active === href.slice(1);
+            return (
+              <a
+                key={label}
+                href={href}
+                className={`relative px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                  isActive
+                    ? 'text-blue-500 dark:text-blue-400'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400'
+                }`}
+              >
+                {label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-blue-500" />
+                )}
+              </a>
+            );
+          })}
         </div>
 
         {/* Controls */}
         <div className="flex items-center gap-3">
           <DarkModeToggle />
           <button
-            className="md:hidden p-2.5 text-slate-600 dark:text-slate-400"
+            className="md:hidden p-2.5 text-slate-600 dark:text-slate-400 hover:text-blue-500 transition-colors"
             onClick={() => setOpen(!open)}
             aria-label="Toggle navigation"
           >
@@ -69,18 +103,23 @@ export default function Navbar() {
       {/* Mobile drawer */}
       {open && (
         <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 pb-5 animate-fade-in">
-          {NAV_LINKS.map(({ label, href }) => (
-            <a
-              key={label}
-              href={href}
-              onClick={() => setOpen(false)}
-              className="block py-3 text-sm font-medium text-slate-600 dark:text-slate-400
-                         hover:text-blue-500 transition-colors
-                         border-b border-slate-100 dark:border-slate-800 last:border-0"
-            >
-              {label}
-            </a>
-          ))}
+          {NAV_LINKS.map(({ label, href }) => {
+            const isActive = active === href.slice(1);
+            return (
+              <a
+                key={label}
+                href={href}
+                onClick={() => setOpen(false)}
+                className={`block py-3 text-sm font-medium transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 ${
+                  isActive
+                    ? 'text-blue-500 dark:text-blue-400'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-blue-500'
+                }`}
+              >
+                {label}
+              </a>
+            );
+          })}
         </div>
       )}
     </nav>

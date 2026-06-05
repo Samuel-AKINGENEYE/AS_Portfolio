@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Send,
-  Code2, Database, Wrench, Globe, ChevronRight, Loader2,
-  Home as HomeIcon, Layers, Award, Play, FolderOpen,
+  Code2, Database, Wrench, Globe, ChevronRight,
+  Award, Play, Rocket, Users, Zap,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -240,60 +240,41 @@ export default function Home() {
 
 
   if (loading) {
-    const bootLines = [
-      { prefix: '$',  text: 'node portfolio.js',          color: '#58a6ff', delay: 0    },
-      { prefix: '⟩',  text: 'Loading environment…',        color: '#8b949e', delay: 0.35 },
-      { prefix: '✓',  text: 'ENV configured',              color: '#3fb950', delay: 0.7  },
-      { prefix: '⟩',  text: 'Importing modules…',          color: '#8b949e', delay: 1.05 },
-      { prefix: '✓',  text: 'React · Express · Tailwind',  color: '#58a6ff', delay: 1.4  },
-      { prefix: '⟩',  text: 'Connecting to database…',     color: '#8b949e', delay: 1.7  },
-      { prefix: '✓',  text: 'MongoDB connected',           color: '#3fb950', delay: 2.05 },
-      { prefix: '⟩',  text: slow ? 'Server warming up, hang tight…' : 'Fetching portfolio data…', color: '#8b949e', delay: 2.35 },
-      { prefix: '✓',  text: 'All systems ready',           color: '#f0883e', delay: 2.7  },
-    ];
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: '#0d1117' }}>
-        <div className="w-full max-w-lg mx-4 sm:mx-auto">
-          {/* macOS-style title bar */}
-          <div
-            className="flex items-center gap-2 px-4 py-3 rounded-t-xl border border-b-0"
-            style={{ background: '#161b22', borderColor: '#30363d' }}
-          >
-            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
-            <span className="ml-3 font-mono text-xs" style={{ color: '#8b949e' }}>
-              ~/portfolio — zsh
-            </span>
-          </div>
-          {/* Terminal body */}
-          <div
-            className="px-6 py-5 rounded-b-xl border font-mono text-sm leading-relaxed"
-            style={{ background: '#0d1117', borderColor: '#30363d' }}
-          >
-            {bootLines.map((line, i) => (
-              <div
-                key={i}
-                className="flex items-baseline gap-3 mb-1.5 opacity-0"
-                style={{ animation: 'termLine 0.25s ease forwards', animationDelay: `${line.delay}s` }}
-              >
-                <span className="font-bold shrink-0 w-4 text-center" style={{ color: line.color }}>
-                  {line.prefix}
-                </span>
-                <span style={{ color: '#e6edf3' }}>{line.text}</span>
+      <div className="min-h-screen bg-white dark:bg-slate-900 animate-fade-in">
+        {/* Navbar placeholder */}
+        <div className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60" />
+
+        <div className="max-w-6xl mx-auto px-6 pt-36 pb-24">
+          {/* Hero skeleton */}
+          <div className="grid lg:grid-cols-[1fr_460px] gap-12 items-start mb-24">
+            <div className="space-y-4">
+              <div className="h-4 w-32 rounded-full skeleton-shimmer" />
+              <div className="h-16 w-5/6 rounded-xl skeleton-shimmer" />
+              <div className="h-10 w-2/3 rounded-xl skeleton-shimmer" />
+              <div className="h-5 w-full rounded-lg skeleton-shimmer" />
+              <div className="h-5 w-4/5 rounded-lg skeleton-shimmer" />
+              <div className="h-4 w-1/2 rounded-lg skeleton-shimmer" />
+              <div className="flex gap-3 pt-3">
+                <div className="h-11 w-32 rounded-lg skeleton-shimmer" />
+                <div className="h-11 w-32 rounded-lg skeleton-shimmer" />
               </div>
-            ))}
-            {/* Blinking cursor */}
-            <div
-              className="flex items-baseline gap-3 mt-2 opacity-0"
-              style={{ animation: 'termLine 0.25s ease forwards', animationDelay: '3s' }}
-            >
-              <span className="font-bold w-4 text-center" style={{ color: '#3fb950' }}>$</span>
-              <span
-                className="inline-block w-2 h-[1em] align-middle"
-                style={{ background: '#3fb950', animation: 'termBlink 1s step-end infinite' }}
-              />
+              {slow && (
+                <p className="font-mono text-xs text-amber-500 dark:text-amber-400 pt-2 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Server warming up, hang tight…
+                </p>
+              )}
             </div>
+            <div className="hidden lg:block h-72 rounded-xl skeleton-shimmer" />
+          </div>
+
+          {/* Section skeleton */}
+          <div className="space-y-4 mb-8">
+            <div className="h-9 w-24 rounded-xl skeleton-shimmer" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => <div key={i} className="h-64 rounded-xl skeleton-shimmer" />)}
           </div>
         </div>
       </div>
@@ -343,16 +324,31 @@ export default function Home() {
               <div className="flex flex-wrap gap-3 animate-slide-up-d4">
                 <a
                   href="#projects"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-colors text-sm"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-all duration-200 text-sm hover:-translate-y-0.5 shadow-md shadow-accent/20"
                 >
                   See my work <ChevronRight size={14} />
                 </a>
                 <a
                   href="#contact"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-500 dark:hover:border-slate-500 font-medium rounded-md transition-colors text-sm"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-accent dark:hover:border-accent hover:text-accent dark:hover:text-accent font-medium rounded-md transition-all duration-200 text-sm hover:-translate-y-0.5"
                 >
                   Get in touch
                 </a>
+              </div>
+
+              {/* Stats row */}
+              <div className="flex flex-wrap gap-3 mt-8 animate-slide-up-d4" style={{ animationDelay: '0.5s' }}>
+                {[
+                  { icon: Rocket, value: '8+',   label: 'Projects Built' },
+                  { icon: Users,  value: '500+',  label: 'Users Reached' },
+                  { icon: Zap,    value: '40%',   label: 'Faster Delivery' },
+                ].map(({ icon: Icon, value, label }) => (
+                  <div key={label} className="stat-card gap-0.5">
+                    <Icon size={14} className="text-accent mb-1" />
+                    <span className="text-lg font-extrabold text-slate-900 dark:text-white">{value}</span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">{label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 

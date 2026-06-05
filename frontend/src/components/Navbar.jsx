@@ -9,9 +9,25 @@ const NAV_LINKS = [
   { num: '04', label: 'Education',  href: '#education'   },
 ];
 
+const SECTION_IDS = ['hero', 'projects', 'skills', 'experience', 'education', 'contact'];
+
+function useActiveSection() {
+  const [active, setActive] = useState('hero');
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); }),
+      { rootMargin: '-30% 0px -60% 0px', threshold: 0 }
+    );
+    SECTION_IDS.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+    return () => io.disconnect();
+  }, []);
+  return active;
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const active = useActiveSection();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -37,20 +53,24 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-7">
-          {NAV_LINKS.map(({ num, label, href }) => (
-            <a
-              key={label}
-              href={href}
-              className="group flex items-baseline gap-1 transition-colors"
-            >
-              <span className="font-mono text-[10px] text-accent/60 group-hover:text-accent transition-colors leading-none">
-                {num}.
-              </span>
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                {label}
-              </span>
-            </a>
-          ))}
+          {NAV_LINKS.map(({ num, label, href }) => {
+            const isActive = active === href.slice(1);
+            return (
+              <a
+                key={label}
+                href={href}
+                className={`group relative flex items-baseline gap-1 transition-colors ${isActive ? 'text-accent' : ''}`}
+              >
+                <span className={`font-mono text-[10px] transition-colors leading-none ${isActive ? 'text-accent' : 'text-accent/60 group-hover:text-accent'}`}>
+                  {num}.
+                </span>
+                <span className={`text-sm font-medium transition-colors ${isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
+                  {label}
+                </span>
+                {isActive && <span className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-accent" />}
+              </a>
+            );
+          })}
 
           <a
             href="#contact"
