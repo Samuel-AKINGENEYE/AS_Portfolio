@@ -4,6 +4,7 @@ import {
   Github, Linkedin, Twitter, Mail, MapPin, Send,
   Code2, Database, Wrench, Globe, ChevronRight,
   Award, Play, Rocket, Users, Zap,
+  Home as HomeIcon, Layers,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
