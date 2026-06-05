@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import {
   Github, Linkedin, Twitter, Mail, MapPin, Send,
   Code2, Database, Wrench, Globe, ChevronRight,
-  Award, Play, Rocket, Users, Zap,
+  Award, Play,
   Home as HomeIcon, Layers,
 } from 'lucide-react';
 import Navbar from '../components/Navbar.jsx';
@@ -337,20 +337,6 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* Stats row */}
-              <div className="flex flex-wrap gap-3 mt-8 animate-slide-up-d4" style={{ animationDelay: '0.5s' }}>
-                {[
-                  { icon: Rocket, value: '8+',   label: 'Projects Built' },
-                  { icon: Users,  value: '500+',  label: 'Users Reached' },
-                  { icon: Zap,    value: '40%',   label: 'Faster Delivery' },
-                ].map(({ icon: Icon, value, label }) => (
-                  <div key={label} className="stat-card gap-0.5">
-                    <Icon size={14} className="text-accent mb-1" />
-                    <span className="text-lg font-extrabold text-slate-900 dark:text-white">{value}</span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">{label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Right — VS Code editor card */}

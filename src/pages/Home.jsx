@@ -5,7 +5,7 @@ import {
   Briefcase, Code2, Database, Wrench, Globe,
   Star, StarHalf, MessageSquare, ChevronRight,
   ArrowDown, Send, Award, Eye, ChevronDown, ChevronUp, Download, X, FileText,
-  Play, FolderOpen, GitCommit, GraduationCap, Zap, Users, Rocket,
+  Play, FolderOpen, GitCommit, GraduationCap,
 } from 'lucide-react';
 
 import Navbar           from '../components/Navbar.jsx';
@@ -78,11 +78,6 @@ const HERO_ROLES = [
   'Open Source Contributor',
 ];
 
-const HERO_STATS = [
-  { icon: Rocket,  value: '8+',   label: 'Projects Built' },
-  { icon: Users,   value: '500+', label: 'Users Reached' },
-  { icon: Zap,     value: '40%',  label: 'Faster Delivery' },
-];
 
 // ─── Typing animation hook ────────────────────────────────────────────────────
 
@@ -439,16 +434,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Stats row */}
-              <div className="flex flex-wrap gap-3">
-                {HERO_STATS.map(({ icon: Icon, value, label }) => (
-                  <div key={label} className="stat-card gap-1">
-                    <Icon size={15} className="text-blue-500 mb-1" />
-                    <span className="text-xl font-extrabold text-slate-900 dark:text-white">{value}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Right — VS Code editor card */}
