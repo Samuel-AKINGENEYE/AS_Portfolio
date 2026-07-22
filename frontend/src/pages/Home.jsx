@@ -13,6 +13,7 @@ import CertificateCard from '../components/CertificateCard.jsx';
 import WhatsAppButton from '../components/WhatsAppButton.jsx';
 import Timeline from '../components/Timeline.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
+import CodeTerminalLoader from '../components/CodeTerminalLoader.jsx';
 import {
   portfolioApi, analyticsApi, contactApi,
 } from '../services/api.js';
@@ -241,45 +242,7 @@ export default function Home() {
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-slate-900 animate-fade-in">
-        {/* Navbar placeholder */}
-        <div className="fixed top-0 inset-x-0 z-50 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60" />
-
-        <div className="max-w-6xl mx-auto px-6 pt-36 pb-24">
-          {/* Hero skeleton */}
-          <div className="grid lg:grid-cols-[1fr_460px] gap-12 items-start mb-24">
-            <div className="space-y-4">
-              <div className="h-4 w-32 rounded-full skeleton-shimmer" />
-              <div className="h-16 w-5/6 rounded-xl skeleton-shimmer" />
-              <div className="h-10 w-2/3 rounded-xl skeleton-shimmer" />
-              <div className="h-5 w-full rounded-lg skeleton-shimmer" />
-              <div className="h-5 w-4/5 rounded-lg skeleton-shimmer" />
-              <div className="h-4 w-1/2 rounded-lg skeleton-shimmer" />
-              <div className="flex gap-3 pt-3">
-                <div className="h-11 w-32 rounded-lg skeleton-shimmer" />
-                <div className="h-11 w-32 rounded-lg skeleton-shimmer" />
-              </div>
-              {slow && (
-                <p className="font-mono text-xs text-amber-500 dark:text-amber-400 pt-2 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  Server warming up, hang tight…
-                </p>
-              )}
-            </div>
-            <div className="hidden lg:block h-72 rounded-xl skeleton-shimmer" />
-          </div>
-
-          {/* Section skeleton */}
-          <div className="space-y-4 mb-8">
-            <div className="h-9 w-24 rounded-xl skeleton-shimmer" />
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => <div key={i} className="h-64 rounded-xl skeleton-shimmer" />)}
-          </div>
-        </div>
-      </div>
-    );
+    return <CodeTerminalLoader />;
   }
 
   return (

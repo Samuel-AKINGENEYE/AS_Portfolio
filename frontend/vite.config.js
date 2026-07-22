@@ -25,6 +25,7 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'ui-vendor':    ['lucide-react', 'react-hot-toast'],
+          'chart-vendor': ['recharts'],
           'api':          ['axios'],
         },
       },
@@ -32,6 +33,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'axios'],
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'react-hot-toast', 'axios', 'recharts'],
+    exclude: ['@supabase/supabase-js'],
   },
 });
