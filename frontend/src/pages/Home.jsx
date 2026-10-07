@@ -13,7 +13,6 @@ import CertificateCard from '../components/CertificateCard.jsx';
 import WhatsAppButton from '../components/WhatsAppButton.jsx';
 import Timeline from '../components/Timeline.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
-import CodeTerminalLoader from '../components/CodeTerminalLoader.jsx';
 import {
   portfolioApi, analyticsApi, contactApi,
 } from '../services/api.js';
@@ -141,8 +140,7 @@ export default function Home() {
   const [skills, setSkills] = useState([]);
   const [education, setEducation] = useState([]);
   const [experience, setExperience] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [slow, setSlow] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [techFilter, setTechFilter] = useState('All');
   const [certFilter, setCertFilter] = useState('All');
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '', honeypot: '' });
@@ -171,11 +169,7 @@ export default function Home() {
       setSkills(cached.skills ?? []);
       setEducation(cached.education ?? []);
       setExperience(cached.experience ?? []);
-      setLoading(false);
     }
-
-    let slowTimer;
-    if (!cached) slowTimer = setTimeout(() => setSlow(true), 5000);
 
     portfolioApi.getAll()
       .then((res) => {
@@ -190,11 +184,6 @@ export default function Home() {
       })
       .catch(() => {
         if (!cached) toast.error('Failed to load portfolio. Please refresh.');
-      })
-      .finally(() => {
-        clearTimeout(slowTimer);
-        setSlow(false);
-        if (!cached) setLoading(false);
       });
   }, []);
 
@@ -239,11 +228,7 @@ export default function Home() {
   };
 
   const social = profile?.socialLinks ?? {};
-
-
-  if (loading) {
-    return <CodeTerminalLoader />;
-  }
+  const avatarSrc = profile?.avatar && profile.avatar.includes('cloudinary') ? '/avatar.jpg' : (profile?.avatar || '/avatar.jpg');
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300 pb-16 md:pb-0">
@@ -309,8 +294,8 @@ export default function Home() {
                 {/* Floating avatar — static, no spin */}
                 <div className="absolute -top-5 -right-5 z-10 w-14 h-14 rounded-full border-2 border-dashed border-accent/70 flex items-center justify-center">
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-accent/40 bg-slate-900 flex items-center justify-center shadow-lg">
-                    {profile?.avatar
-                      ? <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
+                    {avatarSrc
+                      ? <img src={avatarSrc} alt="avatar" className="w-full h-full object-cover" />
                       : <span className="font-mono text-[10px] font-bold text-accent select-none">SA</span>
                     }
                   </div>

@@ -41,7 +41,7 @@ const restore = async () => {
     email: 'freshtalent491@gmail.com',
     availability: 'Available Now',
     yearsOfExperience: 2,
-    avatar: 'https://res.cloudinary.com/dtswzyqks/image/upload/v1778364437/portfolio/avatars/jwmnu7ukubjeypowrm8g.png',
+    avatar: '/avatar.jpg',
     resumeUrl: 'https://res.cloudinary.com/dtswzyqks/image/upload/v1778423492/portfolio/resumes/tpazc3kptlvhoym6nm7z.pdf',
     socialLinks: {
       github: 'https://github.com/Samuel-AKINGENEYE',

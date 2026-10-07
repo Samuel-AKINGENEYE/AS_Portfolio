@@ -326,7 +326,7 @@ export default function Home() {
   const [education,    setEducation]    = useState([]);
   const [profile,      setProfile]      = useState(null);
   const [certFilter,   setCertFilter]   = useState('All');
-  const [loading,      setLoading]      = useState(true);
+  const [loading,      setLoading]      = useState(false);
   const [showResume,   setShowResume]   = useState(false);
 
   const [showAllProjects, setShowAllProjects] = useState(false);
@@ -348,7 +348,6 @@ export default function Home() {
       if (profRes.status === 'fulfilled') setProfile(profRes.value.data.data ?? null);
       if (expRes.status === 'fulfilled')  setExperience(expRes.value.data.data ?? []);
       if (eduRes.status === 'fulfilled')  setEducation(eduRes.value.data.data ?? []);
-      setLoading(false);
     });
   }, []);
 
@@ -370,8 +369,6 @@ export default function Home() {
     linkedin: 'https://linkedin.com/in/samuel-akingeneye',
     twitter:  'https://twitter.com/samuel_ak',
   };
-
-  if (loading) return <PageSkeleton />;
 
   return (
     <div className="min-h-screen">
