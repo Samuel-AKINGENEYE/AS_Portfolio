@@ -14,7 +14,15 @@ import ProjectCard      from '../components/ProjectCard.jsx';
 import CertificateCard  from '../components/CertificateCard.jsx';
 import GitHubCalendar   from '../components/GitHubCalendar.jsx';
 import { SkillIcon }    from '../components/SkillIcon.jsx';
-import { projectsApi, certificatesApi, profileApi, contactApi, experienceApi, educationApi } from '../services/api.js';
+import {
+  projectsApi,
+  certificatesApi,
+  profileApi,
+  contactApi,
+  experienceApi,
+  educationApi,
+  portfolioCache,
+} from '../services/api.js';
 
 // ─── Static data ──────────────────────────────────────────────────────────────
 
@@ -320,11 +328,13 @@ function PageSkeleton() {
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [projects,     setProjects]     = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [experience,   setExperience]   = useState([]);
-  const [education,    setEducation]    = useState([]);
-  const [profile,      setProfile]      = useState(null);
+  const initialPortfolio = portfolioCache.getInitial();
+
+  const [projects,     setProjects]     = useState(initialPortfolio.projects ?? []);
+  const [certificates, setCertificates] = useState(initialPortfolio.certificates ?? []);
+  const [experience,   setExperience]   = useState(initialPortfolio.experience ?? []);
+  const [education,    setEducation]    = useState(initialPortfolio.education ?? []);
+  const [profile,      setProfile]      = useState(initialPortfolio.profile ?? null);
   const [certFilter,   setCertFilter]   = useState('All');
   const [loading,      setLoading]      = useState(false);
   const [showResume,   setShowResume]   = useState(false);
@@ -336,6 +346,15 @@ export default function Home() {
   const typingRole = useTypingText(HERO_ROLES);
 
   useEffect(() => {
+    const cached = portfolioCache.read();
+    if (cached) {
+      setProjects(cached.projects ?? []);
+      setCertificates(cached.certificates ?? []);
+      setExperience(cached.experience ?? []);
+      setEducation(cached.education ?? []);
+      setProfile(cached.profile ?? null);
+    }
+
     Promise.allSettled([
       projectsApi.getAll(true),
       certificatesApi.getAll(),
@@ -343,11 +362,23 @@ export default function Home() {
       experienceApi.getAll(),
       educationApi.getAll(),
     ]).then(([projRes, certRes, profRes, expRes, eduRes]) => {
+      const nextData = {
+        profile: profRes.status === 'fulfilled' ? (profRes.value.data.data ?? null) : (cached?.profile ?? initialPortfolio.profile ?? null),
+        projects: projRes.status === 'fulfilled' ? (projRes.value.data.data ?? []) : (cached?.projects ?? initialPortfolio.projects ?? []),
+        certificates: certRes.status === 'fulfilled' ? (certRes.value.data.data ?? []) : (cached?.certificates ?? initialPortfolio.certificates ?? []),
+        experience: expRes.status === 'fulfilled' ? (expRes.value.data.data ?? []) : (cached?.experience ?? initialPortfolio.experience ?? []),
+        education: eduRes.status === 'fulfilled' ? (eduRes.value.data.data ?? []) : (cached?.education ?? initialPortfolio.education ?? []),
+      };
+
       if (projRes.status === 'fulfilled') setProjects(projRes.value.data.data ?? []);
       if (certRes.status === 'fulfilled') setCertificates(certRes.value.data.data ?? []);
       if (profRes.status === 'fulfilled') setProfile(profRes.value.data.data ?? null);
       if (expRes.status === 'fulfilled')  setExperience(expRes.value.data.data ?? []);
       if (eduRes.status === 'fulfilled')  setEducation(eduRes.value.data.data ?? []);
+
+      portfolioCache.write(nextData);
+    }).catch(() => {
+      // Keep the cached/instant bootstrap content visible even when the API is slow or unavailable.
     });
   }, []);
 
